@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>
+        Gestión de Alumnos
+    </title>
+</head>
+
+
+<body>
+
+    <h1>Gestión de Alumnos</h1>
+
+
+    <a href="{% url 'alumno_crear' %}">
+        Registrar nuevo alumno
+    </a>
+
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <p>
+                {{ message }}
+            </p>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <hr>
+
+
+    <table border="1">
+
+        <thead>
+
+            <tr>
+                <th>Legajo</th>
+                <th>DNI</th>
+                <th>Apellido</th>
+                <th>Nombre</th>
+                <th>Curso</th>
+                <th>Nivel</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for alumno in alumnos %}
+
+                <tr>
+
+                    <td>
+                        {{ alumno.legajo }}
+                    </td>
+
+                    <td>
+                        {{ alumno.dni }}
+                    </td>
+
+                    <td>
+                        {{ alumno.apellido }}
+                    </td>
+
+                    <td>
+                        {{ alumno.nombre }}
+                    </td>
+
+                    <td>
+                        {{ alumno.curso.nombre }}
+                        {{ alumno.curso.division }}
+                    </td>
+
+                    <td>
+                        {{ alumno.curso.nivel.nombre }}
+                    </td>
+
+
+                    <td>
+
+                        {% if alumno.estado %}
+
+                            Activo
+
+                        {% else %}
+
+                            Inactivo
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a href="{% url 'alumno_editar' alumno.id_alumno %}">
+                            Editar
+                        </a>
+
+
+                        {% if alumno.estado %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'alumno_desactivar' alumno.id_alumno %}"
+                                style="display:inline;"
+                            >
+
+                                {% csrf_token %}
+
+                                <button type="submit">
+                                    Desactivar
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+
+            {% empty %}
+
+                <tr>
+
+                    <td colspan="8">
+                        No hay alumnos registrados.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+
+</body>
+
+</html>
