@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Modificar mis datos
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="formulario">
+
+        <h1>
+            Modificar mis datos
+        </h1>
+
+        <p>
+            Podés modificar únicamente tus datos de contacto.
+        </p>
+
+
+        <div class="tarjeta">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+
+                <button
+                    class="boton"
+                    type="submit"
+                >
+                    Guardar cambios
+                </button>
+
+
+                <a
+                    class="boton boton-secundario"
+                    href="{% url 'alumno_mis_datos' %}"
+                >
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,90 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            Educar Para Transformar
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/estilos.css' %}"
+    >
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="marca">
+
+            <div class="logo">
+                E
+            </div>
+
+            <div>
+                <strong>
+                    Educar Para Transformar
+                </strong>
+
+                <span>
+                    Centro Educativo
+                </span>
+            </div>
+
+        </div>
+
+
+        {% if request.user.is_authenticated %}
+
+            <div class="usuario-header">
+
+                <span>
+                    {{ request.user.username }}
+                </span>
+
+                <a href="{% url 'logout' %}">
+                    Cerrar sesión
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </header>
+
+
+    <main class="contenedor">
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="mensaje">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+</body>
+
+</html>

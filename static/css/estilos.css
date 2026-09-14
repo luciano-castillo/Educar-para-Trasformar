@@ -1,0 +1,199 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #08111f;
+    color: #eaf2ff;
+}
+
+.header {
+    height: 72px;
+    padding: 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #0d1726;
+    border-bottom: 1px solid #26364d;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.marca strong {
+    display: block;
+    font-size: 17px;
+}
+
+.marca span {
+    display: block;
+    margin-top: 3px;
+    color: #8391a5;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.logo {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #1777ff;
+    color: white;
+
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.usuario-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.usuario-header span {
+    color: #bbc7d8;
+}
+
+.usuario-header a {
+    color: #6da5ff;
+    text-decoration: none;
+}
+
+.contenedor {
+    max-width: 1200px;
+    margin: auto;
+    padding: 45px 30px;
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 32px;
+}
+
+h2 {
+    color: #c5d1e3;
+}
+
+.mensaje {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+
+    background: #11253b;
+    border: 1px solid #1d72d8;
+
+    border-radius: 10px;
+}
+
+.boton {
+    display: inline-block;
+
+    padding: 11px 18px;
+
+    background: #1777ff;
+    color: white;
+
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.boton:hover {
+    background: #348aff;
+}
+
+.boton-secundario {
+    background: transparent;
+    border: 1px solid #426080;
+}
+
+.boton-peligro {
+    background: #a93b3b;
+}
+
+.tarjeta {
+    background: #101c2d;
+
+    border: 1px solid #24364d;
+    border-radius: 14px;
+
+    padding: 24px;
+
+    margin-bottom: 22px;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    background: #101c2d;
+
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 14px 16px;
+    text-align: left;
+
+    border-bottom: 1px solid #26364d;
+}
+
+th {
+    color: #90a6c1;
+    background: #142237;
+}
+
+td {
+    color: #e4ebf5;
+}
+
+form p {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #bbc8d8;
+}
+
+input,
+select {
+    width: 100%;
+
+    padding: 11px;
+
+    color: white;
+    background: #0d1726;
+
+    border: 1px solid #334862;
+    border-radius: 8px;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #1777ff;
+}
+
+.formulario {
+    max-width: 650px;
+}

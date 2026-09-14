@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class NivelEducativo(models.Model):
     id_nivel = models.BigAutoField(primary_key=True)
@@ -46,6 +47,14 @@ class Curso(models.Model):
     
 class Alumno(models.Model):
     id_alumno = models.BigAutoField(primary_key=True)
+    
+    usuario = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="alumno"
+    )
 
     dni = models.CharField(
         max_length=15,

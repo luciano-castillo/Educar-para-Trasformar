@@ -38,6 +38,7 @@ class AlumnoAdmin(admin.ModelAdmin):
         "dni",
         "apellido",
         "nombre",
+        "usuario",
         "curso",
         "estado",
     )

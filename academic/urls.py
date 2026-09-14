@@ -27,5 +27,17 @@ urlpatterns = [
         views.alumno_desactivar,
         name="alumno_desactivar"
     ),
+    
+    path(
+        "alumno/mis-datos/",
+        views.alumno_mis_datos,
+        name="alumno_mis_datos"
+    ),
+
+    path(
+        "alumno/mis-datos/editar/",
+        views.alumno_editar_mis_datos,
+        name="alumno_editar_mis_datos"
+    ),
 
 ]

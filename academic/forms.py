@@ -46,3 +46,34 @@ class AlumnoForm(forms.ModelForm):
                 attrs={"placeholder": "correo@ejemplo.com"}
             ),
         }
+
+class AlumnoDatosPersonalesForm(forms.ModelForm):
+
+    class Meta:
+        model = Alumno
+
+        fields = [
+            "correo",
+            "telefono",
+            "domicilio",
+        ]
+
+        widgets = {
+            "correo": forms.EmailInput(
+                attrs={
+                    "placeholder": "correo@ejemplo.com"
+                }
+            ),
+
+            "telefono": forms.TextInput(
+                attrs={
+                    "placeholder": "Ingrese teléfono"
+                }
+            ),
+
+            "domicilio": forms.TextInput(
+                attrs={
+                    "placeholder": "Ingrese domicilio"
+                }
+            ),
+        }

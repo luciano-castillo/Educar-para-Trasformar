@@ -24,5 +24,10 @@ urlpatterns = [
         "academico/",
         include("academic.urls")
     ),
+    
+    path(
+        "cuentas/",
+        include("accounts.urls")
+    ),
 
 ]
