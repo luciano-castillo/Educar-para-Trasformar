@@ -1,5 +1,5 @@
 from django import forms
-from .models import Alumno
+from .models import Alumno, Profesor
 
 
 class AlumnoForm(forms.ModelForm):
@@ -74,6 +74,70 @@ class AlumnoDatosPersonalesForm(forms.ModelForm):
             "domicilio": forms.TextInput(
                 attrs={
                     "placeholder": "Ingrese domicilio"
+                }
+            ),
+        }
+
+class ProfesorForm(forms.ModelForm):
+
+    class Meta:
+        model = Profesor
+
+        fields = [
+            "dni",
+            "legajo",
+            "nombre",
+            "apellido",
+            "especialidad",
+            "correo",
+            "telefono",
+            "estado",
+        ]
+
+        widgets = {
+            "dni": forms.TextInput(
+                attrs={"placeholder": "Ingrese DNI"}
+            ),
+            "legajo": forms.TextInput(
+                attrs={"placeholder": "Ingrese legajo"}
+            ),
+            "nombre": forms.TextInput(
+                attrs={"placeholder": "Ingrese nombre"}
+            ),
+            "apellido": forms.TextInput(
+                attrs={"placeholder": "Ingrese apellido"}
+            ),
+            "especialidad": forms.TextInput(
+                attrs={"placeholder": "Ingrese especialidad"}
+            ),
+            "correo": forms.EmailInput(
+                attrs={"placeholder": "correo@ejemplo.com"}
+            ),
+            "telefono": forms.TextInput(
+                attrs={"placeholder": "Ingrese teléfono"}
+            ),
+        }
+
+class ProfesorDatosPersonalesForm(forms.ModelForm):
+
+    class Meta:
+        model = Profesor
+
+        fields = [
+            "correo",
+            "telefono",
+        ]
+
+        widgets = {
+            "correo": forms.EmailInput(
+                attrs={
+                    "placeholder": "correo@ejemplo.com"
+                }
+            ),
+
+            "telefono": forms.TextInput(
+                attrs={
+                    "placeholder": "Ingrese teléfono"
                 }
             ),
         }

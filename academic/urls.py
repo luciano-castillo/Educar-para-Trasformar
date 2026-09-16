@@ -39,5 +39,42 @@ urlpatterns = [
         views.alumno_editar_mis_datos,
         name="alumno_editar_mis_datos"
     ),
+    #profesores
+    
+    path(
+        "profesores/",
+        views.profesor_lista,
+        name="profesor_lista"
+    ),
+
+    path(
+        "profesores/nuevo/",
+        views.profesor_crear,
+        name="profesor_crear"
+    ),
+
+    path(
+        "profesores/<int:id_profesor>/editar/",
+        views.profesor_editar,
+        name="profesor_editar"
+    ),
+
+    path(
+        "profesores/<int:id_profesor>/desactivar/",
+        views.profesor_desactivar,
+        name="profesor_desactivar"
+    ),
+    
+    path(
+        "profesor/mis-datos/",
+        views.profesor_mis_datos,
+        name="profesor_mis_datos"
+    ),
+
+    path(
+        "profesor/mis-datos/editar/",
+        views.profesor_editar_mis_datos,
+        name="profesor_editar_mis_datos"
+    ),
 
 ]

@@ -121,6 +121,9 @@ def inicio_por_rol(request):
     
     if rol == PerfilUsuario.Rol.ALUMNO:
         return redirect("alumno_mis_datos")
+    
+    if rol == PerfilUsuario.Rol.DOCENTE:
+        return redirect("profesor_mis_datos")
 
     return render(
         request,

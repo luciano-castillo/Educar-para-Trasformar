@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    {{ titulo }}
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="formulario">
+
+        <h1>
+            {{ titulo }}
+        </h1>
+
+
+        <div class="tarjeta">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+
+                <button
+                    class="boton"
+                    type="submit"
+                >
+                    Guardar
+                </button>
+
+
+                <a
+                    class="boton boton-secundario"
+                    href="{% url 'profesor_lista' %}"
+                >
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+{% endblock %}

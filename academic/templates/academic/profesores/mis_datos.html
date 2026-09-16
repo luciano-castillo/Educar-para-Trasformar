@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Mis datos
+{% endblock %}
+
+
+{% block content %}
+
+    <h1>
+        Hola, {{ profesor.nombre }}
+    </h1>
+
+    <p>
+        Consultá tu información personal y profesional.
+    </p>
+
+
+    <div class="tarjeta">
+
+        <h2>
+            Información personal
+        </h2>
+
+        <p>
+            <strong>DNI:</strong>
+            {{ profesor.dni }}
+        </p>
+
+        <p>
+            <strong>Legajo:</strong>
+            {{ profesor.legajo }}
+        </p>
+
+        <p>
+            <strong>Nombre:</strong>
+            {{ profesor.nombre }}
+        </p>
+
+        <p>
+            <strong>Apellido:</strong>
+            {{ profesor.apellido }}
+        </p>
+
+    </div>
+
+
+    <div class="tarjeta">
+
+        <h2>
+            Información profesional
+        </h2>
+
+        <p>
+            <strong>Especialidad:</strong>
+            {{ profesor.especialidad }}
+        </p>
+
+        <p>
+            <strong>Estado:</strong>
+
+            {% if profesor.estado %}
+                Activo
+            {% else %}
+                Inactivo
+            {% endif %}
+        </p>
+
+    </div>
+
+
+    <div class="tarjeta">
+
+        <h2>
+            Datos de contacto
+        </h2>
+
+        <p>
+            <strong>Correo:</strong>
+            {{ profesor.correo }}
+        </p>
+
+        <p>
+            <strong>Teléfono:</strong>
+            {{ profesor.telefono }}
+        </p>
+
+
+        <a
+            class="boton"
+            href="{% url 'profesor_editar_mis_datos' %}"
+        >
+            Modificar mis datos
+        </a>
+
+    </div>
+
+
+    <div class="tarjeta">
+
+        <h2>
+            Mis materias y cursos
+        </h2>
+    
+    
+        {% if dictados %}
+    
+            <table>
+    
+                <thead>
+    
+                    <tr>
+                        <th>Materia</th>
+                        <th>Curso</th>
+                        <th>Nivel</th>
+                        <th>Día</th>
+                        <th>Horario</th>
+                    </tr>
+    
+                </thead>
+    
+    
+                <tbody>
+    
+                    {% for dictado in dictados %}
+    
+                        <tr>
+    
+                            <td>
+                                {{ dictado.materia.nombre }}
+                            </td>
+    
+                            <td>
+                                {{ dictado.curso.nombre }}
+                                {{ dictado.curso.division }}
+                            </td>
+    
+                            <td>
+                                {{ dictado.curso.nivel.nombre }}
+                            </td>
+    
+                            <td>
+                                {{ dictado.horario.get_dia_semana_display }}
+                            </td>
+    
+                            <td>
+                                {{ dictado.horario.hora_inicio|time:"H:i" }}
+                                -
+                                {{ dictado.horario.hora_fin|time:"H:i" }}
+                            </td>
+    
+                        </tr>
+    
+                    {% endfor %}
+    
+                </tbody>
+    
+            </table>
+    
+    
+        {% else %}
+    
+            <p>
+                Actualmente no tenés materias o cursos asignados.
+            </p>
+    
+        {% endif %}
+    
+    </div>
+
+{% endblock %}
