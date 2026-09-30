@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Niveles educativos</h1>
+
+    <p>
+        Administración de los niveles educativos.
+    </p>
+
+    <a
+        href="{% url 'nivel_crear' %}"
+        class="boton"
+    >
+        Nuevo nivel
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if niveles %}
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nivel</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for nivel in niveles %}
+
+                    <tr>
+
+                        <td>
+                            {{ nivel.id_nivel }}
+                        </td>
+
+                        <td>
+                            {{ nivel.nombre }}
+                        </td>
+
+                        <td>
+
+                            {% if nivel.estado %}
+                                Activo
+                            {% else %}
+                                Inactivo
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'nivel_editar' nivel.id_nivel %}"
+                                class="boton-secundario"
+                            >
+                                Editar
+                            </a>
+
+                            {% if nivel.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'nivel_desactivar' nivel.id_nivel %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Desactivar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen niveles educativos registrados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

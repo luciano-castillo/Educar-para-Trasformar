@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Cursos</h1>
+
+    <p>
+        Administración de los cursos del centro educativo.
+    </p>
+
+    <a
+        href="{% url 'curso_crear' %}"
+        class="boton"
+    >
+        Nuevo curso
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if cursos %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Curso</th>
+                    <th>División</th>
+                    <th>Turno</th>
+                    <th>Nivel</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for curso in cursos %}
+
+                    <tr>
+
+                        <td>
+                            {{ curso.id_curso }}
+                        </td>
+
+                        <td>
+                            {{ curso.nombre }}
+                        </td>
+
+                        <td>
+                            {{ curso.division }}
+                        </td>
+
+                        <td>
+                            {{ curso.get_turno_display }}
+                        </td>
+
+                        <td>
+                            {{ curso.nivel.nombre }}
+                        </td>
+
+                        <td>
+
+                            {% if curso.estado %}
+                                Activo
+                            {% else %}
+                                Inactivo
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'curso_editar' curso.id_curso %}"
+                                class="boton-secundario"
+                            >
+                                Editar
+                            </a>
+
+                            {% if curso.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'curso_desactivar' curso.id_curso %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Desactivar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>No existen cursos registrados.</p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

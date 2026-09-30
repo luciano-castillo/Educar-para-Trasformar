@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>{{ titulo }}</h1>
+
+    <form method="post" class="formulario">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Guardar
+        </button>
+
+        <a
+            href="{% url 'curso_lista' %}"
+            class="boton-secundario"
+        >
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
