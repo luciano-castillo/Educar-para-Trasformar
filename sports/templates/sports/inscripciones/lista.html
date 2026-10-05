@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Inscripciones deportivas</h1>
+
+    <p>
+        Administración de alumnos inscriptos
+        en los grupos deportivos.
+    </p>
+
+    <a
+        href="{% url 'inscripcion_crear' %}"
+        class="boton"
+    >
+        Nueva inscripción
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if inscripciones %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Alumno</th>
+                    <th>Legajo</th>
+                    <th>Deporte</th>
+                    <th>Nivel</th>
+                    <th>Profesor</th>
+                    <th>Día</th>
+                    <th>Horario</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for inscripcion in inscripciones %}
+
+                    <tr>
+
+                        <td>
+                            {{ inscripcion.alumno.apellido }},
+                            {{ inscripcion.alumno.nombre }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.alumno.legajo }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.deporte.nombre }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.nivel.nombre }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.profesor.apellido }},
+                            {{ inscripcion.grupo.profesor.nombre }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.horario.get_dia_semana_display }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.horario.hora_inicio|time:"H:i" }}
+                            -
+                            {{ inscripcion.grupo.horario.hora_fin|time:"H:i" }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}
+                        </td>
+
+                        <td>
+
+                            {% if inscripcion.estado %}
+                                Activa
+                            {% else %}
+                                Inactiva
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if inscripcion.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'inscripcion_desactivar' inscripcion.id_inscripcion %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Finalizar
+                                    </button>
+
+                                </form>
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen inscripciones deportivas registradas.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

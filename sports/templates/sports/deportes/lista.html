@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Deportes</h1>
+
+    <p>
+        Administración de los deportes
+        ofrecidos por la institución.
+    </p>
+
+    <a
+        href="{% url 'deporte_crear' %}"
+        class="boton"
+    >
+        Nuevo deporte
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if deportes %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Deporte</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for deporte in deportes %}
+
+                    <tr>
+
+                        <td>
+                            {{ deporte.id_deporte }}
+                        </td>
+
+                        <td>
+                            {{ deporte.nombre }}
+                        </td>
+
+                        <td>
+                            {{ deporte.descripcion|default:"-" }}
+                        </td>
+
+                        <td>
+
+                            {% if deporte.estado %}
+                                Activo
+                            {% else %}
+                                Inactivo
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'deporte_editar' deporte.id_deporte %}"
+                                class="boton-secundario"
+                            >
+                                Editar
+                            </a>
+
+                            {% if deporte.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'deporte_desactivar' deporte.id_deporte %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Desactivar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen deportes registrados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

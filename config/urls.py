@@ -29,5 +29,10 @@ urlpatterns = [
         "cuentas/",
         include("accounts.urls")
     ),
+    #Deportes
+    path(
+        "",
+        include("sports.urls")
+    ),
 
 ]

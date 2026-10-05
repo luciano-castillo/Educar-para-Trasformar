@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Grupos deportivos</h1>
+
+    <p>
+        Administración de los grupos deportivos
+        de la institución.
+    </p>
+
+    <a
+        href="{% url 'grupo_crear' %}"
+        class="boton"
+    >
+        Nuevo grupo deportivo
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if grupos %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Deporte</th>
+                    <th>Nivel</th>
+                    <th>Profesor</th>
+                    <th>Día</th>
+                    <th>Horario</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for grupo in grupos %}
+
+                    <tr>
+
+                        <td>
+                            {{ grupo.id_grupo }}
+                        </td>
+
+                        <td>
+                            {{ grupo.deporte.nombre }}
+                        </td>
+
+                        <td>
+                            {{ grupo.nivel.nombre }}
+                        </td>
+
+                        <td>
+                            {{ grupo.profesor.apellido }},
+                            {{ grupo.profesor.nombre }}
+                        </td>
+
+                        <td>
+                            {{ grupo.horario.get_dia_semana_display }}
+                        </td>
+
+                        <td>
+                            {{ grupo.horario.hora_inicio|time:"H:i" }}
+                            -
+                            {{ grupo.horario.hora_fin|time:"H:i" }}
+                        </td>
+
+                        <td>
+
+                            {% if grupo.estado %}
+                                Activo
+                            {% else %}
+                                Inactivo
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'grupo_editar' grupo.id_grupo %}"
+                                class="boton-secundario"
+                            >
+                                Editar
+                            </a>
+
+
+                            {% if grupo.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'grupo_desactivar' grupo.id_grupo %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Desactivar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen grupos deportivos registrados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
