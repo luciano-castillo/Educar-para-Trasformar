@@ -149,6 +149,94 @@ class Profesor(models.Model):
     def __str__(self):
         return f"{self.apellido}, {self.nombre} - Legajo {self.legajo}"
 
+class Tutor(models.Model):
+
+    id_tutor = models.BigAutoField(
+        primary_key=True
+    )
+
+    usuario = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tutor"
+    )
+
+    dni = models.CharField(
+        max_length=15,
+        unique=True
+    )
+
+    nombre = models.CharField(
+        max_length=100
+    )
+
+    apellido = models.CharField(
+        max_length=100
+    )
+
+    domicilio = models.CharField(
+        max_length=150
+    )
+
+    telefono = models.CharField(
+        max_length=30
+    )
+
+    correo = models.EmailField(
+        max_length=150
+    )
+
+    estado = models.BooleanField(
+        default=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.apellido}, "
+            f"{self.nombre} - DNI {self.dni}"
+        )
+
+class TutorAlumno(models.Model):
+
+    id_relacion = models.BigAutoField(
+        primary_key=True
+    )
+
+    tutor = models.ForeignKey(
+        Tutor,
+        on_delete=models.PROTECT,
+        related_name="alumnos_asociados"
+    )
+
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.PROTECT,
+        related_name="tutores_asociados"
+    )
+
+    class Meta:
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "tutor",
+                    "alumno",
+                ],
+                name="tutor_alumno_unico"
+            )
+        ]
+
+    def __str__(self):
+
+        return (
+            f"{self.tutor.apellido}, "
+            f"{self.tutor.nombre} → "
+            f"{self.alumno.apellido}, "
+            f"{self.alumno.nombre}"
+        )
+
 class Materia(models.Model):
     id_materia = models.BigAutoField(primary_key=True)
 

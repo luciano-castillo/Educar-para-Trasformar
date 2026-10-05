@@ -129,3 +129,36 @@ def docente_required(view_func):
         )
 
     return wrapper
+
+def tutor_required(view_func):
+
+    def wrapper(request, *args, **kwargs):
+
+        if not request.user.is_authenticated:
+            return redirect("login")
+
+        try:
+            perfil = request.user.perfil
+        except PerfilUsuario.DoesNotExist:
+            messages.error(
+                request,
+                "El usuario no posee un perfil asignado."
+            )
+            return redirect("login")
+
+        if perfil.rol != PerfilUsuario.Rol.TUTOR:
+
+            messages.error(
+                request,
+                "No tiene permisos para acceder a esta sección."
+            )
+
+            return redirect("inicio_por_rol")
+
+        return view_func(
+            request,
+            *args,
+            **kwargs
+        )
+
+    return wrapper

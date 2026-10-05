@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models.deletion import ProtectedError
 
-from accounts.decorators import admin_required, alumno_required, docente_required
+from accounts.decorators import admin_required, alumno_required, docente_required, tutor_required
 
-from .models import Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso
+from sports.models import InscripcionDeporte
+from .models import Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso, Tutor, TutorAlumno
 from .forms import (
     AlumnoForm, 
     AlumnoDatosPersonalesForm, 
@@ -15,6 +16,8 @@ from .forms import (
     DictadoMateriaForm,
     CursoForm,
     NivelEducativoForm,
+    TutorForm,
+    TutorAlumnoForm,
     )
 
 #Alumnos
@@ -927,3 +930,338 @@ def curso_desactivar(request, id_curso):
         )
 
     return redirect("curso_lista")
+
+#Tutor
+@admin_required
+def tutor_lista(request):
+
+    tutores = (
+        Tutor.objects
+        .all()
+        .order_by(
+            "apellido",
+            "nombre"
+        )
+    )
+
+    return render(
+        request,
+        "academic/tutores/lista.html",
+        {
+            "tutores": tutores
+        }
+    )
+
+@admin_required
+def tutor_crear(request):
+
+    if request.method == "POST":
+
+        form = TutorForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                "El tutor fue registrado correctamente."
+            )
+
+            return redirect(
+                "tutor_lista"
+            )
+
+    else:
+
+        form = TutorForm()
+
+    return render(
+        request,
+        "academic/tutores/formulario.html",
+        {
+            "form": form,
+            "titulo": "Nuevo tutor"
+        }
+    )
+
+@admin_required
+def tutor_editar(
+    request,
+    id_tutor
+):
+
+    tutor = get_object_or_404(
+        Tutor,
+        id_tutor=id_tutor
+    )
+
+    if request.method == "POST":
+
+        form = TutorForm(
+            request.POST,
+            instance=tutor
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                "Los datos del tutor fueron modificados correctamente."
+            )
+
+            return redirect(
+                "tutor_lista"
+            )
+
+    else:
+
+        form = TutorForm(
+            instance=tutor
+        )
+
+    return render(
+        request,
+        "academic/tutores/formulario.html",
+        {
+            "form": form,
+            "titulo": "Modificar tutor"
+        }
+    )
+
+@admin_required
+def tutor_desactivar(
+    request,
+    id_tutor
+):
+
+    tutor = get_object_or_404(
+        Tutor,
+        id_tutor=id_tutor
+    )
+
+    if request.method == "POST":
+
+        tutor.estado = False
+        tutor.save()
+
+        messages.success(
+            request,
+            "El tutor fue desactivado correctamente."
+        )
+
+    return redirect(
+        "tutor_lista"
+    )
+
+#Tutores y alumnos 
+@admin_required
+def tutor_alumno_lista(request):
+
+    relaciones = (
+        TutorAlumno.objects
+        .select_related(
+            "tutor",
+            "alumno",
+            "alumno__curso",
+            "alumno__curso__nivel"
+        )
+        .order_by(
+            "tutor__apellido",
+            "tutor__nombre",
+            "alumno__apellido"
+        )
+    )
+
+    return render(
+        request,
+        "academic/tutores/asociaciones_lista.html",
+        {
+            "relaciones": relaciones
+        }
+    )
+
+@admin_required
+def tutor_alumno_crear(request):
+
+    if request.method == "POST":
+
+        form = TutorAlumnoForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                "El alumno fue asociado al tutor correctamente."
+            )
+
+            return redirect(
+                "tutor_alumno_lista"
+            )
+
+    else:
+
+        form = TutorAlumnoForm()
+
+    return render(
+        request,
+        "academic/tutores/asociacion_formulario.html",
+        {
+            "form": form,
+            "titulo": "Asociar alumno a tutor"
+        }
+    )
+
+@admin_required
+def tutor_alumno_eliminar(
+    request,
+    id_relacion
+):
+
+    relacion = get_object_or_404(
+        TutorAlumno,
+        id_relacion=id_relacion
+    )
+
+    if request.method == "POST":
+
+        relacion.delete()
+
+        messages.success(
+            request,
+            "La asociación entre tutor y alumno fue eliminada."
+        )
+
+    return redirect(
+        "tutor_alumno_lista"
+    )
+    
+@tutor_required
+def tutor_mis_hijos(request):
+
+    try:
+
+        tutor = request.user.tutor
+
+    except Tutor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un tutor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    relaciones = (
+        TutorAlumno.objects
+        .filter(
+            tutor=tutor,
+            alumno__estado=True
+        )
+        .select_related(
+            "alumno",
+            "alumno__curso",
+            "alumno__curso__nivel"
+        )
+        .order_by(
+            "alumno__apellido",
+            "alumno__nombre"
+        )
+    )
+
+    return render(
+        request,
+        "academic/tutores/mis_hijos.html",
+        {
+            "tutor": tutor,
+            "relaciones": relaciones,
+        }
+    )
+
+@tutor_required
+def tutor_detalle_alumno(
+    request,
+    id_alumno
+):
+
+    try:
+
+        tutor = request.user.tutor
+
+    except Tutor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un tutor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    relacion = get_object_or_404(
+        TutorAlumno,
+        tutor=tutor,
+        alumno__id_alumno=id_alumno,
+        alumno__estado=True
+    )
+
+    alumno = relacion.alumno
+
+    dictados = (
+        DictadoMateria.objects
+        .filter(
+            curso=alumno.curso,
+            materia__estado=True,
+            profesor__estado=True,
+            curso__estado=True
+        )
+        .select_related(
+            "materia",
+            "profesor",
+            "horario"
+        )
+        .order_by(
+            "materia__nombre"
+        )
+    )
+
+    deportes = (
+        InscripcionDeporte.objects
+        .filter(
+            alumno=alumno,
+            estado=True,
+            grupo__estado=True,
+            grupo__deporte__estado=True
+        )
+        .select_related(
+            "grupo",
+            "grupo__deporte",
+            "grupo__profesor",
+            "grupo__horario"
+        )
+        .order_by(
+            "grupo__deporte__nombre"
+        )
+    )
+
+    return render(
+        request,
+        "academic/tutores/detalle_alumno.html",
+        {
+            "tutor": tutor,
+            "alumno": alumno,
+            "dictados": dictados,
+            "deportes": deportes,
+        }
+    )

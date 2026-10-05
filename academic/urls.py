@@ -194,5 +194,59 @@ urlpatterns = [
         views.curso_desactivar,
         name="curso_desactivar"
     ),
+    #Tutores
+    
+    path(
+        "tutores/",
+        views.tutor_lista,
+        name="tutor_lista"
+    ),
 
+    path(
+        "tutores/nuevo/",
+        views.tutor_crear,
+        name="tutor_crear"
+    ),
+
+    path(
+        "tutores/<int:id_tutor>/editar/",
+        views.tutor_editar,
+        name="tutor_editar"
+    ),
+
+    path(
+        "tutores/<int:id_tutor>/desactivar/",
+        views.tutor_desactivar,
+        name="tutor_desactivar"
+    ),
+    
+    path(
+        "tutor/mis-hijos/",
+        views.tutor_mis_hijos,
+        name="tutor_mis_hijos"
+    ),
+    
+    #Tutores y alumnos
+    path(
+        "tutores/asociaciones/",
+        views.tutor_alumno_lista,
+        name="tutor_alumno_lista"
+    ),
+
+    path(
+        "tutores/asociaciones/nueva/",
+        views.tutor_alumno_crear,
+        name="tutor_alumno_crear"
+    ),
+
+    path(
+        "tutores/asociaciones/<int:id_relacion>/eliminar/",
+        views.tutor_alumno_eliminar,
+        name="tutor_alumno_eliminar"
+    ),
+    path(
+        "tutor/alumno/<int:id_alumno>/",
+        views.tutor_detalle_alumno,
+        name="tutor_detalle_alumno"
+    ),
 ]

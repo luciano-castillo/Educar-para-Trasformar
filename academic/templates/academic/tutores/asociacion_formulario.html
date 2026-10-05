@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        {{ titulo }}
+    </h1>
+
+    <p>
+        Seleccione un tutor y el alumno
+        que desea asociar.
+    </p>
+
+    <form
+        method="post"
+        class="formulario"
+    >
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Asociar
+        </button>
+
+        <a
+            href="{% url 'tutor_alumno_lista' %}"
+            class="boton-secundario"
+        >
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

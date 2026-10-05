@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        {{ alumno.nombre }}
+        {{ alumno.apellido }}
+    </h1>
+
+    <p>
+        <strong>Legajo:</strong>
+        {{ alumno.legajo }}
+    </p>
+
+    <p>
+        <strong>Curso:</strong>
+        {{ alumno.curso.nombre }}
+        {{ alumno.curso.division }}
+    </p>
+
+    <p>
+        <strong>Nivel:</strong>
+        {{ alumno.curso.nivel.nombre }}
+    </p>
+
+    <a
+        href="{% url 'tutor_mis_hijos' %}"
+        class="boton-secundario"
+    >
+        Volver
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Materias y profesores</h2>
+
+    {% if dictados %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Materia</th>
+                    <th>Profesor</th>
+                    <th>Día</th>
+                    <th>Horario</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for dictado in dictados %}
+
+                    <tr>
+
+                        <td>
+                            {{ dictado.materia.nombre }}
+                        </td>
+
+                        <td>
+                            {{ dictado.profesor.apellido }},
+                            {{ dictado.profesor.nombre }}
+                        </td>
+
+                        <td>
+                            {{ dictado.horario.get_dia_semana_display }}
+                        </td>
+
+                        <td>
+                            {{ dictado.horario.hora_inicio|time:"H:i" }}
+                            -
+                            {{ dictado.horario.hora_fin|time:"H:i" }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen materias asignadas al curso.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Deportes</h2>
+
+    {% if deportes %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Deporte</th>
+                    <th>Profesor</th>
+                    <th>Día</th>
+                    <th>Horario</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for inscripcion in deportes %}
+
+                    <tr>
+
+                        <td>
+                            {{ inscripcion.grupo.deporte.nombre }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.profesor.apellido }},
+                            {{ inscripcion.grupo.profesor.nombre }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.horario.get_dia_semana_display }}
+                        </td>
+
+                        <td>
+                            {{ inscripcion.grupo.horario.hora_inicio|time:"H:i" }}
+                            -
+                            {{ inscripcion.grupo.horario.hora_fin|time:"H:i" }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            El alumno no posee deportes activos.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

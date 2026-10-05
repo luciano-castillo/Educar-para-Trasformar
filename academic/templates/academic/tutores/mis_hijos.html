@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Mis hijos / alumnos asociados</h1>
+
+    <p>
+        Tutor:
+        <strong>
+            {{ tutor.nombre }}
+            {{ tutor.apellido }}
+        </strong>
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if relaciones %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Alumno</th>
+                    <th>Legajo</th>
+                    <th>Curso</th>
+                    <th>Nivel</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for relacion in relaciones %}
+
+                    <tr>
+
+                        <td>
+                            {{ relacion.alumno.apellido }},
+                            {{ relacion.alumno.nombre }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.legajo }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.curso.nombre }}
+                            {{ relacion.alumno.curso.division }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.curso.nivel.nombre }}
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'tutor_detalle_alumno' relacion.alumno.id_alumno %}"
+                                class="boton"
+                            >
+                                Ver información
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            Actualmente no posee alumnos asociados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

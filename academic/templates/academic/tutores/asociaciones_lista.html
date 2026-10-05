@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Alumnos asociados a tutores</h1>
+
+    <p>
+        Administración de las relaciones
+        entre padres/tutores y alumnos.
+    </p>
+
+    <a
+        href="{% url 'tutor_alumno_crear' %}"
+        class="boton"
+    >
+        Nueva asociación
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if relaciones %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Tutor</th>
+                    <th>DNI Tutor</th>
+                    <th>Alumno</th>
+                    <th>Legajo</th>
+                    <th>Curso</th>
+                    <th>Nivel</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for relacion in relaciones %}
+
+                    <tr>
+
+                        <td>
+                            {{ relacion.tutor.apellido }},
+                            {{ relacion.tutor.nombre }}
+                        </td>
+
+                        <td>
+                            {{ relacion.tutor.dni }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.apellido }},
+                            {{ relacion.alumno.nombre }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.legajo }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.curso.nombre }}
+                            {{ relacion.alumno.curso.division }}
+                        </td>
+
+                        <td>
+                            {{ relacion.alumno.curso.nivel.nombre }}
+                        </td>
+
+                        <td>
+
+                            <form
+                                method="post"
+                                action="{% url 'tutor_alumno_eliminar' relacion.id_relacion %}"
+                                style="display:inline;"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="boton-peligro"
+                                >
+                                    Desvincular
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen alumnos asociados a tutores.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

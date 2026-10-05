@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import NivelEducativo, Curso, Alumno, Profesor, Materia, Horario, DictadoMateria
+from .models import NivelEducativo, Curso, Alumno, Profesor, Tutor, Materia, Horario, DictadoMateria,TutorAlumno
 
 
 @admin.register(NivelEducativo)
@@ -94,6 +94,48 @@ class ProfesorAdmin(admin.ModelAdmin):
     ordering = (
         "apellido",
         "nombre",
+    )
+
+@admin.register(Tutor)
+class TutorAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "id_tutor",
+        "dni",
+        "apellido",
+        "nombre",
+        "telefono",
+        "correo",
+        "estado",
+    )
+
+    search_fields = (
+        "dni",
+        "apellido",
+        "nombre",
+    )
+
+    list_filter = (
+        "estado",
+    )
+
+@admin.register(TutorAlumno)
+class TutorAlumnoAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "id_relacion",
+        "tutor",
+        "alumno",
+    )
+
+    search_fields = (
+        "tutor__nombre",
+        "tutor__apellido",
+        "tutor__dni",
+        "alumno__nombre",
+        "alumno__apellido",
+        "alumno__dni",
+        "alumno__legajo",
     )
 
 @admin.register(Materia)

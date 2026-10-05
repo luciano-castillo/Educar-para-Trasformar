@@ -1,5 +1,5 @@
 from django import forms
-from .models import Alumno, Profesor, NivelEducativo, Materia, Horario, Curso, DictadoMateria
+from .models import Alumno, Profesor, NivelEducativo, Materia, Horario, Curso, DictadoMateria, Tutor, TutorAlumno
 
 
 class AlumnoForm(forms.ModelForm):
@@ -354,6 +354,116 @@ class CursoForm(forms.ModelForm):
             if cursos.exists():
                 raise forms.ValidationError(
                     "Ya existe un curso con el mismo nombre, división, turno y nivel."
+                )
+
+        return cleaned_data
+    
+class TutorForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Tutor
+
+        fields = [
+            "dni",
+            "nombre",
+            "apellido",
+            "domicilio",
+            "telefono",
+            "correo",
+            "estado",
+        ]
+
+        widgets = {
+
+            "dni": forms.TextInput(
+                attrs={
+                    "placeholder": "DNI"
+                }
+            ),
+
+            "nombre": forms.TextInput(
+                attrs={
+                    "placeholder": "Nombre"
+                }
+            ),
+
+            "apellido": forms.TextInput(
+                attrs={
+                    "placeholder": "Apellido"
+                }
+            ),
+
+            "domicilio": forms.TextInput(
+                attrs={
+                    "placeholder": "Domicilio"
+                }
+            ),
+
+            "telefono": forms.TextInput(
+                attrs={
+                    "placeholder": "Teléfono"
+                }
+            ),
+
+            "correo": forms.EmailInput(
+                attrs={
+                    "placeholder": "Correo electrónico"
+                }
+            ),
+        }
+
+class TutorAlumnoForm(forms.ModelForm):
+
+    class Meta:
+
+        model = TutorAlumno
+
+        fields = [
+            "tutor",
+            "alumno",
+        ]
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.fields["tutor"].queryset = (
+            Tutor.objects
+            .filter(estado=True)
+            .order_by(
+                "apellido",
+                "nombre"
+            )
+        )
+
+        self.fields["alumno"].queryset = (
+            Alumno.objects
+            .filter(estado=True)
+            .select_related("curso")
+            .order_by(
+                "apellido",
+                "nombre"
+            )
+        )
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        tutor = cleaned_data.get("tutor")
+        alumno = cleaned_data.get("alumno")
+
+        if tutor and alumno:
+
+            if TutorAlumno.objects.filter(
+                tutor=tutor,
+                alumno=alumno
+            ).exists():
+
+                raise forms.ValidationError(
+                    "Este alumno ya se encuentra asociado "
+                    "a este tutor."
                 )
 
         return cleaned_data
