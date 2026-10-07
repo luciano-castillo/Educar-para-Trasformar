@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
 from .models import PerfilUsuario
-
+from accounts.decorators import admin_required
 
 def login_usuario(request):
 
@@ -117,7 +117,7 @@ def inicio_por_rol(request):
         return redirect("login")
 
     if rol == PerfilUsuario.Rol.ADMIN:
-        return redirect("alumno_lista")
+        return redirect("admin_dashboard")
     
     if rol == PerfilUsuario.Rol.ALUMNO:
         return redirect("alumno_mis_datos")
@@ -142,3 +142,12 @@ def logout_usuario(request):
     logout(request)
 
     return redirect("login")
+
+
+@admin_required
+def admin_dashboard(request):
+
+    return render(
+        request,
+        "accounts/admin_dashboard.html"
+    )

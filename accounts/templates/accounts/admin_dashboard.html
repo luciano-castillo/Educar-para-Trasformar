@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard-cabecera">
+
+    <h1>Panel de Administración</h1>
+
+    <p>
+        Desde aquí puede acceder a los distintos módulos
+        de gestión del sistema.
+    </p>
+
+</div>
+
+
+<h2 class="dashboard-seccion-titulo">
+    Gestión académica
+</h2>
+
+<div class="dashboard-grid">
+
+    <a href="{% url 'alumno_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            👨‍🎓
+        </div>
+
+        <h3>Alumnos</h3>
+
+        <p>
+            Registrar, modificar y administrar alumnos.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'profesor_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            👨‍🏫
+        </div>
+
+        <h3>Profesores</h3>
+
+        <p>
+            Gestionar profesores y sus datos.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'nivel_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            🏫
+        </div>
+
+        <h3>Niveles educativos</h3>
+
+        <p>
+            Administrar los niveles de enseñanza.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'curso_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            📚
+        </div>
+
+        <h3>Cursos</h3>
+
+        <p>
+            Crear y administrar cursos y divisiones.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'materia_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            📖
+        </div>
+
+        <h3>Materias</h3>
+
+        <p>
+            Administrar las materias de la institución.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'horario_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            🕐
+        </div>
+
+        <h3>Horarios</h3>
+
+        <p>
+            Configurar días y horarios académicos.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'dictado_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            🗂️
+        </div>
+
+        <h3>Asignación de materias</h3>
+
+        <p>
+            Vincular materias, profesores, cursos y horarios.
+        </p>
+
+    </a>
+
+</div>
+
+
+<h2 class="dashboard-seccion-titulo">
+    Deportes
+</h2>
+
+<div class="dashboard-grid">
+
+    <a href="{% url 'deporte_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            ⚽
+        </div>
+
+        <h3>Deportes</h3>
+
+        <p>
+            Administrar los deportes disponibles.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'grupo_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            🏃
+        </div>
+
+        <h3>Grupos deportivos</h3>
+
+        <p>
+            Gestionar profesores, niveles y horarios deportivos.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'inscripcion_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            📝
+        </div>
+
+        <h3>Inscripciones deportivas</h3>
+
+        <p>
+            Administrar alumnos inscriptos en deportes.
+        </p>
+
+    </a>
+
+</div>
+
+
+<h2 class="dashboard-seccion-titulo">
+    Padres y tutores
+</h2>
+
+<div class="dashboard-grid">
+
+    <a href="{% url 'tutor_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            👨‍👩‍👧
+        </div>
+
+        <h3>Padres / Tutores</h3>
+
+        <p>
+            Registrar y administrar tutores.
+        </p>
+
+    </a>
+
+
+    <a href="{% url 'tutor_alumno_lista' %}" class="dashboard-panel">
+
+        <div class="dashboard-icono">
+            🔗
+        </div>
+
+        <h3>Asociar alumnos</h3>
+
+        <p>
+            Relacionar alumnos con sus padres o tutores.
+        </p>
+
+    </a>
+
+</div>
+
+{% endblock %}
