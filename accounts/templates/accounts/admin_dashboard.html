@@ -217,4 +217,88 @@
 
 </div>
 
+<h2 class="dashboard-seccion-titulo">
+    Servicios
+</h2>
+
+<div class="dashboard-grid">
+    
+    <a
+        href="{% url 'ruta_lista' %}"
+        class="dashboard-panel"
+    >
+
+        <div class="dashboard-icono">
+            🚌
+        </div>
+
+        <h3>Rutas de transporte</h3>
+
+        <p>
+            Administrar rutas y valores mensuales.
+        </p>
+
+    </a>
+
+
+    <a
+        href="{% url 'transporte_contratacion_lista' %}"
+        class="dashboard-panel"
+    >
+
+        <div class="dashboard-icono">
+            🎫
+        </div>
+
+        <h3>Contrataciones de transporte</h3>
+
+        <p>
+            Asignar mensualmente el servicio
+            de transporte a los alumnos.
+        </p>
+
+    </a>
+
+    <a
+        href="{% url 'comedor_lista' %}"
+        class="dashboard-panel"
+    >
+
+        <div class="dashboard-icono">
+            🍽️
+        </div>
+
+        <h3>Comedor escolar</h3>
+
+        <p>
+            Administrar servicios y valores
+            del comedor.
+        </p>
+
+    </a>
+
+
+    <a
+        href="{% url 'comedor_contratacion_lista' %}"
+        class="dashboard-panel"
+    >
+
+        <div class="dashboard-icono">
+            🍴
+        </div>
+
+        <h3>Contrataciones de comedor</h3>
+
+        <p>
+            Gestionar mensualmente
+            el comedor de los alumnos.
+        </p>
+
+    </a>
+
+
+</div>
+
+
+
 {% endblock %}

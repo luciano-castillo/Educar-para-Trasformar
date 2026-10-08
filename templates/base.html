@@ -44,23 +44,35 @@
             </div>
 
         </div>
+        
+        <div class="usuario-nav">
 
-
-        {% if request.user.is_authenticated %}
-
-            <div class="usuario-header">
-
+            {% if request.user.is_authenticated %}
+        
+                {% if request.user.perfil.rol == "ADMIN" %}
+        
+                    <a
+                        href="{% url 'admin_dashboard' %}"
+                        class="nav-dashboard"
+                    >
+                        🏠 Panel principal
+                    </a>
+        
+                {% endif %}
+        
                 <span>
                     {{ request.user.username }}
                 </span>
-
+        
                 <a href="{% url 'logout' %}">
                     Cerrar sesión
                 </a>
+        
+            {% endif %}
+        
+        </div>
 
-            </div>
 
-        {% endif %}
 
     </header>
 

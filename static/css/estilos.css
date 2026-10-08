@@ -306,3 +306,32 @@ select:focus {
 
     color: #6b7280;
 }
+
+.nav-dashboard {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 14px;
+
+    background-color: #1677ff;
+
+    color: white;
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.nav-dashboard:hover {
+    background-color: #0d65df;
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: white;
+}

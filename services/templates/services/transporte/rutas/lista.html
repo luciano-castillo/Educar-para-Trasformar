@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Rutas de Transporte</h1>
+
+    <p>
+        Administración de las rutas
+        de transporte escolar.
+    </p>
+
+    <a
+        href="{% url 'ruta_crear' %}"
+        class="boton"
+    >
+        Nueva ruta
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if rutas %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Ruta</th>
+                    <th>Descripción</th>
+                    <th>Valor mensual</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for ruta in rutas %}
+
+                    <tr>
+
+                        <td>
+                            {{ ruta.id_ruta }}
+                        </td>
+
+                        <td>
+                            {{ ruta.nombre }}
+                        </td>
+
+                        <td>
+                            {{ ruta.descripcion|default:"-" }}
+                        </td>
+
+                        <td>
+                            $ {{ ruta.valor_mensual }}
+                        </td>
+
+                        <td>
+
+                            {% if ruta.estado %}
+                                Activa
+                            {% else %}
+                                Inactiva
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'ruta_editar' ruta.id_ruta %}"
+                                class="boton-secundario"
+                            >
+                                Editar
+                            </a>
+
+                            {% if ruta.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'ruta_desactivar' ruta.id_ruta %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Desactivar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen rutas registradas.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

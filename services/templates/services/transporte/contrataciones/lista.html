@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Contrataciones de Transporte</h1>
+
+    <p>
+        Gestión mensual del servicio de transporte
+        contratado por los alumnos.
+    </p>
+
+    <a
+        href="{% url 'transporte_contratacion_crear' %}"
+        class="boton"
+    >
+        Nueva contratación
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if contrataciones %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Alumno</th>
+                    <th>Legajo</th>
+                    <th>Ruta</th>
+                    <th>Período</th>
+                    <th>Valor</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for contratacion in contrataciones %}
+
+                    <tr>
+
+                        <td>
+                            {{ contratacion.alumno.apellido }},
+                            {{ contratacion.alumno.nombre }}
+                        </td>
+
+                        <td>
+                            {{ contratacion.alumno.legajo }}
+                        </td>
+
+                        <td>
+                            {{ contratacion.ruta.nombre }}
+                        </td>
+
+                        <td>
+                            {{ contratacion.get_mes_display }}
+                            {{ contratacion.anio }}
+                        </td>
+
+                        <td>
+                            $ {{ contratacion.ruta.valor_mensual }}
+                        </td>
+
+                        <td>
+
+                            {% if contratacion.estado %}
+                                Activa
+                            {% else %}
+                                Cancelada
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'transporte_contratacion_editar' contratacion.id_contratacion %}"
+                                class="boton-secundario"
+                            >
+                                Editar
+                            </a>
+
+                            {% if contratacion.estado %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'transporte_contratacion_desactivar' contratacion.id_contratacion %}"
+                                    style="display:inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro"
+                                    >
+                                        Cancelar
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen contrataciones de transporte registradas.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

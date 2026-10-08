@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Comedor Escolar</h1>
+
+    <p>
+        Administración de los servicios
+        y valores del comedor escolar.
+    </p>
+
+    <a
+        href="{% url 'comedor_crear' %}"
+        class="boton"
+    >
+        Nuevo servicio
+    </a>
+
+</div>
+
+<div class="tarjeta">
+
+    {% if servicios %}
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Servicio</th>
+                    <th>Descripción</th>
+                    <th>Valor mensual</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for servicio in servicios %}
+
+                <tr>
+
+                    <td>
+                        {{ servicio.id_servicio_comedor }}
+                    </td>
+
+                    <td>
+                        {{ servicio.nombre }}
+                    </td>
+
+                    <td>
+                        {{ servicio.descripcion|default:"-" }}
+                    </td>
+
+                    <td>
+                        $ {{ servicio.valor_mensual }}
+                    </td>
+
+                    <td>
+
+                        {% if servicio.estado %}
+                            Activo
+                        {% else %}
+                            Inactivo
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'comedor_editar' servicio.id_servicio_comedor %}"
+                            class="boton-secundario"
+                        >
+                            Editar
+                        </a>
+
+                        {% if servicio.estado %}
+
+                        <form
+                            method="post"
+                            action="{% url 'comedor_desactivar' servicio.id_servicio_comedor %}"
+                            style="display:inline;"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="boton-peligro"
+                            >
+                                Desactivar
+                            </button>
+
+                        </form>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen servicios de comedor registrados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,94 @@
+name: Django CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+
+permissions:
+  contents: read
+
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+
+    services:
+
+      postgres:
+
+        image: postgres:16
+
+        env:
+          POSTGRES_DB: educar_transformar_db
+          POSTGRES_USER: educar_user
+          POSTGRES_PASSWORD: ci_password
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd "pg_isready -U educar_user -d educar_transformar_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
+    env:
+
+      DB_NAME: educar_transformar_db
+      DB_USER: educar_user
+      DB_PASSWORD: ci_password
+      DB_HOST: localhost
+      DB_PORT: 5432
+
+      SECRET_KEY: clave-solo-para-ci
+      DEBUG: "False"
+
+
+    steps:
+
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+
+        with:
+          python-version: "3.11.3"
+          cache: "pip"
+
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+
+      - name: Verificar migraciones pendientes
+        run: |
+          python manage.py makemigrations --check --dry-run
+
+
+      - name: Aplicar migraciones
+        run: |
+          python manage.py migrate --noinput
+
+
+      - name: Verificar configuración de Django
+        run: |
+          python manage.py check
+
+
+      - name: Ejecutar pruebas
+        run: |
+          python manage.py test

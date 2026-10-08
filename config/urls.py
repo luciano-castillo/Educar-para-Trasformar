@@ -34,5 +34,10 @@ urlpatterns = [
         "",
         include("sports.urls")
     ),
+    
+    path(
+        "",
+        include("services.urls")
+    ),
 
 ]
