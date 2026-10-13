@@ -39,5 +39,10 @@ urlpatterns = [
         "",
         include("services.urls")
     ),
+    #Cuotas
+    path(
+        "",
+        include("billing.urls")
+    ),
 
 ]

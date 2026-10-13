@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'academic',
     'services',
     'sports',
+    'billing',
 ]
 
 MIDDLEWARE = [

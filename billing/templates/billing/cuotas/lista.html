@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Cuotas Mensuales</h1>
+
+    <p>
+        Administración de los valores mensuales
+        de la cuota educativa.
+    </p>
+
+    <a
+        href="{% url 'cuota_crear' %}"
+        class="boton"
+    >
+        Nueva cuota
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if cuotas %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Período</th>
+                    <th>Valor</th>
+                    <th>Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for cuota in cuotas %}
+
+                <tr>
+
+                    <td>
+                        {{ cuota.id_cuota }}
+                    </td>
+
+                    <td>
+                        {{ cuota.get_mes_display }}
+                        {{ cuota.anio }}
+                    </td>
+
+                    <td>
+                        $ {{ cuota.valor }}
+                    </td>
+
+                    <td>
+                        {{ cuota.fecha_vencimiento|date:"d/m/Y" }}
+                    </td>
+
+                    <td>
+
+                        {% if cuota.estado %}
+                            Activa
+                        {% else %}
+                            Inactiva
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'cuota_editar' cuota.id_cuota %}"
+                            class="boton-secundario"
+                        >
+                            Editar
+                        </a>
+
+                        {% if cuota.estado %}
+
+                        <form
+                            method="post"
+                            action="{% url 'cuota_desactivar' cuota.id_cuota %}"
+                            style="display:inline;"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="boton-peligro"
+                            >
+                                Desactivar
+                            </button>
+
+                        </form>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen cuotas mensuales registradas.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
