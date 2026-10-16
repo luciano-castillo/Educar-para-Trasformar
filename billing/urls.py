@@ -28,5 +28,23 @@ urlpatterns = [
         views.cuota_desactivar,
         name="cuota_desactivar"
     ),
+    #Facturas
+    path(
+        "facturas/",
+        views.factura_lista,
+        name="factura_lista"
+    ),
+
+    path(
+        "facturas/nueva/",
+        views.factura_generar,
+        name="factura_generar"
+    ),
+
+    path(
+        "facturas/<int:id_factura>/",
+        views.factura_detalle,
+        name="factura_detalle"
+    ),
 
 ]

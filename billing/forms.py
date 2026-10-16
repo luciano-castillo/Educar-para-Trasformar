@@ -1,7 +1,7 @@
 from django import forms
 
 from .models import CuotaMensual
-
+from academic.models import Alumno
 
 class CuotaMensualForm(forms.ModelForm):
 
@@ -80,3 +80,39 @@ class CuotaMensualForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+
+class GenerarFacturaForm(forms.Form):
+
+    alumno = forms.ModelChoiceField(
+        queryset=Alumno.objects.none(),
+        label="Alumno"
+    )
+
+    mes = forms.ChoiceField(
+        choices=CuotaMensual.MESES,
+        label="Mes"
+    )
+
+    anio = forms.IntegerField(
+        label="Año",
+        min_value=2026,
+        widget=forms.NumberInput(
+            attrs={
+                "placeholder": "Ej.: 2026"
+            }
+        )
+    )
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.fields["alumno"].queryset = (
+            Alumno.objects
+            .filter(estado=True)
+            .order_by(
+                "apellido",
+                "nombre"
+            )
+        )

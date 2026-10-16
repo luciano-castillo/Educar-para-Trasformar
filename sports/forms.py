@@ -17,6 +17,7 @@ class DeporteForm(forms.ModelForm):
         fields = [
             "nombre",
             "descripcion",
+            "valor_mensual",
             "estado",
         ]
 
@@ -34,7 +35,29 @@ class DeporteForm(forms.ModelForm):
                     "placeholder": "Descripción del deporte"
                 }
             ),
+            
+            "valor_mensual": forms.NumberInput(
+                attrs={
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "Ej.: 20000"
+                }
+            ),
         }
+        
+    def clean_valor_mensual(self):
+
+        valor = self.cleaned_data.get(
+            "valor_mensual"
+        )
+
+        if valor is not None and valor <= 0:
+
+            raise forms.ValidationError(
+                "El valor mensual del deporte debe ser mayor a cero."
+            )
+
+        return valor
 
 class GrupoDeportivoForm(forms.ModelForm):
 

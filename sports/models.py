@@ -22,6 +22,12 @@ class Deporte(models.Model):
         blank=True
     )
 
+    valor_mensual = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+    
     estado = models.BooleanField(
         default=True
     )
@@ -109,6 +115,11 @@ class InscripcionDeporte(models.Model):
         auto_now_add=True
     )
 
+    fecha_baja = models.DateField(
+        null=True,
+        blank=True
+    )
+    
     estado = models.BooleanField(
         default=True
     )

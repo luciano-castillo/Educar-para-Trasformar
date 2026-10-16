@@ -5,6 +5,7 @@ from django.shortcuts import (
 )
 
 from django.contrib import messages
+from django.utils import timezone
 
 from .models import Deporte, GrupoDeportivo, InscripcionDeporte
 from .forms import DeporteForm, GrupoDeportivoForm, InscripcionDeporteForm
@@ -337,7 +338,14 @@ def inscripcion_desactivar(
     if request.method == "POST":
 
         inscripcion.estado = False
-        inscripcion.save()
+        inscripcion.fecha_baja = timezone.localdate()
+        
+        inscripcion.save(
+            update_fields=[
+                "estado",
+                "fecha_baja",
+            ]
+        )
 
         messages.success(
             request,

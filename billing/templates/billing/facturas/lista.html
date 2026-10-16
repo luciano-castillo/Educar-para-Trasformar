@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Facturación</h1>
+
+    <p>
+        Administración de las facturas
+        mensuales de los alumnos.
+    </p>
+
+    <a
+        href="{% url 'factura_generar' %}"
+        class="boton"
+    >
+        Nueva factura
+    </a>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if facturas %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>N°</th>
+                    <th>Alumno</th>
+                    <th>Período</th>
+                    <th>Vencimiento</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for factura in facturas %}
+
+                <tr>
+
+                    <td>
+                        {{ factura.id_factura }}
+                    </td>
+
+                    <td>
+                        {{ factura.alumno.apellido }},
+                        {{ factura.alumno.nombre }}
+                    </td>
+
+                    <td>
+                        {{ factura.get_mes_display }}
+                        {{ factura.anio }}
+                    </td>
+
+                    <td>
+                        {{ factura.fecha_vencimiento|date:"d/m/Y" }}
+                    </td>
+
+                    <td>
+                        $ {{ factura.total }}
+                    </td>
+
+                    <td>
+                        {{ factura.get_estado_display }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'factura_detalle' factura.id_factura %}"
+                            class="boton-secundario"
+                        >
+                            Ver detalle
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen facturas registradas.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Nueva factura</h1>
+
+    <p>
+        Seleccione el alumno y el período
+        que desea facturar.
+    </p>
+
+    <form
+        method="post"
+        class="formulario"
+    >
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Generar factura
+        </button>
+
+        <a
+            href="{% url 'factura_lista' %}"
+            class="boton-secundario"
+        >
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
