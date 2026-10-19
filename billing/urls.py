@@ -46,5 +46,25 @@ urlpatterns = [
         views.factura_detalle,
         name="factura_detalle"
     ),
+    
+    # PAGOS
+
+    path(
+        "facturas/<int:id_factura>/pagos/nuevo/",
+        views.pago_registrar,
+        name="pago_registrar"
+    ),
+
+    path(
+        "pagos/<int:id_pago>/validar/",
+        views.pago_validar,
+        name="pago_validar"
+    ),
+
+    path(
+        "pagos/<int:id_pago>/rechazar/",
+        views.pago_rechazar,
+        name="pago_rechazar"
+    ),
 
 ]

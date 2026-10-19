@@ -35,6 +35,21 @@
         {{ factura.get_estado_display }}
     </p>
 
+    <p>
+        <strong>Total factura:</strong>
+        $ {{ factura.total }}
+    </p>
+    
+    <p>
+        <strong>Total pagado:</strong>
+        $ {{ factura.total_pagado }}
+    </p>
+    
+    <p>
+        <strong>Saldo pendiente:</strong>
+        $ {{ factura.saldo }}
+    </p>
+
 </div>
 
 
@@ -94,6 +109,17 @@
 
         </tfoot>
 
+        {% if factura.estado != "PAGADA" and factura.estado != "ANULADA" %}
+
+        <a
+            href="{% url 'pago_registrar' factura.id_factura %}"
+            class="boton"
+        >
+            Registrar transferencia
+        </a>
+
+        {% endif %}
+
     </table>
 
     <br>
@@ -104,6 +130,119 @@
     >
         Volver
     </a>
+
+</div>
+
+<div class="tarjeta">
+
+    <h2>Pagos registrados</h2>
+
+    {% if factura.pagos.all %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>N°</th>
+                    <th>Fecha</th>
+                    <th>Operación</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for pago in factura.pagos.all %}
+
+                <tr>
+
+                    <td>
+                        {{ pago.id_pago }}
+                    </td>
+
+                    <td>
+                        {{ pago.fecha_transferencia|date:"d/m/Y" }}
+                    </td>
+
+                    <td>
+                        {{ pago.numero_operacion|default:"-" }}
+                    </td>
+
+                    <td>
+                        $ {{ pago.monto }}
+                    </td>
+
+                    <td>
+                        {{ pago.get_estado_display }}
+                    </td>
+
+                    <td>
+
+                        {% if pago.estado == "PENDIENTE" %}
+
+                        <form
+                            method="post"
+                            action="{% url 'pago_validar' pago.id_pago %}"
+                            style="display:inline;"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="boton"
+                            >
+                                Validar
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'pago_rechazar' pago.id_pago %}"
+                            style="display:inline;"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="boton-peligro"
+                            >
+                                Rechazar
+                            </button>
+
+                        </form>
+
+                        {% else %}
+
+                            -
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No existen pagos registrados
+            para esta factura.
+        </p>
+
+    {% endif %}
 
 </div>
 

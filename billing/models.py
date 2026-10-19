@@ -1,5 +1,7 @@
 from django.db import models
 from decimal import Decimal
+from django.conf import settings
+from django.db.models import Sum
 
 class CuotaMensual(models.Model):
 
@@ -131,6 +133,68 @@ class Factura(models.Model):
             ),
             Decimal("0.00")
         )
+    
+    @property
+    def total_pagado(self):
+
+        resultado = (
+            self.pagos
+            .filter(
+                estado="VALIDADO"
+            )
+            .aggregate(
+                total=Sum(
+                    "detalles_pago__importe_aplicado"
+                )
+            )
+        )
+
+        return (
+            resultado["total"]
+            or Decimal("0.00")
+        )
+
+
+    @property
+    def saldo(self):
+
+        saldo = (
+            self.total
+            - self.total_pagado
+        )
+
+        if saldo < 0:
+            return Decimal("0.00")
+
+        return saldo
+
+
+    def actualizar_estado_pago(self):
+
+        if self.estado == "ANULADA":
+            return
+
+        if self.total_pagado <= 0:
+
+            nuevo_estado = "PENDIENTE"
+
+        elif self.total_pagado < self.total:
+
+            nuevo_estado = "PARCIAL"
+
+        else:
+
+            nuevo_estado = "PAGADA"
+
+        if self.estado != nuevo_estado:
+
+            self.estado = nuevo_estado
+
+            self.save(
+                update_fields=[
+                    "estado"
+                ]
+            )
 
     def __str__(self):
 
@@ -218,10 +282,199 @@ class DetalleFactura(models.Model):
                 name="detalle_factura_importe_positivo"
             ),
         ]
+    
+    @property
+    def total_pagado(self):
+
+        resultado = (
+            self.aplicaciones_pago
+            .filter(
+                pago__estado="VALIDADO"
+            )
+            .aggregate(
+                total=Sum(
+                    "importe_aplicado"
+                )
+            )
+        )
+
+        return (
+            resultado["total"]
+            or Decimal("0.00")
+        )
+
+
+    @property
+    def saldo_pendiente(self):
+
+        saldo = (
+            self.importe
+            - self.total_pagado
+        )
+
+        if saldo < 0:
+            return Decimal("0.00")
+
+        return saldo
+
+
+    @property
+    def saldo_disponible_pago(self):
+
+        utilizado = (
+            self.aplicaciones_pago
+            .exclude(
+                pago__estado="RECHAZADO"
+            )
+            .aggregate(
+                total=Sum(
+                    "importe_aplicado"
+                )
+            )["total"]
+            or Decimal("0.00")
+        )
+
+        disponible = (
+            self.importe
+            - utilizado
+        )
+
+        if disponible < 0:
+            return Decimal("0.00")
+
+        return disponible
 
     def __str__(self):
 
         return (
             f"{self.descripcion} - "
             f"${self.importe}"
+        )
+
+class Pago(models.Model):
+
+    ESTADOS = [
+        ("PENDIENTE", "Pendiente"),
+        ("VALIDADO", "Validado"),
+        ("RECHAZADO", "Rechazado"),
+    ]
+
+    id_pago = models.BigAutoField(
+        primary_key=True
+    )
+
+    factura = models.ForeignKey(
+        Factura,
+        on_delete=models.PROTECT,
+        related_name="pagos"
+    )
+
+    fecha_transferencia = models.DateField()
+
+    monto = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    numero_operacion = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    estado = models.CharField(
+        max_length=10,
+        choices=ESTADOS,
+        default="PENDIENTE"
+    )
+
+    observaciones = models.CharField(
+        max_length=250,
+        blank=True
+    )
+
+    registrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pagos_registrados"
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+
+        ordering = [
+            "-fecha_registro"
+        ]
+
+        constraints = [
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    monto__gt=0
+                ),
+                name="pago_monto_positivo"
+            ),
+        ]
+
+    def __str__(self):
+
+        return (
+            f"Pago {self.id_pago} - "
+            f"Factura {self.factura_id} - "
+            f"${self.monto}"
+        )
+
+class PagoDetalle(models.Model):
+
+    id_pago_detalle = models.BigAutoField(
+        primary_key=True
+    )
+
+    pago = models.ForeignKey(
+        Pago,
+        on_delete=models.CASCADE,
+        related_name="detalles_pago"
+    )
+
+    detalle_factura = models.ForeignKey(
+        DetalleFactura,
+        on_delete=models.PROTECT,
+        related_name="aplicaciones_pago"
+    )
+
+    importe_aplicado = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    class Meta:
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=[
+                    "pago",
+                    "detalle_factura",
+                ],
+                name="pago_detalle_unico"
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    importe_aplicado__gt=0
+                ),
+                name="pago_detalle_importe_positivo"
+            ),
+        ]
+
+    def __str__(self):
+
+        return (
+            f"Pago {self.pago_id} - "
+            f"{self.detalle_factura.descripcion} - "
+            f"${self.importe_aplicado}"
         )

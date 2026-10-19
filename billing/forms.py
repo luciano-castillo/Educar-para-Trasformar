@@ -1,6 +1,7 @@
 from django import forms
+from decimal import Decimal
 
-from .models import CuotaMensual
+from .models import CuotaMensual, DetalleFactura
 from academic.models import Alumno
 
 class CuotaMensualForm(forms.ModelForm):
@@ -116,3 +117,174 @@ class GenerarFacturaForm(forms.Form):
                 "nombre"
             )
         )
+
+class RegistrarPagoForm(forms.Form):
+
+    fecha_transferencia = forms.DateField(
+        label="Fecha de transferencia",
+        widget=forms.DateInput(
+            attrs={
+                "type": "date"
+            }
+        )
+    )
+
+    numero_operacion = forms.CharField(
+        label="Número de operación",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Ej.: 123456789"
+            }
+        )
+    )
+
+    observaciones = forms.CharField(
+        label="Observaciones",
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Observaciones del pago"
+            }
+        )
+    )
+
+    def __init__(
+        self,
+        *args,
+        factura=None,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        self.factura = factura
+
+        if not factura:
+            return
+
+        detalles = (
+            factura.detalles
+            .all()
+            .order_by(
+                "id_detalle"
+            )
+        )
+
+        for detalle in detalles:
+
+            disponible = (
+                detalle.saldo_disponible_pago
+            )
+
+            if disponible <= 0:
+                continue
+
+            nombre_campo = (
+                f"concepto_{detalle.id_detalle}"
+            )
+
+            self.fields[
+                nombre_campo
+            ] = forms.DecimalField(
+                label=(
+                    f"{detalle.descripcion} "
+                    f"- Disponible: ${disponible}"
+                ),
+                required=False,
+                min_value=Decimal("0.01"),
+                max_value=disponible,
+                decimal_places=2,
+                max_digits=10,
+                widget=forms.NumberInput(
+                    attrs={
+                        "step": "0.01",
+                        "placeholder": "0.00"
+                    }
+                )
+            )
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        if not self.factura:
+            return cleaned_data
+
+        aplicaciones = []
+
+        for nombre, importe in (
+            cleaned_data.items()
+        ):
+
+            if not nombre.startswith(
+                "concepto_"
+            ):
+                continue
+
+            if importe in (
+                None,
+                "",
+            ):
+                continue
+
+            id_detalle = int(
+                nombre.replace(
+                    "concepto_",
+                    ""
+                )
+            )
+
+            try:
+
+                detalle = (
+                    self.factura.detalles
+                    .get(
+                        id_detalle=id_detalle
+                    )
+                )
+
+            except DetalleFactura.DoesNotExist:
+
+                raise forms.ValidationError(
+                    "Uno de los conceptos "
+                    "seleccionados no pertenece "
+                    "a esta factura."
+                )
+
+            disponible = (
+                detalle.saldo_disponible_pago
+            )
+
+            if importe > disponible:
+
+                raise forms.ValidationError(
+                    f"El importe de "
+                    f"'{detalle.descripcion}' "
+                    f"supera el saldo disponible."
+                )
+
+            aplicaciones.append(
+                (
+                    detalle,
+                    importe,
+                )
+            )
+
+        if not aplicaciones:
+
+            raise forms.ValidationError(
+                "Debe ingresar un importe "
+                "en al menos un concepto."
+            )
+
+        cleaned_data[
+            "aplicaciones"
+        ] = aplicaciones
+
+        return cleaned_data

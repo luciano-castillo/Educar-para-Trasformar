@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>Registrar transferencia</h1>
+
+    <p>
+        <strong>Factura:</strong>
+        N° {{ factura.id_factura }}
+    </p>
+
+    <p>
+        <strong>Alumno:</strong>
+        {{ factura.alumno.apellido }},
+        {{ factura.alumno.nombre }}
+    </p>
+
+    <p>
+        <strong>Período:</strong>
+        {{ factura.get_mes_display }}
+        {{ factura.anio }}
+    </p>
+
+    <p>
+        <strong>Total:</strong>
+        $ {{ factura.total }}
+    </p>
+
+    <p>
+        <strong>Pagado:</strong>
+        $ {{ factura.total_pagado }}
+    </p>
+
+    <p>
+        <strong>Saldo:</strong>
+        $ {{ factura.saldo }}
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Datos de la transferencia</h2>
+
+    <p>
+        Ingrese el importe que desea aplicar
+        a cada concepto.
+    </p>
+
+    <form
+        method="post"
+        class="formulario"
+    >
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Registrar pago
+        </button>
+
+        <a
+            href="{% url 'factura_detalle' factura.id_factura %}"
+            class="boton-secundario"
+        >
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -13,16 +13,23 @@ from django.core.exceptions import ValidationError
 from .models import (
     CuotaMensual,
     Factura,
+    Pago,
 )
 
 from .forms import (
     CuotaMensualForm,
     GenerarFacturaForm,
+    RegistrarPagoForm,
 )
 
-from .services import generar_factura_alumno
+from .services import (
+    generar_factura_alumno,
+    registrar_pago,
+    validar_pago,
+    rechazar_pago,
+)
 
-
+#---Cuotas---
 @admin_required
 def cuota_lista(request):
 
@@ -152,6 +159,7 @@ def cuota_desactivar(
         "cuota_lista"
     )
 
+#---Facturas---
 @admin_required
 def factura_lista(request):
 
@@ -265,4 +273,186 @@ def factura_detalle(request,id_factura):
         {
             "factura": factura
         }
+    )
+
+#---Pagos---
+@admin_required
+def pago_registrar(
+    request,
+    id_factura
+):
+
+    factura = get_object_or_404(
+        Factura.objects
+        .select_related(
+            "alumno"
+        )
+        .prefetch_related(
+            "detalles"
+        ),
+        id_factura=id_factura
+    )
+
+    if factura.estado == "ANULADA":
+
+        messages.error(
+            request,
+            "No se pueden registrar pagos "
+            "sobre una factura anulada."
+        )
+
+        return redirect(
+            "factura_detalle",
+            id_factura=factura.id_factura
+        )
+
+    if request.method == "POST":
+
+        form = RegistrarPagoForm(
+            request.POST,
+            factura=factura
+        )
+
+        if form.is_valid():
+
+            try:
+
+                pago = registrar_pago(
+                    factura=factura,
+                    fecha_transferencia=(
+                        form.cleaned_data[
+                            "fecha_transferencia"
+                        ]
+                    ),
+                    aplicaciones=(
+                        form.cleaned_data[
+                            "aplicaciones"
+                        ]
+                    ),
+                    numero_operacion=(
+                        form.cleaned_data[
+                            "numero_operacion"
+                        ]
+                    ),
+                    observaciones=(
+                        form.cleaned_data[
+                            "observaciones"
+                        ]
+                    ),
+                    registrado_por=request.user
+                )
+
+                messages.success(
+                    request,
+                    (
+                        f"El pago N° "
+                        f"{pago.id_pago} "
+                        "fue registrado y quedó "
+                        "pendiente de validación."
+                    )
+                )
+
+                return redirect(
+                    "factura_detalle",
+                    id_factura=factura.id_factura
+                )
+
+            except ValidationError as error:
+
+                form.add_error(
+                    None,
+                    error.messages[0]
+                )
+
+    else:
+
+        form = RegistrarPagoForm(
+            factura=factura
+        )
+
+    return render(
+        request,
+        "billing/pagos/registrar.html",
+        {
+            "form": form,
+            "factura": factura,
+        }
+    )
+
+
+@admin_required
+def pago_validar(
+    request,
+    id_pago
+):
+
+    pago = get_object_or_404(
+        Pago.objects.select_related(
+            "factura"
+        ),
+        id_pago=id_pago
+    )
+
+    if request.method == "POST":
+
+        try:
+
+            validar_pago(
+                pago
+            )
+
+            messages.success(
+                request,
+                "El pago fue validado correctamente."
+            )
+
+        except ValidationError as error:
+
+            messages.error(
+                request,
+                error.messages[0]
+            )
+
+    return redirect(
+        "factura_detalle",
+        id_factura=pago.factura_id
+    )
+
+
+@admin_required
+def pago_rechazar(
+    request,
+    id_pago
+):
+
+    pago = get_object_or_404(
+        Pago.objects.select_related(
+            "factura"
+        ),
+        id_pago=id_pago
+    )
+
+    if request.method == "POST":
+
+        try:
+
+            rechazar_pago(
+                pago
+            )
+
+            messages.success(
+                request,
+                "El pago fue rechazado."
+            )
+
+        except ValidationError as error:
+
+            messages.error(
+                request,
+                error.messages[0]
+            )
+
+    return redirect(
+        "factura_detalle",
+        id_factura=pago.factura_id
     )

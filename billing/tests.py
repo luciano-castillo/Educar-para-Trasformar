@@ -1,4 +1,5 @@
 from datetime import date, time
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -28,10 +29,16 @@ from services.models import (
 from .models import (
     CuotaMensual,
     Factura,
+    Pago,
 )
 
 from .forms import CuotaMensualForm
-from .services import generar_factura_alumno
+from .services import (
+    generar_factura_alumno,
+    registrar_pago,
+    validar_pago,
+    rechazar_pago,
+)
 
 
 class CuotaMensualTestCase(TestCase):
@@ -556,5 +563,386 @@ class GeneracionFacturaTestCase(TestCase):
                 alumno=self.alumno,
                 mes=10,
                 anio=2026
+            ).exists()
+        )
+    
+    def test_pago_pendiente_no_reduce_deuda(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        pago = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="TEST-001"
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            pago.estado,
+            "PENDIENTE"
+        )
+
+        self.assertEqual(
+            pago.monto,
+            Decimal("55000.00")
+        )
+
+        self.assertEqual(
+            pago.detalles_pago.count(),
+            1
+        )
+
+        self.assertEqual(
+            factura.total_pagado,
+            Decimal("0.00")
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("148000.00")
+        )
+
+        self.assertEqual(
+            factura.estado,
+            "PENDIENTE"
+        )
+
+
+    def test_validar_pago_parcial_actualiza_factura(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        pago = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="TEST-002"
+        )
+
+        validar_pago(
+            pago
+        )
+
+        pago.refresh_from_db()
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            pago.estado,
+            "VALIDADO"
+        )
+
+        self.assertEqual(
+            factura.total_pagado,
+            Decimal("55000.00")
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("93000.00")
+        )
+
+        self.assertEqual(
+            factura.estado,
+            "PARCIAL"
+        )
+
+
+    def test_varios_pagos_completan_factura(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        pago1 = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="TEST-003-A"
+        )
+
+        validar_pago(
+            pago1
+        )
+
+        otros_detalles = list(
+            factura.detalles.exclude(
+                pk=cuota.pk
+            )
+        )
+
+        pago2 = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                16
+            ),
+            aplicaciones=[
+                (
+                    detalle,
+                    detalle.importe
+                )
+                for detalle in otros_detalles
+            ],
+            numero_operacion="TEST-003-B"
+        )
+
+        validar_pago(
+            pago2
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.pagos.filter(
+                estado="VALIDADO"
+            ).count(),
+            2
+        )
+
+        self.assertEqual(
+            factura.total_pagado,
+            Decimal("148000.00")
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("0.00")
+        )
+
+        self.assertEqual(
+            factura.estado,
+            "PAGADA"
+        )
+
+
+    def test_pago_pendiente_reserva_el_concepto(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="TEST-004-A"
+        )
+
+        with self.assertRaises(
+            ValidationError
+        ):
+
+            registrar_pago(
+                factura=factura,
+                fecha_transferencia=date(
+                    2026,
+                    10,
+                    16
+                ),
+                aplicaciones=[
+                    (
+                        cuota,
+                        cuota.importe
+                    )
+                ],
+                numero_operacion="TEST-004-B"
+            )
+
+        self.assertEqual(
+            Pago.objects.filter(
+                factura=factura
+            ).count(),
+            1
+        )
+
+
+    def test_rechazar_pago_libera_concepto(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        pago1 = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="TEST-005-A"
+        )
+
+        rechazar_pago(
+            pago1
+        )
+
+        pago1.refresh_from_db()
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            pago1.estado,
+            "RECHAZADO"
+        )
+
+        self.assertEqual(
+            factura.total_pagado,
+            Decimal("0.00")
+        )
+
+        self.assertEqual(
+            factura.estado,
+            "PENDIENTE"
+        )
+
+        # El concepto debe volver a quedar
+        # disponible para otra transferencia.
+
+        pago2 = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                16
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="TEST-005-B"
+        )
+
+        self.assertEqual(
+            pago2.estado,
+            "PENDIENTE"
+        )
+
+        self.assertEqual(
+            pago2.monto,
+            Decimal("55000.00")
+        )
+
+
+    def test_no_permite_concepto_de_otra_factura(self):
+
+        factura1 = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        factura2 = generar_factura_alumno(
+            alumno=self.alumno_sin_servicios,
+            mes=10,
+            anio=2026
+        )
+
+        detalle_otra_factura = (
+            factura2.detalles.first()
+        )
+
+        with self.assertRaises(
+            ValidationError
+        ):
+
+            registrar_pago(
+                factura=factura1,
+                fecha_transferencia=date(
+                    2026,
+                    10,
+                    15
+                ),
+                aplicaciones=[
+                    (
+                        detalle_otra_factura,
+                        detalle_otra_factura.importe
+                    )
+                ],
+                numero_operacion="TEST-006"
+            )
+
+        self.assertFalse(
+            Pago.objects.filter(
+                factura=factura1
             ).exists()
         )
