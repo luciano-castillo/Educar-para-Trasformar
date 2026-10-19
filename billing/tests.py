@@ -8,6 +8,10 @@ from django.utils.datastructures import MultiValueDict
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
+from django.contrib.auth.models import User
+from django.urls import reverse
+
+from accounts.models import PerfilUsuario
 
 from academic.models import (
     NivelEducativo,
@@ -1358,3 +1362,454 @@ class GeneracionFacturaTestCase(TestCase):
             factura.saldo,
             Decimal("148000.00")
         )
+    
+    def _login_admin(self):
+
+        usuario = User.objects.create_user(
+            username="admin_reportes",
+            password="admin123"
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=usuario,
+            rol=PerfilUsuario.Rol.ADMIN
+        )
+
+        self.client.force_login(
+            usuario
+        )
+    
+    def test_reporte_general_calcula_ingresos_y_deuda(self):
+
+        self._login_admin()
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        # Evitamos que durante el test
+        # pase automáticamente a VENCIDA.
+
+        factura.fecha_vencimiento = date(
+            2026,
+            12,
+            31
+        )
+
+        factura.save(
+            update_fields=[
+                "fecha_vencimiento"
+            ]
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        futbol = factura.detalles.get(
+            grupo_deportivo=self.grupo_futbol
+        )
+
+        voley = factura.detalles.get(
+            grupo_deportivo=self.grupo_voley
+        )
+
+        # Cuota + fútbol validados
+        pago_validado = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                ),
+                (
+                    futbol,
+                    futbol.importe
+                ),
+            ],
+            numero_operacion="REP-001"
+        )
+
+        validar_pago(
+            pago_validado
+        )
+
+        # Vóley queda solamente PENDIENTE.
+        registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                16
+            ),
+            aplicaciones=[
+                (
+                    voley,
+                    voley.importe
+                )
+            ],
+            numero_operacion="REP-002"
+        )
+
+        # Creamos otra factura para asegurarnos
+        # de que el filtro por alumno funcione.
+
+        generar_factura_alumno(
+            alumno=self.alumno_sin_servicios,
+            mes=10,
+            anio=2026
+        )
+
+        response = self.client.get(
+            reverse(
+                "reporte_pagos"
+            ),
+            {
+                "mes": 10,
+                "anio": 2026,
+                "alumno": self.alumno.pk,
+            }
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_facturado"
+            ],
+            Decimal("148000.00")
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_pagado"
+            ],
+            Decimal("75000.00")
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_deuda"
+            ],
+            Decimal("73000.00")
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_cuotas"
+            ],
+            Decimal("55000.00")
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_deportes"
+            ],
+            Decimal("20000.00")
+        )
+
+        # El vóley pendiente NO debe
+        # considerarse ingreso.
+
+        self.assertEqual(
+            response.context[
+                "cantidad_parciales"
+            ],
+            1
+        )
+
+        self.assertEqual(
+            response.context[
+                "facturas"
+            ].count(),
+            1
+        )
+    
+    def test_reporte_deportes_solo_suma_pagos_validados(self):
+
+        self._login_admin()
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        futbol = factura.detalles.get(
+            grupo_deportivo=self.grupo_futbol
+        )
+
+        voley = factura.detalles.get(
+            grupo_deportivo=self.grupo_voley
+        )
+
+        pago_futbol = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    futbol,
+                    futbol.importe
+                )
+            ],
+            numero_operacion="DEP-001"
+        )
+
+        validar_pago(
+            pago_futbol
+        )
+
+        # Este queda pendiente y no
+        # debe aparecer como ingreso.
+
+        registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                16
+            ),
+            aplicaciones=[
+                (
+                    voley,
+                    voley.importe
+                )
+            ],
+            numero_operacion="DEP-002"
+        )
+
+        response = self.client.get(
+            reverse(
+                "reporte_deportes"
+            ),
+            {
+                "mes": 10,
+                "anio": 2026,
+                "deporte": self.futbol.pk,
+                "nivel": self.nivel.pk,
+                "profesor": self.profesor.pk,
+            }
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_cobrado"
+            ],
+            Decimal("20000.00")
+        )
+
+        reporte = list(
+            response.context[
+                "reporte"
+            ]
+        )
+
+        self.assertEqual(
+            len(reporte),
+            1
+        )
+
+        fila = reporte[0]
+
+        self.assertEqual(
+            fila["total_cobrado"],
+            Decimal("20000.00")
+        )
+
+        self.assertEqual(
+            fila["cantidad_alumnos"],
+            1
+        )
+
+        self.assertEqual(
+            fila["cantidad_pagos"],
+            1
+        )
+    
+    def test_reporte_transporte_agrupa_por_ruta(self):
+
+        self._login_admin()
+
+        # El alumno principal ya posee
+        # Zona Centro en setUp.
+
+        ContratacionTransporte.objects.create(
+            alumno=self.alumno_sin_servicios,
+            ruta=self.ruta,
+            mes=10,
+            anio=2026,
+            estado=True
+        )
+
+        factura1 = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        factura2 = generar_factura_alumno(
+            alumno=self.alumno_sin_servicios,
+            mes=10,
+            anio=2026
+        )
+
+        transporte1 = (
+            factura1.detalles.get(
+                tipo_concepto="TRANSPORTE"
+            )
+        )
+
+        transporte2 = (
+            factura2.detalles.get(
+                tipo_concepto="TRANSPORTE"
+            )
+        )
+
+        pago1 = registrar_pago(
+            factura=factura1,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15
+            ),
+            aplicaciones=[
+                (
+                    transporte1,
+                    transporte1.importe
+                )
+            ],
+            numero_operacion="TRANS-001"
+        )
+
+        validar_pago(
+            pago1
+        )
+
+        pago2 = registrar_pago(
+            factura=factura2,
+            fecha_transferencia=date(
+                2026,
+                10,
+                16
+            ),
+            aplicaciones=[
+                (
+                    transporte2,
+                    transporte2.importe
+                )
+            ],
+            numero_operacion="TRANS-002"
+        )
+
+        validar_pago(
+            pago2
+        )
+
+        response = self.client.get(
+            reverse(
+                "reporte_transporte"
+            ),
+            {
+                "mes": 10,
+                "anio": 2026,
+                "ruta": self.ruta.pk,
+            }
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertEqual(
+            response.context[
+                "total_cobrado"
+            ],
+            Decimal("60000.00")
+        )
+
+        reporte = list(
+            response.context[
+                "reporte"
+            ]
+        )
+
+        self.assertEqual(
+            len(reporte),
+            1
+        )
+
+        fila = reporte[0]
+
+        self.assertEqual(
+            fila["total_cobrado"],
+            Decimal("60000.00")
+        )
+
+        self.assertEqual(
+            fila["cantidad_alumnos"],
+            2
+        )
+
+        self.assertEqual(
+            fila["cantidad_pagos"],
+            2
+        )
+    
+    def test_reportes_requieren_usuario_admin(self):
+
+        usuario = User.objects.create_user(
+            username="usuario_no_admin",
+            password="123456"
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=usuario,
+            rol=PerfilUsuario.Rol.ALUMNO
+        )
+
+        self.client.force_login(
+            usuario
+        )
+
+        urls = [
+            reverse(
+                "reporte_pagos"
+            ),
+            reverse(
+                "reporte_deportes"
+            ),
+            reverse(
+                "reporte_transporte"
+            ),
+        ]
+
+        for url in urls:
+
+            response = self.client.get(
+                url
+            )
+
+            self.assertEqual(
+                response.status_code,
+                302
+            )

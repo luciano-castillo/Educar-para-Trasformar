@@ -66,5 +66,23 @@ urlpatterns = [
         views.pago_rechazar,
         name="pago_rechazar"
     ),
+    
+    # REPORTES
+
+    path(
+        "reportes/pagos/",
+        views.reporte_pagos,
+        name="reporte_pagos"
+    ),
+    path(
+        "reportes/deportes/",
+        views.reporte_deportes,
+        name="reporte_deportes"
+    ),
+    path(
+        "reportes/transporte/",
+        views.reporte_transporte,
+        name="reporte_transporte"
+    ),
 
 ]

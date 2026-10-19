@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        Reporte de pagos de transporte
+    </h1>
+
+    <p>
+        Consulte los ingresos de transporte
+        por período y ruta.
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Filtros</h2>
+
+    <form
+        method="get"
+        class="formulario"
+    >
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Filtrar
+        </button>
+
+        <a
+            href="{% url 'reporte_transporte' %}"
+            class="boton-secundario"
+        >
+            Limpiar filtros
+        </a>
+
+    </form>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Resumen</h2>
+
+    <p>
+        <strong>
+            Total cobrado en transporte:
+        </strong>
+
+        $ {{ total_cobrado }}
+    </p>
+
+    <p>
+        Solo se consideran pagos
+        que fueron validados.
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Detalle por ruta</h2>
+
+    {% if reporte %}
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Ruta</th>
+                <th>Alumnos</th>
+                <th>Pagos</th>
+                <th>Total cobrado</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for fila in reporte %}
+
+            <tr>
+
+                <td>
+                    {{ fila.detalle_factura__ruta_transporte__nombre }}
+                </td>
+
+                <td>
+                    {{ fila.cantidad_alumnos }}
+                </td>
+
+                <td>
+                    {{ fila.cantidad_pagos }}
+                </td>
+
+                <td>
+                    $ {{ fila.total_cobrado }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+        <p>
+            No existen pagos de transporte
+            validados para los filtros
+            seleccionados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="tarjeta">
+
+    <a
+        href="{% url 'reporte_pagos' %}"
+        class="boton-secundario"
+    >
+        Volver al reporte general
+    </a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        Reporte de pagos por deporte
+    </h1>
+
+    <p>
+        Consulte los ingresos deportivos
+        por período, deporte, nivel,
+        profesor y horario.
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Filtros</h2>
+
+    <form
+        method="get"
+        class="formulario"
+    >
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Filtrar
+        </button>
+
+        <a
+            href="{% url 'reporte_deportes' %}"
+            class="boton-secundario"
+        >
+            Limpiar filtros
+        </a>
+
+    </form>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Resumen</h2>
+
+    <p>
+        <strong>
+            Total cobrado en deportes:
+        </strong>
+
+        $ {{ total_cobrado }}
+    </p>
+
+    <p>
+        Solo se consideran pagos
+        que fueron validados.
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Detalle</h2>
+
+    {% if reporte %}
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Deporte</th>
+                <th>Nivel</th>
+                <th>Profesor</th>
+                <th>Día</th>
+                <th>Horario</th>
+                <th>Alumnos</th>
+                <th>Pagos</th>
+                <th>Total cobrado</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for fila in reporte %}
+
+            <tr>
+
+                <td>
+                    {{ fila.detalle_factura__grupo_deportivo__deporte__nombre }}
+                </td>
+
+                <td>
+                    {{ fila.detalle_factura__grupo_deportivo__nivel__nombre }}
+                </td>
+
+                <td>
+                    {{ fila.detalle_factura__grupo_deportivo__profesor__apellido }},
+                    {{ fila.detalle_factura__grupo_deportivo__profesor__nombre }}
+                </td>
+
+                <td>
+                    {{ fila.detalle_factura__grupo_deportivo__horario__dia_semana }}
+                </td>
+
+                <td>
+                    {{ fila.detalle_factura__grupo_deportivo__horario__hora_inicio|time:"H:i" }}
+                    -
+                    {{ fila.detalle_factura__grupo_deportivo__horario__hora_fin|time:"H:i" }}
+                </td>
+
+                <td>
+                    {{ fila.cantidad_alumnos }}
+                </td>
+
+                <td>
+                    {{ fila.cantidad_pagos }}
+                </td>
+
+                <td>
+                    $ {{ fila.total_cobrado }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+        <p>
+            No existen pagos deportivos
+            validados para los filtros
+            seleccionados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="tarjeta">
+
+    <a
+        href="{% url 'reporte_pagos' %}"
+        class="boton-secundario"
+    >
+        Volver al reporte general
+    </a>
+
+</div>
+
+{% endblock %}

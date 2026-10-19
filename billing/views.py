@@ -5,6 +5,11 @@ from django.shortcuts import (
 )
 
 from django.contrib import messages
+from decimal import Decimal
+from django.db.models import (
+    Sum,
+    Count,
+)
 
 from accounts.decorators import admin_required
 
@@ -14,12 +19,16 @@ from .models import (
     CuotaMensual,
     Factura,
     Pago,
+    PagoDetalle,
 )
 
 from .forms import (
     CuotaMensualForm,
     GenerarFacturaForm,
     RegistrarPagoForm,
+    ReportePagosForm,
+    ReporteDeportesForm,
+    ReporteTransporteForm,
 )
 
 from .services import (
@@ -466,4 +475,443 @@ def pago_rechazar(
     return redirect(
         "factura_detalle",
         id_factura=pago.factura_id
+    )
+
+# --- REPORTES ---
+
+@admin_required
+def reporte_pagos(request):
+
+    actualizar_facturas_vencidas()
+
+    form = ReportePagosForm(
+        request.GET or None
+    )
+
+    facturas = (
+        Factura.objects
+        .select_related(
+            "alumno",
+            "alumno__curso",
+            "alumno__curso__nivel",
+        )
+        .prefetch_related(
+            "detalles",
+            "pagos",
+        )
+        .all()
+    )
+
+    if form.is_valid():
+
+        mes = form.cleaned_data.get(
+            "mes"
+        )
+
+        anio = form.cleaned_data.get(
+            "anio"
+        )
+
+        alumno = form.cleaned_data.get(
+            "alumno"
+        )
+
+        estado = form.cleaned_data.get(
+            "estado"
+        )
+
+        if mes:
+
+            facturas = facturas.filter(
+                mes=int(mes)
+            )
+
+        if anio:
+
+            facturas = facturas.filter(
+                anio=anio
+            )
+
+        if alumno:
+
+            facturas = facturas.filter(
+                alumno=alumno
+            )
+
+        if estado:
+
+            facturas = facturas.filter(
+                estado=estado
+            )
+
+    facturas = facturas.order_by(
+        "-anio",
+        "-mes",
+        "alumno__apellido",
+        "alumno__nombre",
+    )
+
+    # -----------------------------------------
+    # Totales generales
+    # -----------------------------------------
+
+    total_facturado = Decimal("0.00")
+    total_pagado = Decimal("0.00")
+    total_deuda = Decimal("0.00")
+
+    cantidad_pendientes = 0
+    cantidad_parciales = 0
+    cantidad_pagadas = 0
+    cantidad_vencidas = 0
+
+    for factura in facturas:
+
+        total_facturado += (
+            factura.total
+        )
+
+        total_pagado += (
+            factura.total_pagado
+        )
+
+        total_deuda += (
+            factura.saldo
+        )
+
+        if factura.estado == "PENDIENTE":
+
+            cantidad_pendientes += 1
+
+        elif factura.estado == "PARCIAL":
+
+            cantidad_parciales += 1
+
+        elif factura.estado == "PAGADA":
+
+            cantidad_pagadas += 1
+
+        elif factura.estado == "VENCIDA":
+
+            cantidad_vencidas += 1
+
+    # -----------------------------------------
+    # Total efectivamente pagado por concepto
+    # -----------------------------------------
+
+    pagos_por_concepto = (
+        PagoDetalle.objects
+        .filter(
+            pago__estado="VALIDADO",
+            detalle_factura__factura__in=(
+                facturas
+            )
+        )
+        .values(
+            "detalle_factura__tipo_concepto"
+        )
+        .annotate(
+            total=Sum(
+                "importe_aplicado"
+            )
+        )
+        .order_by(
+            "detalle_factura__tipo_concepto"
+        )
+    )
+
+    conceptos = {
+        "CUOTA": Decimal("0.00"),
+        "DEPORTE": Decimal("0.00"),
+        "TRANSPORTE": Decimal("0.00"),
+        "COMEDOR": Decimal("0.00"),
+    }
+
+    for fila in pagos_por_concepto:
+
+        conceptos[
+            fila[
+                "detalle_factura__tipo_concepto"
+            ]
+        ] = fila["total"]
+
+    contexto = {
+        "form": form,
+        "facturas": facturas,
+
+        "total_facturado": total_facturado,
+        "total_pagado": total_pagado,
+        "total_deuda": total_deuda,
+
+        "cantidad_pendientes": (
+            cantidad_pendientes
+        ),
+        "cantidad_parciales": (
+            cantidad_parciales
+        ),
+        "cantidad_pagadas": (
+            cantidad_pagadas
+        ),
+        "cantidad_vencidas": (
+            cantidad_vencidas
+        ),
+
+        "total_cuotas": conceptos[
+            "CUOTA"
+        ],
+        "total_deportes": conceptos[
+            "DEPORTE"
+        ],
+        "total_transporte": conceptos[
+            "TRANSPORTE"
+        ],
+        "total_comedor": conceptos[
+            "COMEDOR"
+        ],
+    }
+
+    return render(
+        request,
+        "billing/reportes/pagos.html",
+        contexto
+    )
+
+@admin_required
+def reporte_deportes(request):
+
+    form = ReporteDeportesForm(
+        request.GET or None
+    )
+
+    pagos_deportes = (
+        PagoDetalle.objects
+        .filter(
+            pago__estado="VALIDADO",
+            detalle_factura__tipo_concepto="DEPORTE",
+            detalle_factura__grupo_deportivo__isnull=False,
+        )
+    )
+
+    if form.is_valid():
+
+        mes = form.cleaned_data.get(
+            "mes"
+        )
+
+        anio = form.cleaned_data.get(
+            "anio"
+        )
+
+        deporte = form.cleaned_data.get(
+            "deporte"
+        )
+
+        nivel = form.cleaned_data.get(
+            "nivel"
+        )
+
+        profesor = form.cleaned_data.get(
+            "profesor"
+        )
+
+        if mes:
+
+            pagos_deportes = (
+                pagos_deportes.filter(
+                    detalle_factura__factura__mes=(
+                        int(mes)
+                    )
+                )
+            )
+
+        if anio:
+
+            pagos_deportes = (
+                pagos_deportes.filter(
+                    detalle_factura__factura__anio=(
+                        anio
+                    )
+                )
+            )
+
+        if deporte:
+
+            pagos_deportes = (
+                pagos_deportes.filter(
+                    detalle_factura__grupo_deportivo__deporte=(
+                        deporte
+                    )
+                )
+            )
+
+        if nivel:
+
+            pagos_deportes = (
+                pagos_deportes.filter(
+                    detalle_factura__grupo_deportivo__nivel=(
+                        nivel
+                    )
+                )
+            )
+
+        if profesor:
+
+            pagos_deportes = (
+                pagos_deportes.filter(
+                    detalle_factura__grupo_deportivo__profesor=(
+                        profesor
+                    )
+                )
+            )
+
+    total_cobrado = (
+        pagos_deportes
+        .aggregate(
+            total=Sum(
+                "importe_aplicado"
+            )
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    reporte = (
+        pagos_deportes
+        .values(
+            "detalle_factura__grupo_deportivo__deporte__nombre",
+            "detalle_factura__grupo_deportivo__nivel__nombre",
+            "detalle_factura__grupo_deportivo__profesor__apellido",
+            "detalle_factura__grupo_deportivo__profesor__nombre",
+            "detalle_factura__grupo_deportivo__horario__dia_semana",
+            "detalle_factura__grupo_deportivo__horario__hora_inicio",
+            "detalle_factura__grupo_deportivo__horario__hora_fin",
+        )
+        .annotate(
+            total_cobrado=Sum(
+                "importe_aplicado"
+            ),
+            cantidad_pagos=Count(
+                "pago",
+                distinct=True
+            ),
+            cantidad_alumnos=Count(
+                "detalle_factura__factura__alumno",
+                distinct=True
+            ),
+        )
+        .order_by(
+            "detalle_factura__grupo_deportivo__deporte__nombre",
+            "detalle_factura__grupo_deportivo__nivel__nombre",
+        )
+    )
+
+    return render(
+        request,
+        "billing/reportes/deportes.html",
+        {
+            "form": form,
+            "reporte": reporte,
+            "total_cobrado": total_cobrado,
+        }
+    )
+
+@admin_required
+def reporte_transporte(request):
+
+    form = ReporteTransporteForm(
+        request.GET or None
+    )
+
+    pagos_transporte = (
+        PagoDetalle.objects
+        .filter(
+            pago__estado="VALIDADO",
+            detalle_factura__tipo_concepto="TRANSPORTE",
+            detalle_factura__ruta_transporte__isnull=False,
+        )
+    )
+
+    if form.is_valid():
+
+        mes = form.cleaned_data.get(
+            "mes"
+        )
+
+        anio = form.cleaned_data.get(
+            "anio"
+        )
+
+        ruta = form.cleaned_data.get(
+            "ruta"
+        )
+
+        if mes:
+
+            pagos_transporte = (
+                pagos_transporte.filter(
+                    detalle_factura__factura__mes=(
+                        int(mes)
+                    )
+                )
+            )
+
+        if anio:
+
+            pagos_transporte = (
+                pagos_transporte.filter(
+                    detalle_factura__factura__anio=(
+                        anio
+                    )
+                )
+            )
+
+        if ruta:
+
+            pagos_transporte = (
+                pagos_transporte.filter(
+                    detalle_factura__ruta_transporte=(
+                        ruta
+                    )
+                )
+            )
+
+    total_cobrado = (
+        pagos_transporte
+        .aggregate(
+            total=Sum(
+                "importe_aplicado"
+            )
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    reporte = (
+        pagos_transporte
+        .values(
+            "detalle_factura__ruta_transporte__nombre",
+        )
+        .annotate(
+            total_cobrado=Sum(
+                "importe_aplicado"
+            ),
+            cantidad_pagos=Count(
+                "pago",
+                distinct=True
+            ),
+            cantidad_alumnos=Count(
+                "detalle_factura__factura__alumno",
+                distinct=True
+            ),
+        )
+        .order_by(
+            "detalle_factura__ruta_transporte__nombre"
+        )
+    )
+
+    return render(
+        request,
+        "billing/reportes/transporte.html",
+        {
+            "form": form,
+            "reporte": reporte,
+            "total_cobrado": total_cobrado,
+        }
     )

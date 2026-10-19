@@ -2,8 +2,15 @@ from django import forms
 from decimal import Decimal
 from django.core.validators import FileExtensionValidator
 
-from .models import CuotaMensual, DetalleFactura
-from academic.models import Alumno
+from .models import CuotaMensual, DetalleFactura, Factura
+from academic.models import (
+    Alumno,
+    NivelEducativo,
+    Profesor,
+)
+
+from sports.models import Deporte
+from services.models import RutaTransporte
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -366,3 +373,183 @@ class RegistrarPagoForm(forms.Form):
         ] = aplicaciones
 
         return cleaned_data
+#---REPORTES---
+class ReportePagosForm(forms.Form):
+
+    mes = forms.ChoiceField(
+        label="Mes",
+        required=False,
+        choices=[
+            ("", "Todos los meses"),
+            *CuotaMensual.MESES,
+        ]
+    )
+
+    anio = forms.IntegerField(
+        label="Año",
+        required=False,
+        min_value=2026,
+        widget=forms.NumberInput(
+            attrs={
+                "placeholder": "Ej.: 2026"
+            }
+        )
+    )
+
+    alumno = forms.ModelChoiceField(
+        label="Alumno",
+        required=False,
+        queryset=Alumno.objects.none()
+    )
+
+    estado = forms.ChoiceField(
+        label="Estado de factura",
+        required=False,
+        choices=[
+            ("", "Todos los estados"),
+            *Factura.ESTADOS,
+        ]
+    )
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        self.fields["alumno"].queryset = (
+            Alumno.objects
+            .all()
+            .order_by(
+                "apellido",
+                "nombre"
+            )
+        )
+
+class ReporteDeportesForm(forms.Form):
+
+    mes = forms.ChoiceField(
+        label="Mes",
+        required=False,
+        choices=[
+            ("", "Todos los meses"),
+            *CuotaMensual.MESES,
+        ]
+    )
+
+    anio = forms.IntegerField(
+        label="Año",
+        required=False,
+        min_value=2026,
+        widget=forms.NumberInput(
+            attrs={
+                "placeholder": "Ej.: 2026"
+            }
+        )
+    )
+
+    deporte = forms.ModelChoiceField(
+        label="Deporte",
+        required=False,
+        queryset=Deporte.objects.none()
+    )
+
+    nivel = forms.ModelChoiceField(
+        label="Nivel",
+        required=False,
+        queryset=NivelEducativo.objects.none()
+    )
+
+    profesor = forms.ModelChoiceField(
+        label="Profesor",
+        required=False,
+        queryset=Profesor.objects.none()
+    )
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        self.fields["deporte"].queryset = (
+            Deporte.objects
+            .all()
+            .order_by(
+                "nombre"
+            )
+        )
+
+        self.fields["nivel"].queryset = (
+            NivelEducativo.objects
+            .all()
+            .order_by(
+                "nombre"
+            )
+        )
+
+        self.fields["profesor"].queryset = (
+            Profesor.objects
+            .all()
+            .order_by(
+                "apellido",
+                "nombre"
+            )
+        )
+
+class ReporteTransporteForm(forms.Form):
+
+    mes = forms.ChoiceField(
+        label="Mes",
+        required=False,
+        choices=[
+            ("", "Todos los meses"),
+            *CuotaMensual.MESES,
+        ]
+    )
+
+    anio = forms.IntegerField(
+        label="Año",
+        required=False,
+        min_value=2026,
+        widget=forms.NumberInput(
+            attrs={
+                "placeholder": "Ej.: 2026"
+            }
+        )
+    )
+
+    ruta = forms.ModelChoiceField(
+        label="Ruta",
+        required=False,
+        queryset=RutaTransporte.objects.none()
+    )
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        self.fields["ruta"].queryset = (
+            RutaTransporte.objects
+            .all()
+            .order_by(
+                "nombre"
+            )
+        )

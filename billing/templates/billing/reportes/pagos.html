@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        Reporte administrativo de pagos
+    </h1>
+
+    <p>
+        Consulte facturación, pagos y deuda
+        según los filtros seleccionados.
+    </p>
+
+    <a
+        href="{% url 'reporte_deportes' %}"
+        class="boton"
+    >
+        Ver reporte de deportes
+    </a>
+
+    <a
+        href="{% url 'reporte_transporte' %}"
+        class="boton"
+    >
+        Ver reporte de transporte
+    </a>
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Filtros</h2>
+
+    <form
+        method="get"
+        class="formulario"
+    >
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Filtrar
+        </button>
+
+        <a
+            href="{% url 'reporte_pagos' %}"
+            class="boton boton-secundario"
+        >
+            Limpiar filtros
+        </a>
+
+    </form>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Resumen económico</h2>
+
+    <p>
+        <strong>Total facturado:</strong>
+        $ {{ total_facturado }}
+    </p>
+
+    <p>
+        <strong>Total pagado:</strong>
+        $ {{ total_pagado }}
+    </p>
+
+    <p>
+        <strong>Deuda pendiente:</strong>
+        $ {{ total_deuda }}
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>Estado de facturas</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Pendientes</th>
+                <th>Parciales</th>
+                <th>Pagadas</th>
+                <th>Vencidas</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>
+                    {{ cantidad_pendientes }}
+                </td>
+
+                <td>
+                    {{ cantidad_parciales }}
+                </td>
+
+                <td>
+                    {{ cantidad_pagadas }}
+                </td>
+
+                <td>
+                    {{ cantidad_vencidas }}
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>
+        Ingresos por concepto
+    </h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Concepto</th>
+                <th>Total cobrado</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Cuotas mensuales</td>
+                <td>$ {{ total_cuotas }}</td>
+            </tr>
+
+            <tr>
+                <td>Deportes</td>
+                <td>$ {{ total_deportes }}</td>
+            </tr>
+
+            <tr>
+                <td>Transporte</td>
+                <td>$ {{ total_transporte }}</td>
+            </tr>
+
+            <tr>
+                <td>Comedor</td>
+                <td>$ {{ total_comedor }}</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>
+        Detalle de facturas
+    </h2>
+
+    {% if facturas %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>N°</th>
+                    <th>Alumno</th>
+                    <th>Período</th>
+                    <th>Nivel</th>
+                    <th>Total</th>
+                    <th>Pagado</th>
+                    <th>Deuda</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for factura in facturas %}
+
+                <tr>
+
+                    <td>
+                        {{ factura.id_factura }}
+                    </td>
+
+                    <td>
+                        {{ factura.alumno.apellido }},
+                        {{ factura.alumno.nombre }}
+                    </td>
+
+                    <td>
+                        {{ factura.get_mes_display }}
+                        {{ factura.anio }}
+                    </td>
+
+                    <td>
+                        {{ factura.alumno.curso.nivel.nombre }}
+                    </td>
+
+                    <td>
+                        $ {{ factura.total }}
+                    </td>
+
+                    <td>
+                        $ {{ factura.total_pagado }}
+                    </td>
+
+                    <td>
+                        $ {{ factura.saldo }}
+                    </td>
+
+                    <td>
+                        {{ factura.get_estado_display }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'factura_detalle' factura.id_factura %}"
+                            class="boton-secundario"
+                        >
+                            Ver
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No se encontraron facturas
+            para los filtros seleccionados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
