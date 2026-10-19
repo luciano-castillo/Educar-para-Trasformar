@@ -1,8 +1,53 @@
 from django import forms
 from decimal import Decimal
+from django.core.validators import FileExtensionValidator
 
 from .models import CuotaMensual, DetalleFactura
 from academic.models import Alumno
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+#Funcion para Archivos
+class MultipleFileField(forms.FileField):
+
+    def __init__(self, *args, **kwargs):
+
+        kwargs.setdefault(
+            "widget",
+            MultipleFileInput()
+        )
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+    def clean(
+        self,
+        data,
+        initial=None
+    ):
+
+        single_file_clean = super().clean
+
+        if isinstance(
+            data,
+            (list, tuple)
+        ):
+
+            return [
+                single_file_clean(
+                    archivo,
+                    initial
+                )
+                for archivo in data
+            ]
+
+        return single_file_clean(
+            data,
+            initial
+        )
 
 class CuotaMensualForm(forms.ModelForm):
 
@@ -150,6 +195,25 @@ class RegistrarPagoForm(forms.Form):
             }
         )
     )
+    
+    comprobantes = MultipleFileField(
+        label="Comprobante(s) de transferencia",
+        required=False,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=[
+                    "pdf",
+                    "jpg",
+                    "jpeg",
+                    "png",
+                ]
+            )
+        ],
+        help_text=(
+            "Puede seleccionar uno o varios "
+            "archivos PDF, JPG o PNG."
+        )
+    )
 
     def __init__(
         self,
@@ -283,6 +347,20 @@ class RegistrarPagoForm(forms.Form):
                 "en al menos un concepto."
             )
 
+        comprobantes = (
+            cleaned_data.get(
+                "comprobantes"
+            )
+            or []
+        )
+
+        if not comprobantes:
+
+            raise forms.ValidationError(
+                "Debe adjuntar al menos "
+                "un comprobante de transferencia."
+            )
+            
         cleaned_data[
             "aplicaciones"
         ] = aplicaciones

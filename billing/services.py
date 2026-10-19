@@ -19,6 +19,7 @@ from .models import (
     DetalleFactura,
     Pago,
     PagoDetalle,
+    ComprobantePago,
 )
 
 
@@ -247,6 +248,7 @@ def registrar_pago(
     numero_operacion="",
     observaciones="",
     registrado_por=None,
+    comprobantes=None,
 ):
 
     # Bloqueamos la factura mientras
@@ -399,7 +401,28 @@ def registrar_pago(
             importe_aplicado=importe
         )
 
+    # ---------------------------------------------
+    # Guardar comprobantes
+    # ---------------------------------------------
+
+    for archivo in (
+        comprobantes
+        or []
+    ):
+
+        comprobante = ComprobantePago(
+            pago=pago,
+            archivo=archivo
+        )
+
+        # Ejecuta también los validadores
+        # definidos en el modelo.
+        comprobante.full_clean()
+
+        comprobante.save()
+
     return pago
+    
 
 @transaction.atomic
 def validar_pago(pago):

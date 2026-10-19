@@ -2,6 +2,7 @@ from django.db import models
 from decimal import Decimal
 from django.conf import settings
 from django.db.models import Sum
+from django.core.validators import FileExtensionValidator
 
 class CuotaMensual(models.Model):
 
@@ -477,4 +478,55 @@ class PagoDetalle(models.Model):
             f"Pago {self.pago_id} - "
             f"{self.detalle_factura.descripcion} - "
             f"${self.importe_aplicado}"
+        )
+
+def comprobante_upload_to(
+    instance,
+    filename
+):
+
+    return (
+        f"comprobantes/"
+        f"factura_{instance.pago.factura_id}/"
+        f"pago_{instance.pago_id}/"
+        f"{filename}"
+    )
+
+
+class ComprobantePago(models.Model):
+
+    id_comprobante = models.BigAutoField(
+        primary_key=True
+    )
+
+    pago = models.ForeignKey(
+        Pago,
+        on_delete=models.CASCADE,
+        related_name="comprobantes"
+    )
+
+    archivo = models.FileField(
+        upload_to=comprobante_upload_to,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=[
+                    "pdf",
+                    "jpg",
+                    "jpeg",
+                    "png",
+                ]
+            )
+        ]
+    )
+
+    fecha_subida = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"Comprobante "
+            f"{self.id_comprobante} - "
+            f"Pago {self.pago_id}"
         )

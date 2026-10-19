@@ -1,9 +1,13 @@
 from datetime import date, time
 from decimal import Decimal
+import tempfile
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
+from django.utils.datastructures import MultiValueDict
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from academic.models import (
     NivelEducativo,
@@ -30,9 +34,14 @@ from .models import (
     CuotaMensual,
     Factura,
     Pago,
+    ComprobantePago,
 )
 
-from .forms import CuotaMensualForm
+from .forms import (
+    CuotaMensualForm,
+    RegistrarPagoForm,
+)
+
 from .services import (
     generar_factura_alumno,
     registrar_pago,
@@ -946,3 +955,198 @@ class GeneracionFacturaTestCase(TestCase):
                 factura=factura1
             ).exists()
         )
+    
+    def test_pago_permite_varios_comprobantes(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        comprobante_pdf = SimpleUploadedFile(
+            "transferencia.pdf",
+            b"%PDF-1.4 comprobante de prueba",
+            content_type="application/pdf"
+        )
+
+        comprobante_jpg = SimpleUploadedFile(
+            "transferencia.jpg",
+            b"imagen de prueba",
+            content_type="image/jpeg"
+        )
+
+        with tempfile.TemporaryDirectory() as media_root:
+
+            with override_settings(
+                MEDIA_ROOT=media_root
+            ):
+
+                pago = registrar_pago(
+                    factura=factura,
+                    fecha_transferencia=date(
+                        2026,
+                        10,
+                        15
+                    ),
+                    aplicaciones=[
+                        (
+                            cuota,
+                            cuota.importe
+                        )
+                    ],
+                    numero_operacion="COMP-001",
+                    comprobantes=[
+                        comprobante_pdf,
+                        comprobante_jpg,
+                    ]
+                )
+
+                self.assertEqual(
+                    pago.comprobantes.count(),
+                    2
+                )
+
+                self.assertEqual(
+                    ComprobantePago.objects.filter(
+                        pago__factura=factura
+                    ).count(),
+                    2
+                )
+
+                for comprobante in (
+                    pago.comprobantes.all()
+                ):
+
+                    self.assertTrue(
+                        comprobante.archivo.storage.exists(
+                            comprobante.archivo.name
+                        )
+                    )
+    
+    def test_formulario_rechaza_comprobante_invalido(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        archivo_txt = SimpleUploadedFile(
+            "archivo.txt",
+            b"archivo no permitido",
+            content_type="text/plain"
+        )
+
+        archivos = MultiValueDict({
+            "comprobantes": [
+                archivo_txt
+            ]
+        })
+
+        form = RegistrarPagoForm(
+            data={
+                "fecha_transferencia": "2026-10-15",
+                "numero_operacion": "COMP-002",
+                "observaciones": "",
+                (
+                    f"concepto_"
+                    f"{cuota.id_detalle}"
+                ): str(
+                    cuota.importe
+                ),
+            },
+            files=archivos,
+            factura=factura
+        )
+
+        self.assertFalse(
+            form.is_valid()
+        )
+
+        self.assertIn(
+            "comprobantes",
+            form.errors
+        )
+    
+    def test_comprobante_permanece_al_validar_pago(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        archivo = SimpleUploadedFile(
+            "comprobante.png",
+            b"imagen png de prueba",
+            content_type="image/png"
+        )
+
+        with tempfile.TemporaryDirectory() as media_root:
+
+            with override_settings(
+                MEDIA_ROOT=media_root
+            ):
+
+                pago = registrar_pago(
+                    factura=factura,
+                    fecha_transferencia=date(
+                        2026,
+                        10,
+                        15
+                    ),
+                    aplicaciones=[
+                        (
+                            cuota,
+                            cuota.importe
+                        )
+                    ],
+                    numero_operacion="COMP-003",
+                    comprobantes=[
+                        archivo
+                    ]
+                )
+
+                self.assertEqual(
+                    pago.comprobantes.count(),
+                    1
+                )
+
+                validar_pago(
+                    pago
+                )
+
+                pago.refresh_from_db()
+
+                self.assertEqual(
+                    pago.estado,
+                    "VALIDADO"
+                )
+
+                self.assertEqual(
+                    pago.comprobantes.count(),
+                    1
+                )
+
+                comprobante = (
+                    pago.comprobantes.first()
+                )
+
+                self.assertTrue(
+                    comprobante.archivo.storage.exists(
+                        comprobante.archivo.name
+                    )
+                )

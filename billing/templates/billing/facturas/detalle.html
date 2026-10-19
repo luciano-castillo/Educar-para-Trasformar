@@ -149,6 +149,7 @@
                     <th>Operación</th>
                     <th>Monto</th>
                     <th>Estado</th>
+                    <th>Comprobantes</th>
                     <th>Acciones</th>
                 </tr>
 
@@ -225,6 +226,28 @@
 
                         {% endif %}
 
+                    </td>
+                    
+                    <td>
+
+                        {% for comprobante in pago.comprobantes.all %}
+                    
+                            <a
+                                href="{{ comprobante.archivo.url }}"
+                                target="_blank"
+                                rel="noopener"
+                            >
+                                Ver comprobante {{ forloop.counter }}
+                            </a>
+                    
+                            <br>
+                    
+                        {% empty %}
+                    
+                            -
+                    
+                        {% endfor %}
+                    
                     </td>
 
                 </tr>

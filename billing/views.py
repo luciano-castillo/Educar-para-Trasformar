@@ -310,6 +310,7 @@ def pago_registrar(
 
         form = RegistrarPagoForm(
             request.POST,
+            request.FILES,
             factura=factura
         )
 
@@ -339,7 +340,12 @@ def pago_registrar(
                             "observaciones"
                         ]
                     ),
-                    registrado_por=request.user
+                    registrado_por=request.user,
+                    comprobantes=(
+                        form.cleaned_data[
+                            "comprobantes"
+                        ]
+                    ),
                 )
 
                 messages.success(
