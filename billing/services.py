@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.db.models import Sum
+from django.utils import timezone
 
 from sports.models import InscripcionDeporte
 from services.models import (
@@ -580,3 +581,51 @@ def rechazar_pago(pago):
     pago.factura.actualizar_estado_pago()
 
     return pago
+
+@transaction.atomic
+def actualizar_facturas_vencidas(
+    fecha_referencia=None
+):
+
+    if fecha_referencia is None:
+
+        fecha_referencia = (
+            timezone.localdate()
+        )
+
+    facturas = (
+        Factura.objects
+        .filter(
+            fecha_vencimiento__lt=(
+                fecha_referencia
+            )
+        )
+        .exclude(
+            estado__in=[
+                "PAGADA",
+                "ANULADA",
+            ]
+        )
+    )
+
+    cantidad_actualizada = 0
+
+    for factura in facturas:
+
+        if (
+            factura.saldo > 0
+            and
+            factura.estado != "VENCIDA"
+        ):
+
+            factura.estado = "VENCIDA"
+
+            factura.save(
+                update_fields=[
+                    "estado"
+                ]
+            )
+
+            cantidad_actualizada += 1
+
+    return cantidad_actualizada

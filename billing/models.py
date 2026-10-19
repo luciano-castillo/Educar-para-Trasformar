@@ -175,17 +175,25 @@ class Factura(models.Model):
         if self.estado == "ANULADA":
             return
 
-        if self.total_pagado <= 0:
+        if self.saldo <= 0:
 
-            nuevo_estado = "PENDIENTE"
+            nuevo_estado = "PAGADA"
 
-        elif self.total_pagado < self.total:
+        elif self.estado == "VENCIDA":
+
+            # Si la factura ya estaba vencida
+            # y todavía conserva deuda,
+            # debe continuar vencida aunque
+            # reciba un pago parcial.
+            nuevo_estado = "VENCIDA"
+
+        elif self.total_pagado > 0:
 
             nuevo_estado = "PARCIAL"
 
         else:
 
-            nuevo_estado = "PAGADA"
+            nuevo_estado = "PENDIENTE"
 
         if self.estado != nuevo_estado:
 

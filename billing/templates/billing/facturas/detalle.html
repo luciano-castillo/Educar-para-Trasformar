@@ -65,6 +65,8 @@
                 <th>Concepto</th>
                 <th>Descripción</th>
                 <th>Importe</th>
+                <th>Pagado</th>
+                <th>Saldo</th>
             </tr>
 
         </thead>
@@ -87,6 +89,14 @@
                     $ {{ detalle.importe }}
                 </td>
 
+                <td>
+                    $ {{ detalle.total_pagado }}
+                </td>
+                
+                <td>
+                    $ {{ detalle.saldo_pendiente }}
+                </td>
+
             </tr>
 
             {% endfor %}
@@ -97,7 +107,7 @@
 
             <tr>
 
-                <th colspan="2">
+                <th colspan="4">
                     Total
                 </th>
 

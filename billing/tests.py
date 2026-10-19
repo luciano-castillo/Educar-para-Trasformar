@@ -47,6 +47,7 @@ from .services import (
     registrar_pago,
     validar_pago,
     rechazar_pago,
+    actualizar_facturas_vencidas,
 )
 
 
@@ -1150,3 +1151,210 @@ class GeneracionFacturaTestCase(TestCase):
                         comprobante.archivo.name
                     )
                 )
+    
+    def test_factura_vencida_con_deuda(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        actualizar_facturas_vencidas(
+            fecha_referencia=date(
+                2026,
+                10,
+                11
+            )
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.estado,
+            "VENCIDA"
+        )
+
+        self.assertEqual(
+            factura.total_pagado,
+            Decimal("0.00")
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("148000.00")
+        )
+
+
+    def test_factura_vencida_con_pago_parcial_sigue_vencida(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        # Primero dejamos vencer la factura.
+
+        actualizar_facturas_vencidas(
+            fecha_referencia=date(
+                2026,
+                10,
+                11
+            )
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.estado,
+            "VENCIDA"
+        )
+
+        # Después pagamos solamente la cuota.
+
+        cuota = factura.detalles.get(
+            tipo_concepto="CUOTA"
+        )
+
+        pago = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                12
+            ),
+            aplicaciones=[
+                (
+                    cuota,
+                    cuota.importe
+                )
+            ],
+            numero_operacion="DEUDA-001"
+        )
+
+        validar_pago(
+            pago
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.total_pagado,
+            Decimal("55000.00")
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("93000.00")
+        )
+
+        # Aunque hubo un pago parcial,
+        # sigue vencida porque conserva deuda.
+
+        self.assertEqual(
+            factura.estado,
+            "VENCIDA"
+        )
+
+
+    def test_factura_pagada_no_pasa_a_vencida(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        detalles = list(
+            factura.detalles.all()
+        )
+
+        pago = registrar_pago(
+            factura=factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                8
+            ),
+            aplicaciones=[
+                (
+                    detalle,
+                    detalle.importe
+                )
+                for detalle in detalles
+            ],
+            numero_operacion="DEUDA-002"
+        )
+
+        validar_pago(
+            pago
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.estado,
+            "PAGADA"
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("0.00")
+        )
+
+        # Simulamos una fecha posterior
+        # al vencimiento.
+
+        actualizar_facturas_vencidas(
+            fecha_referencia=date(
+                2026,
+                10,
+                20
+            )
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.estado,
+            "PAGADA"
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("0.00")
+        )
+
+
+    def test_factura_no_vence_el_mismo_dia_del_vencimiento(self):
+
+        factura = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026
+        )
+
+        # La cuota vence el 10/10.
+        # Ese mismo día todavía NO debe
+        # considerarse vencida.
+
+        actualizar_facturas_vencidas(
+            fecha_referencia=date(
+                2026,
+                10,
+                10
+            )
+        )
+
+        factura.refresh_from_db()
+
+        self.assertEqual(
+            factura.estado,
+            "PENDIENTE"
+        )
+
+        self.assertEqual(
+            factura.saldo,
+            Decimal("148000.00")
+        )

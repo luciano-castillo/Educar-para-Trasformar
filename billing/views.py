@@ -27,6 +27,7 @@ from .services import (
     registrar_pago,
     validar_pago,
     rechazar_pago,
+    actualizar_facturas_vencidas,
 )
 
 #---Cuotas---
@@ -163,6 +164,8 @@ def cuota_desactivar(
 @admin_required
 def factura_lista(request):
 
+    actualizar_facturas_vencidas()
+    
     facturas = (
         Factura.objects
         .select_related(
@@ -255,6 +258,8 @@ def factura_generar(request):
 @admin_required
 def factura_detalle(request,id_factura):
 
+    actualizar_facturas_vencidas()
+    
     factura = get_object_or_404(
         Factura.objects
         .select_related(
