@@ -412,3 +412,134 @@ class Asistencia(models.Model):
             f"{self.fecha} - "
             f"{self.get_estado_display()}"
         )
+
+class Nota(models.Model):
+
+    id_nota = models.BigAutoField(
+        primary_key=True
+    )
+
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.PROTECT,
+        related_name="notas"
+    )
+
+    dictado = models.ForeignKey(
+        DictadoMateria,
+        on_delete=models.PROTECT,
+        related_name="notas"
+    )
+
+    periodo = models.CharField(
+        max_length=50
+    )
+
+    evaluacion = models.CharField(
+        max_length=100
+    )
+
+    calificacion = models.DecimalField(
+        max_digits=4,
+        decimal_places=2
+    )
+
+    fecha = models.DateField()
+
+    observaciones = models.CharField(
+        max_length=250,
+        blank=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    fecha_modificacion = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=[
+                    "alumno",
+                    "dictado",
+                    "periodo",
+                    "evaluacion",
+                ],
+                name="nota_alumno_dictado_periodo_evaluacion_unica"
+            ),
+
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        calificacion__gte=1
+                    )
+                    &
+                    models.Q(
+                        calificacion__lte=10
+                    )
+                ),
+                name="nota_calificacion_entre_1_y_10"
+            ),
+        ]
+
+        ordering = [
+            "-fecha",
+            "alumno__apellido",
+            "alumno__nombre",
+        ]
+
+    def clean(self):
+
+        super().clean()
+
+        if (
+            self.alumno_id
+            and
+            self.dictado_id
+            and
+            self.alumno.curso_id
+            != self.dictado.curso_id
+        ):
+
+            raise ValidationError(
+                {
+                    "alumno": (
+                        "El alumno no pertenece "
+                        "al curso de este dictado."
+                    )
+                }
+            )
+
+        if (
+            self.calificacion is not None
+            and
+            (
+                self.calificacion < 1
+                or
+                self.calificacion > 10
+            )
+        ):
+
+            raise ValidationError(
+                {
+                    "calificacion": (
+                        "La calificación debe estar "
+                        "entre 1 y 10."
+                    )
+                }
+            )
+
+    def __str__(self):
+
+        return (
+            f"{self.alumno.apellido}, "
+            f"{self.alumno.nombre} - "
+            f"{self.dictado.materia.nombre} - "
+            f"{self.evaluacion} - "
+            f"{self.calificacion}"
+        )

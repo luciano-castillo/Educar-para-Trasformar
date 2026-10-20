@@ -7,13 +7,14 @@ from django.core.exceptions import ValidationError
 from django.db.models import (
     Count,
     Q,
+    Max,
 )
 
 from accounts.decorators import admin_required, alumno_required, docente_required, tutor_required
 
 from sports.models import InscripcionDeporte
-from .services import registrar_asistencias
-from .models import Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso, Tutor, TutorAlumno, Asistencia
+from .services import registrar_asistencias, registrar_notas
+from .models import (Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso, Tutor, TutorAlumno, Asistencia, Nota)
 from .forms import (
     AlumnoForm, 
     AlumnoDatosPersonalesForm, 
@@ -669,6 +670,316 @@ def asistencia_historial(
     return render(
         request,
         "academic/asistencias/historial.html",
+        {
+            "profesor": profesor,
+            "dictado": dictado,
+            "historial": historial,
+        }
+    )
+
+@docente_required
+def nota_registrar(
+    request,
+    id_dictado
+):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictado = get_object_or_404(
+        DictadoMateria.objects.select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario",
+            "profesor",
+        ),
+        id_dictado=id_dictado,
+        profesor=profesor
+    )
+
+    alumnos = (
+        Alumno.objects
+        .filter(
+            curso=dictado.curso,
+            estado=True
+        )
+        .order_by(
+            "apellido",
+            "nombre"
+        )
+    )
+
+    # -----------------------------------------
+    # Datos generales de la evaluación
+    # -----------------------------------------
+
+    periodo = (
+        request.POST.get("periodo")
+        or
+        request.GET.get("periodo")
+        or
+        ""
+    ).strip()
+
+    evaluacion = (
+        request.POST.get("evaluacion")
+        or
+        request.GET.get("evaluacion")
+        or
+        ""
+    ).strip()
+
+    fecha_texto = (
+        request.POST.get("fecha")
+        or
+        request.GET.get("fecha")
+    )
+
+    if fecha_texto:
+
+        try:
+
+            fecha_seleccionada = (
+                date.fromisoformat(
+                    fecha_texto
+                )
+            )
+
+        except ValueError:
+
+            fecha_seleccionada = (
+                date.today()
+            )
+
+    else:
+
+        fecha_seleccionada = (
+            date.today()
+        )
+
+    # -----------------------------------------
+    # Guardar notas
+    # -----------------------------------------
+
+    if request.method == "POST":
+
+        registros = []
+
+        for alumno in alumnos:
+
+            calificacion = (
+                request.POST.get(
+                    f"calificacion_{alumno.id_alumno}",
+                    ""
+                )
+            ).strip()
+
+            observaciones = (
+                request.POST.get(
+                    f"observaciones_{alumno.id_alumno}",
+                    ""
+                )
+            ).strip()
+
+            # Si no escribió una nota,
+            # no guardamos ese alumno.
+            if not calificacion:
+
+                continue
+
+            registros.append(
+                {
+                    "alumno": alumno,
+                    "calificacion": calificacion,
+                    "observaciones": observaciones,
+                }
+            )
+
+        try:
+
+            registrar_notas(
+                profesor=profesor,
+                dictado=dictado,
+                periodo=periodo,
+                evaluacion=evaluacion,
+                fecha=fecha_seleccionada,
+                registros=registros
+            )
+
+            messages.success(
+                request,
+                "Las notas fueron registradas correctamente."
+            )
+
+            return redirect(
+                (
+                    f"{request.path}"
+                    f"?periodo={periodo}"
+                    f"&evaluacion={evaluacion}"
+                )
+            )
+
+        except ValidationError as error:
+
+            messages.error(
+                request,
+                error.messages[0]
+            )
+
+    # -----------------------------------------
+    # Buscar notas ya registradas
+    # -----------------------------------------
+
+    notas_existentes = {}
+
+    notas_queryset = Nota.objects.none()
+
+    if periodo and evaluacion:
+
+        notas_queryset = (
+            Nota.objects
+            .filter(
+                dictado=dictado,
+                periodo__iexact=periodo,
+                evaluacion__iexact=evaluacion,
+            )
+        )
+
+        notas_existentes = {
+            nota.alumno_id: nota
+            for nota in notas_queryset
+        }
+
+        # Si estamos consultando una evaluación existente
+        # y no se indicó una fecha manualmente,
+        # recuperamos la fecha original.
+        if (
+            request.method == "GET"
+            and
+            not fecha_texto
+            and
+            notas_queryset.exists()
+        ):
+
+            fecha_seleccionada = (
+                notas_queryset
+                .order_by("fecha")
+                .first()
+                .fecha
+            )
+
+    filas = []
+
+    for alumno in alumnos:
+
+        nota = notas_existentes.get(
+            alumno.id_alumno
+        )
+
+        filas.append(
+            {
+                "alumno": alumno,
+                "calificacion": (
+                    nota.calificacion
+                    if nota
+                    else ""
+                ),
+                "observaciones": (
+                    nota.observaciones
+                    if nota
+                    else ""
+                ),
+            }
+        )
+
+    return render(
+        request,
+        "academic/notas/registrar.html",
+        {
+            "profesor": profesor,
+            "dictado": dictado,
+            "periodo": periodo,
+            "evaluacion": evaluacion,
+            "fecha_seleccionada": (
+                fecha_seleccionada
+            ),
+            "filas": filas,
+        }
+    )
+
+@docente_required
+def nota_historial(
+    request,
+    id_dictado
+):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictado = get_object_or_404(
+        DictadoMateria.objects.select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario",
+            "profesor",
+        ),
+        id_dictado=id_dictado,
+        profesor=profesor
+    )
+
+    historial = (
+        Nota.objects
+        .filter(
+            dictado=dictado
+        )
+        .values(
+            "periodo",
+            "evaluacion",
+        )
+        .annotate(
+            fecha=Max(
+                "fecha"
+            ),
+            cantidad_notas=Count(
+                "id_nota"
+            ),
+        )
+        .order_by(
+            "-fecha",
+            "periodo",
+            "evaluacion",
+        )
+    )
+
+    return render(
+        request,
+        "academic/notas/historial.html",
         {
             "profesor": profesor,
             "dictado": dictado,

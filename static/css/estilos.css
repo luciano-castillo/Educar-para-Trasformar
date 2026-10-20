@@ -97,12 +97,13 @@ h2 {
     border-radius: 10px;
 }
 
-.boton {
+.boton,
+.boton-secundario,
+.boton-peligro {
     display: inline-block;
 
     padding: 11px 18px;
 
-    background: #1777ff;
     color: white;
 
     text-decoration: none;
@@ -112,17 +113,32 @@ h2 {
     cursor: pointer;
 }
 
+.boton {
+    background: #1777ff;
+}
+
 .boton:hover {
     background: #348aff;
 }
+
 
 .boton-secundario {
     background: transparent;
     border: 1px solid #426080;
 }
 
+.boton-secundario:hover {
+    background: #142237;
+    border-color: #6b87a8;
+}
+
+
 .boton-peligro {
     background: #a93b3b;
+}
+
+.boton-peligro:hover {
+    background: #c44a4a;
 }
 
 .tarjeta {

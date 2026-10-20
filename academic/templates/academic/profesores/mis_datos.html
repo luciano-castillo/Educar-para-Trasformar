@@ -167,7 +167,21 @@
                                 >
                                     Ver historial
                                 </a>
-                            
+                                
+                                <a
+                                    href="{% url 'nota_registrar' dictado.id_dictado %}"
+                                    class="boton"
+                                >
+                                    Registrar notas
+                                </a>
+                                
+                                <a
+                                    href="{% url 'nota_historial' dictado.id_dictado %}"
+                                    class="boton-secundario"
+                                >
+                                    Historial de notas
+                                </a>
+                                
                             </td>
                             
                         </tr>

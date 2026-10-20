@@ -11,7 +11,7 @@
     <h1>Gestión de Alumnos</h1>
 
     <a
-        class="boton boton-secundario"
+        class="boton"
         href="{% url 'alumno_crear' %}"
     >
         + Registrar alumno
@@ -101,7 +101,7 @@
 
                     <td>
 
-                        <a href="{% url 'alumno_editar' alumno.id_alumno %}">
+                        <a href="{% url 'alumno_editar' alumno.id_alumno %}" class="boton-secundario">
                             Editar
                         </a>
 
@@ -116,7 +116,7 @@
 
                                 {% csrf_token %}
 
-                                <button type="submit">
+                                <button type="submit" class="boton-peligro">
                                     Desactivar
                                 </button>
 

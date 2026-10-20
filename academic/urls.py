@@ -88,6 +88,16 @@ urlpatterns = [
         views.asistencia_historial,
         name="asistencia_historial"
     ),
+    path(
+        "profesor/notas/<int:id_dictado>/",
+        views.nota_registrar,
+        name="nota_registrar"
+    ),
+    path(
+        "profesor/notas/<int:id_dictado>/historial/",
+        views.nota_historial,
+        name="nota_historial"
+    ),
     #Materias
     path(
         "materias/",
