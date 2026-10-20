@@ -76,6 +76,18 @@ urlpatterns = [
         views.profesor_editar_mis_datos,
         name="profesor_editar_mis_datos"
     ),
+    
+    path(
+        "profesor/asistencias/<int:id_dictado>/",
+        views.asistencia_tomar,
+        name="asistencia_tomar"
+    ),
+    
+    path(
+        "profesor/asistencias/<int:id_dictado>/historial/",
+        views.asistencia_historial,
+        name="asistencia_historial"
+    ),
     #Materias
     path(
         "materias/",

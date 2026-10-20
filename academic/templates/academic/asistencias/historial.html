@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Historial de asistencia
+{% endblock %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        Historial de asistencia
+    </h1>
+
+    <p>
+        <strong>Materia:</strong>
+        {{ dictado.materia.nombre }}
+    </p>
+
+    <p>
+        <strong>Curso:</strong>
+        {{ dictado.curso.nombre }}
+        {{ dictado.curso.division }}
+    </p>
+
+    <p>
+        <strong>Nivel:</strong>
+        {{ dictado.curso.nivel.nombre }}
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    {% if historial %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Fecha</th>
+                    <th>Presentes</th>
+                    <th>Ausentes</th>
+                    <th>Tarde</th>
+                    <th>Justificados</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for fila in historial %}
+
+                <tr>
+
+                    <td>
+                        {{ fila.fecha|date:"d/m/Y" }}
+                    </td>
+
+                    <td>
+                        {{ fila.presentes }}
+                    </td>
+
+                    <td>
+                        {{ fila.ausentes }}
+                    </td>
+
+                    <td>
+                        {{ fila.tardes }}
+                    </td>
+
+                    <td>
+                        {{ fila.justificados }}
+                    </td>
+
+                    <td>
+                        {{ fila.total }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'asistencia_tomar' dictado.id_dictado %}?fecha={{ fila.fecha|date:'Y-m-d' }}"
+                            class="boton-secundario"
+                        >
+                            Ver
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            Todavía no existen asistencias
+            registradas para esta materia.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="tarjeta">
+
+    <a
+        href="{% url 'asistencia_tomar' dictado.id_dictado %}"
+        class="boton"
+    >
+        Tomar asistencia
+    </a>
+
+    <a
+        href="{% url 'profesor_mis_datos' %}"
+        class="boton-secundario"
+    >
+        Volver a mis materias
+    </a>
+
+</div>
+
+{% endblock %}

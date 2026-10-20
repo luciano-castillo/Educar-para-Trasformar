@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class NivelEducativo(models.Model):
     id_nivel = models.BigAutoField(primary_key=True)
@@ -313,4 +314,101 @@ class DictadoMateria(models.Model):
             f"{self.materia.nombre} - "
             f"{self.curso.nombre} {self.curso.division} - "
             f"{self.profesor.apellido}"
+        )
+
+class Asistencia(models.Model):
+
+    ESTADOS = [
+        ("PRESENTE", "Presente"),
+        ("AUSENTE", "Ausente"),
+        ("TARDE", "Tarde"),
+        ("JUSTIFICADO", "Justificado"),
+    ]
+
+    id_asistencia = models.BigAutoField(
+        primary_key=True
+    )
+
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.PROTECT,
+        related_name="asistencias"
+    )
+
+    dictado = models.ForeignKey(
+        DictadoMateria,
+        on_delete=models.PROTECT,
+        related_name="asistencias"
+    )
+
+    fecha = models.DateField()
+
+    estado = models.CharField(
+        max_length=12,
+        choices=ESTADOS,
+        default="PRESENTE"
+    )
+
+    observaciones = models.CharField(
+        max_length=250,
+        blank=True
+    )
+
+    fecha_registro = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    fecha_modificacion = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "alumno",
+                    "dictado",
+                    "fecha",
+                ],
+                name="asistencia_alumno_dictado_fecha_unica"
+            )
+        ]
+
+        ordering = [
+            "-fecha",
+            "alumno__apellido",
+            "alumno__nombre",
+        ]
+
+    def clean(self):
+
+        super().clean()
+
+        if (
+            self.alumno_id
+            and
+            self.dictado_id
+            and
+            self.alumno.curso_id
+            != self.dictado.curso_id
+        ):
+
+            raise ValidationError(
+                {
+                    "alumno": (
+                        "El alumno no pertenece "
+                        "al curso de este dictado."
+                    )
+                }
+            )
+
+    def __str__(self):
+
+        return (
+            f"{self.alumno.apellido}, "
+            f"{self.alumno.nombre} - "
+            f"{self.dictado.materia.nombre} - "
+            f"{self.fecha} - "
+            f"{self.get_estado_display()}"
         )

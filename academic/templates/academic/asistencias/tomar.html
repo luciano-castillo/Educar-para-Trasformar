@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Tomar asistencia
+{% endblock %}
+
+{% block content %}
+
+<div class="tarjeta">
+
+    <h1>
+        Tomar asistencia
+    </h1>
+
+    <p>
+        <strong>Materia:</strong>
+        {{ dictado.materia.nombre }}
+    </p>
+
+    <p>
+        <strong>Curso:</strong>
+        {{ dictado.curso.nombre }}
+        {{ dictado.curso.division }}
+    </p>
+
+    <p>
+        <strong>Nivel:</strong>
+        {{ dictado.curso.nivel.nombre }}
+    </p>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>
+        Seleccionar fecha
+    </h2>
+
+    <form method="get">
+
+        <input
+            type="date"
+            name="fecha"
+            value="{{ fecha_seleccionada|date:'Y-m-d' }}"
+        >
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Ver asistencia
+        </button>
+
+    </form>
+
+</div>
+
+
+<div class="tarjeta">
+
+    <h2>
+        Alumnos
+    </h2>
+
+    {% if filas %}
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="fecha"
+                value="{{ fecha_seleccionada|date:'Y-m-d' }}"
+            >
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Alumno</th>
+                        <th>Legajo</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for fila in filas %}
+
+                    <tr>
+
+                        <td>
+                            {{ fila.alumno.apellido }},
+                            {{ fila.alumno.nombre }}
+                        </td>
+
+                        <td>
+                            {{ fila.alumno.legajo }}
+                        </td>
+
+                        <td>
+
+                            <select
+                                name="estado_{{ fila.alumno.id_alumno }}"
+                            >
+
+                                {% for valor, etiqueta in estados %}
+
+                                    <option
+                                        value="{{ valor }}"
+                                        {% if fila.estado == valor %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ etiqueta }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="text"
+                                name="observaciones_{{ fila.alumno.id_alumno }}"
+                                value="{{ fila.observaciones }}"
+                                maxlength="250"
+                            >
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <button
+                type="submit"
+                class="boton"
+            >
+                Guardar asistencia
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <p>
+            No hay alumnos activos
+            en este curso.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="tarjeta">
+
+    <a
+        href="{% url 'profesor_mis_datos' %}"
+        class="boton-secundario"
+    >
+        Volver a mis materias
+    </a>
+
+</div>
+
+{% endblock %}

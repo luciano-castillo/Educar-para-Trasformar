@@ -102,6 +102,7 @@
         <h2>
             Mis materias y cursos
         </h2>
+        
     
     
         {% if dictados %}
@@ -116,6 +117,7 @@
                         <th>Nivel</th>
                         <th>Día</th>
                         <th>Horario</th>
+                        <th>Acciones</th>
                     </tr>
     
                 </thead>
@@ -149,7 +151,25 @@
                                 -
                                 {{ dictado.horario.hora_fin|time:"H:i" }}
                             </td>
-    
+                            
+                            <td>
+
+                                <a
+                                    href="{% url 'asistencia_tomar' dictado.id_dictado %}"
+                                    class="boton"
+                                >
+                                    Tomar asistencia
+                                </a>
+
+                                <a
+                                    href="{% url 'asistencia_historial' dictado.id_dictado %}"
+                                    class="boton-secundario"
+                                >
+                                    Ver historial
+                                </a>
+                            
+                            </td>
+                            
                         </tr>
     
                     {% endfor %}

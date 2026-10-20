@@ -1,11 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models.deletion import ProtectedError
+from datetime import date
+
+from django.core.exceptions import ValidationError
+from django.db.models import (
+    Count,
+    Q,
+)
 
 from accounts.decorators import admin_required, alumno_required, docente_required, tutor_required
 
 from sports.models import InscripcionDeporte
-from .models import Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso, Tutor, TutorAlumno
+from .services import registrar_asistencias
+from .models import Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso, Tutor, TutorAlumno, Asistencia
 from .forms import (
     AlumnoForm, 
     AlumnoDatosPersonalesForm, 
@@ -18,6 +26,7 @@ from .forms import (
     NivelEducativoForm,
     TutorForm,
     TutorAlumnoForm,
+    
     )
 
 #Alumnos
@@ -382,6 +391,288 @@ def profesor_editar_mis_datos(request):
         {
             "form": form,
             "profesor": profesor
+        }
+    )
+
+@docente_required
+def asistencia_tomar(
+    request,
+    id_dictado
+):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictado = get_object_or_404(
+        DictadoMateria.objects.select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario",
+            "profesor",
+        ),
+        id_dictado=id_dictado,
+        profesor=profesor
+    )
+
+    # -----------------------------------------
+    # Fecha seleccionada
+    # -----------------------------------------
+
+    fecha_texto = (
+        request.POST.get("fecha")
+        or request.GET.get("fecha")
+    )
+
+    if fecha_texto:
+
+        try:
+
+            fecha_seleccionada = (
+                date.fromisoformat(
+                    fecha_texto
+                )
+            )
+
+        except ValueError:
+
+            fecha_seleccionada = (
+                date.today()
+            )
+
+    else:
+
+        fecha_seleccionada = (
+            date.today()
+        )
+
+    # -----------------------------------------
+    # Alumnos activos del curso
+    # -----------------------------------------
+
+    alumnos = (
+        Alumno.objects
+        .filter(
+            curso=dictado.curso,
+            estado=True
+        )
+        .order_by(
+            "apellido",
+            "nombre"
+        )
+    )
+
+    # -----------------------------------------
+    # Guardar asistencia
+    # -----------------------------------------
+
+    if request.method == "POST":
+
+        registros = []
+
+        for alumno in alumnos:
+
+            estado = request.POST.get(
+                f"estado_{alumno.id_alumno}"
+            )
+
+            observaciones = (
+                request.POST.get(
+                    f"observaciones_{alumno.id_alumno}",
+                    ""
+                )
+            )
+
+            registros.append(
+                {
+                    "alumno": alumno,
+                    "estado": estado,
+                    "observaciones": observaciones,
+                }
+            )
+
+        try:
+
+            registrar_asistencias(
+                profesor=profesor,
+                dictado=dictado,
+                fecha=fecha_seleccionada,
+                registros=registros
+            )
+
+            messages.success(
+                request,
+                "La asistencia fue registrada correctamente."
+            )
+
+            return redirect(
+                (
+                    f"{request.path}"
+                    f"?fecha={fecha_seleccionada.isoformat()}"
+                )
+            )
+
+        except ValidationError as error:
+
+            messages.error(
+                request,
+                error.messages[0]
+            )
+
+    # -----------------------------------------
+    # Asistencias ya existentes
+    # -----------------------------------------
+
+    asistencias_existentes = {
+        asistencia.alumno_id: asistencia
+        for asistencia in (
+            Asistencia.objects
+            .filter(
+                dictado=dictado,
+                fecha=fecha_seleccionada
+            )
+        )
+    }
+
+    filas = []
+
+    for alumno in alumnos:
+
+        asistencia = (
+            asistencias_existentes.get(
+                alumno.id_alumno
+            )
+        )
+
+        filas.append(
+            {
+                "alumno": alumno,
+                "estado": (
+                    asistencia.estado
+                    if asistencia
+                    else "PRESENTE"
+                ),
+                "observaciones": (
+                    asistencia.observaciones
+                    if asistencia
+                    else ""
+                ),
+            }
+        )
+
+    return render(
+        request,
+        "academic/asistencias/tomar.html",
+        {
+            "profesor": profesor,
+            "dictado": dictado,
+            "fecha_seleccionada": (
+                fecha_seleccionada
+            ),
+            "filas": filas,
+            "estados": Asistencia.ESTADOS,
+        }
+    )
+
+@docente_required
+def asistencia_historial(
+    request,
+    id_dictado
+):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictado = get_object_or_404(
+        DictadoMateria.objects.select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario",
+            "profesor",
+        ),
+        id_dictado=id_dictado,
+        profesor=profesor
+    )
+
+    historial = (
+        Asistencia.objects
+        .filter(
+            dictado=dictado
+        )
+        .values(
+            "fecha"
+        )
+        .annotate(
+
+            total=Count(
+                "id_asistencia"
+            ),
+
+            presentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="PRESENTE"
+                )
+            ),
+
+            ausentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="AUSENTE"
+                )
+            ),
+
+            tardes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="TARDE"
+                )
+            ),
+
+            justificados=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="JUSTIFICADO"
+                )
+            ),
+        )
+        .order_by(
+            "-fecha"
+        )
+    )
+
+    return render(
+        request,
+        "academic/asistencias/historial.html",
+        {
+            "profesor": profesor,
+            "dictado": dictado,
+            "historial": historial,
         }
     )
 
