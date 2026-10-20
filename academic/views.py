@@ -1954,13 +1954,89 @@ def tutor_detalle_alumno(
         .select_related(
             "materia",
             "profesor",
-            "horario"
+            "horario",
+            "curso",
+            "curso__nivel",
         )
         .order_by(
             "materia__nombre"
         )
     )
 
+    materias = []
+
+    for dictado in dictados:
+
+        notas = (
+            Nota.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha",
+                "periodo",
+                "evaluacion"
+            )
+        )
+
+        asistencias = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha"
+            )
+        )
+
+        resumen_asistencia = (
+            asistencias.aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+
+                ausentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="AUSENTE"
+                    )
+                ),
+
+                tardes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="TARDE"
+                    )
+                ),
+
+                justificados=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="JUSTIFICADO"
+                    )
+                ),
+            )
+        )
+
+        materias.append(
+            {
+                "dictado": dictado,
+                "notas": notas,
+                "asistencias": asistencias,
+                "resumen_asistencia": resumen_asistencia,
+            }
+        )
+        
     deportes = (
         InscripcionDeporte.objects
         .filter(
@@ -1987,6 +2063,7 @@ def tutor_detalle_alumno(
             "tutor": tutor,
             "alumno": alumno,
             "dictados": dictados,
+            "materias": materias,
             "deportes": deportes,
         }
     )

@@ -23,6 +23,8 @@ from .models import (
     DictadoMateria,
     Asistencia,
     Nota,
+    Tutor,
+    TutorAlumno,
 )
 
 from .services import registrar_asistencias, registrar_notas
@@ -1538,5 +1540,442 @@ class AlumnoAcademicoTestCase(TestCase):
             response.url,
             reverse(
                 "login"
+            )
+        )
+
+class TutorAcademicoTestCase(TestCase):
+
+    def setUp(self):
+
+        # -----------------------------------------
+        # Usuario tutor
+        # -----------------------------------------
+
+        self.usuario_tutor = (
+            User.objects.create_user(
+                username="tutor_academico",
+                password="123456"
+            )
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=self.usuario_tutor,
+            rol=PerfilUsuario.Rol.TUTOR
+        )
+
+        self.tutor = Tutor.objects.create(
+            usuario=self.usuario_tutor,
+            dni="81111111",
+            nombre="María",
+            apellido="González",
+            domicilio="Calle Tutor 1",
+            telefono="111111",
+            correo="tutor@test.com",
+            estado=True
+        )
+
+        # -----------------------------------------
+        # Usuario docente
+        # -----------------------------------------
+
+        self.usuario_docente = (
+            User.objects.create_user(
+                username="docente_tutor_test",
+                password="123456"
+            )
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=self.usuario_docente,
+            rol=PerfilUsuario.Rol.DOCENTE
+        )
+
+        # -----------------------------------------
+        # Nivel y curso
+        # -----------------------------------------
+
+        self.nivel = NivelEducativo.objects.create(
+            nombre="Secundario",
+            estado=True
+        )
+
+        self.curso = Curso.objects.create(
+            nombre="5°",
+            division="A",
+            turno="MANANA",
+            nivel=self.nivel,
+            estado=True
+        )
+
+        # -----------------------------------------
+        # Profesor
+        # -----------------------------------------
+
+        self.profesor = Profesor.objects.create(
+            usuario=self.usuario_docente,
+            dni="82222222",
+            legajo="PROFT001",
+            nombre="Ana",
+            apellido="Pérez",
+            especialidad="Lengua",
+            correo="profesor.tutor@test.com",
+            telefono="222222",
+            estado=True
+        )
+
+        # -----------------------------------------
+        # Materia y horario
+        # -----------------------------------------
+
+        self.materia = Materia.objects.create(
+            nombre="Lengua",
+            estado=True
+        )
+
+        self.horario = Horario.objects.create(
+            dia_semana="JUEVES",
+            hora_inicio="08:00",
+            hora_fin="09:00"
+        )
+
+        self.dictado = DictadoMateria.objects.create(
+            materia=self.materia,
+            profesor=self.profesor,
+            curso=self.curso,
+            horario=self.horario
+        )
+
+        # -----------------------------------------
+        # Alumno asociado al tutor
+        # -----------------------------------------
+
+        self.alumno = Alumno.objects.create(
+            dni="83333333",
+            legajo="ALUT001",
+            nombre="Juan",
+            apellido="Gómez",
+            fecha_nacimiento="2010-01-10",
+            domicilio="Calle Alumno 1",
+            telefono="333333",
+            correo="juan.tutor@test.com",
+            curso=self.curso,
+            estado=True
+        )
+
+        TutorAlumno.objects.create(
+            tutor=self.tutor,
+            alumno=self.alumno
+        )
+
+        # -----------------------------------------
+        # Alumno NO asociado al tutor
+        # -----------------------------------------
+
+        self.otro_alumno = Alumno.objects.create(
+            dni="84444444",
+            legajo="ALUT002",
+            nombre="Pedro",
+            apellido="Martínez",
+            fecha_nacimiento="2010-02-15",
+            domicilio="Calle Alumno 2",
+            telefono="444444",
+            correo="pedro.tutor@test.com",
+            curso=self.curso,
+            estado=True
+        )
+
+        self.fecha = (
+            timezone.localdate()
+            - timedelta(days=1)
+        )
+
+        # -----------------------------------------
+        # Nota del alumno asociado
+        # -----------------------------------------
+
+        Nota.objects.create(
+            alumno=self.alumno,
+            dictado=self.dictado,
+            periodo="1° Trimestre",
+            evaluacion="Parcial N°1",
+            calificacion=Decimal("9.00"),
+            fecha=self.fecha,
+            observaciones="NOTA_HIJO_ASOCIADO"
+        )
+
+        # -----------------------------------------
+        # Nota del alumno NO asociado
+        # -----------------------------------------
+
+        Nota.objects.create(
+            alumno=self.otro_alumno,
+            dictado=self.dictado,
+            periodo="1° Trimestre",
+            evaluacion="Parcial N°1",
+            calificacion=Decimal("4.00"),
+            fecha=self.fecha,
+            observaciones="NOTA_PRIVADA_OTRO_ALUMNO"
+        )
+
+        # -----------------------------------------
+        # Asistencias del alumno asociado
+        # -----------------------------------------
+
+        Asistencia.objects.create(
+            alumno=self.alumno,
+            dictado=self.dictado,
+            fecha=self.fecha,
+            estado="PRESENTE"
+        )
+
+        Asistencia.objects.create(
+            alumno=self.alumno,
+            dictado=self.dictado,
+            fecha=(
+                self.fecha
+                - timedelta(days=1)
+            ),
+            estado="JUSTIFICADO",
+            observaciones="Falta justificada"
+        )
+
+        # -----------------------------------------
+        # Asistencia del alumno NO asociado
+        # -----------------------------------------
+
+        Asistencia.objects.create(
+            alumno=self.otro_alumno,
+            dictado=self.dictado,
+            fecha=self.fecha,
+            estado="AUSENTE",
+            observaciones="ASISTENCIA_PRIVADA_OTRO"
+        )
+
+
+    def test_tutor_ve_sus_alumnos_asociados(self):
+
+        self.client.force_login(
+            self.usuario_tutor
+        )
+
+        response = self.client.get(
+            reverse(
+                "tutor_mis_hijos"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertContains(
+            response,
+            self.alumno.nombre
+        )
+
+        self.assertNotContains(
+            response,
+            self.otro_alumno.nombre
+        )
+
+
+    def test_tutor_accede_al_detalle_de_alumno_asociado(self):
+
+        self.client.force_login(
+            self.usuario_tutor
+        )
+
+        response = self.client.get(
+            reverse(
+                "tutor_detalle_alumno",
+                args=[
+                    self.alumno.id_alumno
+                ]
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertEqual(
+            response.context["alumno"],
+            self.alumno
+        )
+
+
+    def test_tutor_ve_notas_y_asistencias_del_alumno(self):
+
+        self.client.force_login(
+            self.usuario_tutor
+        )
+
+        response = self.client.get(
+            reverse(
+                "tutor_detalle_alumno",
+                args=[
+                    self.alumno.id_alumno
+                ]
+            )
+        )
+
+        materias = response.context[
+            "materias"
+        ]
+
+        self.assertEqual(
+            len(materias),
+            1
+        )
+
+        materia = materias[0]
+
+        notas = list(
+            materia["notas"]
+        )
+
+        asistencias = list(
+            materia["asistencias"]
+        )
+
+        self.assertEqual(
+            len(notas),
+            1
+        )
+
+        self.assertEqual(
+            notas[0].calificacion,
+            Decimal("9.00")
+        )
+
+        self.assertEqual(
+            notas[0].alumno,
+            self.alumno
+        )
+
+        self.assertEqual(
+            len(asistencias),
+            2
+        )
+
+        self.assertTrue(
+            all(
+                asistencia.alumno
+                == self.alumno
+                for asistencia
+                in asistencias
+            )
+        )
+
+        resumen = materia[
+            "resumen_asistencia"
+        ]
+
+        self.assertEqual(
+            resumen["total"],
+            2
+        )
+
+        self.assertEqual(
+            resumen["presentes"],
+            1
+        )
+
+        self.assertEqual(
+            resumen["ausentes"],
+            0
+        )
+
+        self.assertEqual(
+            resumen["tardes"],
+            0
+        )
+
+        self.assertEqual(
+            resumen["justificados"],
+            1
+        )
+
+
+    def test_tutor_no_ve_informacion_de_otro_alumno(self):
+
+        self.client.force_login(
+            self.usuario_tutor
+        )
+
+        response = self.client.get(
+            reverse(
+                "tutor_detalle_alumno",
+                args=[
+                    self.alumno.id_alumno
+                ]
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertNotContains(
+            response,
+            "NOTA_PRIVADA_OTRO_ALUMNO"
+        )
+
+        self.assertNotContains(
+            response,
+            "ASISTENCIA_PRIVADA_OTRO"
+        )
+
+        self.assertNotContains(
+            response,
+            "4.00"
+        )
+
+
+    def test_tutor_no_puede_acceder_alumno_no_asociado(self):
+
+        self.client.force_login(
+            self.usuario_tutor
+        )
+
+        response = self.client.get(
+            reverse(
+                "tutor_detalle_alumno",
+                args=[
+                    self.otro_alumno.id_alumno
+                ]
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            404
+        )
+
+
+    def test_otro_rol_no_puede_acceder_vista_tutor(self):
+
+        self.client.force_login(
+            self.usuario_docente
+        )
+
+        response = self.client.get(
+            reverse(
+                "tutor_mis_hijos"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302
+        )
+
+        self.assertEqual(
+            response.url,
+            reverse(
+                "inicio_por_rol"
             )
         )

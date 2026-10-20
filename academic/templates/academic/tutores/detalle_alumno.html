@@ -100,6 +100,208 @@
 
 <div class="tarjeta">
 
+    <h2>
+        Información académica
+    </h2>
+
+    {% if materias %}
+
+        {% for materia in materias %}
+
+            <div class="tarjeta">
+
+                <h3>
+                    {{ materia.dictado.materia.nombre }}
+                </h3>
+
+                <p>
+                    <strong>Profesor:</strong>
+
+                    {{ materia.dictado.profesor.apellido }},
+                    {{ materia.dictado.profesor.nombre }}
+                </p>
+
+
+                <h4>
+                    Notas
+                </h4>
+
+                {% if materia.notas %}
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Período</th>
+                                <th>Evaluación</th>
+                                <th>Fecha</th>
+                                <th>Calificación</th>
+                                <th>Observaciones</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for nota in materia.notas %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ nota.periodo }}
+                                    </td>
+
+                                    <td>
+                                        {{ nota.evaluacion }}
+                                    </td>
+
+                                    <td>
+                                        {{ nota.fecha|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+                                        {{ nota.calificacion }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if nota.observaciones %}
+
+                                            {{ nota.observaciones }}
+
+                                        {% else %}
+
+                                            -
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                {% else %}
+
+                    <p>
+                        Todavía no existen notas
+                        registradas para esta materia.
+                    </p>
+
+                {% endif %}
+
+
+                <h4>
+                    Asistencia
+                </h4>
+
+                <p>
+                    <strong>Total:</strong>
+                    {{ materia.resumen_asistencia.total }}
+                </p>
+
+                <p>
+                    <strong>Presentes:</strong>
+                    {{ materia.resumen_asistencia.presentes }}
+                </p>
+
+                <p>
+                    <strong>Ausentes:</strong>
+                    {{ materia.resumen_asistencia.ausentes }}
+                </p>
+
+                <p>
+                    <strong>Tardes:</strong>
+                    {{ materia.resumen_asistencia.tardes }}
+                </p>
+
+                <p>
+                    <strong>Justificadas:</strong>
+                    {{ materia.resumen_asistencia.justificados }}
+                </p>
+
+
+                {% if materia.asistencias %}
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for asistencia in materia.asistencias %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ asistencia.fecha|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+                                        {{ asistencia.get_estado_display }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if asistencia.observaciones %}
+
+                                            {{ asistencia.observaciones }}
+
+                                        {% else %}
+
+                                            -
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                {% else %}
+
+                    <p>
+                        Todavía no existen asistencias
+                        registradas para esta materia.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>
+            No existen materias asignadas
+            al curso del alumno.
+        </p>
+
+    {% endif %}
+
+</div>
+
+<div class="tarjeta">
+
     <h2>Deportes</h2>
 
     {% if deportes %}
