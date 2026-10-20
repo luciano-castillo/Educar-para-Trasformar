@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Mi información académica
+{% endblock %}
+
+{% block content %}
+
+<h1>
+    Mi información académica
+</h1>
+
+<p>
+    Consultá tus materias,
+    calificaciones y asistencias.
+</p>
+
+
+<div class="tarjeta">
+
+    <h2>
+        Datos académicos
+    </h2>
+
+    <p>
+        <strong>Alumno:</strong>
+        {{ alumno.apellido }},
+        {{ alumno.nombre }}
+    </p>
+
+    <p>
+        <strong>Legajo:</strong>
+        {{ alumno.legajo }}
+    </p>
+
+    <p>
+        <strong>Curso:</strong>
+        {{ alumno.curso.nombre }}
+        {{ alumno.curso.division }}
+    </p>
+
+    <p>
+        <strong>Nivel:</strong>
+        {{ alumno.curso.nivel.nombre }}
+    </p>
+
+</div>
+
+
+{% if materias %}
+
+    {% for materia in materias %}
+
+        <div class="tarjeta">
+
+            <h2>
+                {{ materia.dictado.materia.nombre }}
+            </h2>
+
+            <p>
+                <strong>Profesor:</strong>
+
+                {{ materia.dictado.profesor.apellido }},
+                {{ materia.dictado.profesor.nombre }}
+            </p>
+
+            <p>
+                <strong>Día:</strong>
+
+                {{ materia.dictado.horario.get_dia_semana_display }}
+            </p>
+
+            <p>
+                <strong>Horario:</strong>
+
+                {{ materia.dictado.horario.hora_inicio|time:"H:i" }}
+                -
+                {{ materia.dictado.horario.hora_fin|time:"H:i" }}
+            </p>
+
+
+            <h3>
+                Mis notas
+            </h3>
+
+            {% if materia.notas %}
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Período</th>
+                            <th>Evaluación</th>
+                            <th>Fecha</th>
+                            <th>Calificación</th>
+                            <th>Observaciones</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for nota in materia.notas %}
+
+                            <tr>
+
+                                <td>
+                                    {{ nota.periodo }}
+                                </td>
+
+                                <td>
+                                    {{ nota.evaluacion }}
+                                </td>
+
+                                <td>
+                                    {{ nota.fecha|date:"d/m/Y" }}
+                                </td>
+
+                                <td>
+                                    {{ nota.calificacion }}
+                                </td>
+
+                                <td>
+
+                                    {% if nota.observaciones %}
+
+                                        {{ nota.observaciones }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            {% else %}
+
+                <p>
+                    Todavía no tenés notas
+                    registradas en esta materia.
+                </p>
+
+            {% endif %}
+
+
+            <h3>
+                Mi asistencia
+            </h3>
+
+            <p>
+                <strong>Total de clases registradas:</strong>
+                {{ materia.resumen_asistencia.total }}
+            </p>
+
+            <p>
+                <strong>Presentes:</strong>
+                {{ materia.resumen_asistencia.presentes }}
+            </p>
+
+            <p>
+                <strong>Ausentes:</strong>
+                {{ materia.resumen_asistencia.ausentes }}
+            </p>
+
+            <p>
+                <strong>Tardes:</strong>
+                {{ materia.resumen_asistencia.tardes }}
+            </p>
+
+            <p>
+                <strong>Justificadas:</strong>
+                {{ materia.resumen_asistencia.justificados }}
+            </p>
+
+
+            {% if materia.asistencias %}
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Observaciones</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for asistencia in materia.asistencias %}
+
+                            <tr>
+
+                                <td>
+                                    {{ asistencia.fecha|date:"d/m/Y" }}
+                                </td>
+
+                                <td>
+                                    {{ asistencia.get_estado_display }}
+                                </td>
+
+                                <td>
+
+                                    {% if asistencia.observaciones %}
+
+                                        {{ asistencia.observaciones }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            {% else %}
+
+                <p>
+                    Todavía no existen asistencias
+                    registradas en esta materia.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <div class="tarjeta">
+
+        <p>
+            Actualmente no tenés materias asignadas.
+        </p>
+
+    </div>
+
+{% endif %}
+
+
+<div class="tarjeta">
+
+    <a
+        href="{% url 'alumno_mis_datos' %}"
+        class="boton-secundario"
+    >
+        Volver a mis datos
+    </a>
+
+</div>
+
+{% endblock %}

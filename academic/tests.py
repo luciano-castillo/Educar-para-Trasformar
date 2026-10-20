@@ -1148,3 +1148,395 @@ class NotaTestCase(TestCase):
             fila["fecha"],
             self.fecha
         )
+
+class AlumnoAcademicoTestCase(TestCase):
+
+    def setUp(self):
+
+        # -----------------------------------------
+        # Usuario alumno
+        # -----------------------------------------
+
+        self.usuario_alumno = (
+            User.objects.create_user(
+                username="alumno_academico",
+                password="123456"
+            )
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=self.usuario_alumno,
+            rol=PerfilUsuario.Rol.ALUMNO
+        )
+
+        # -----------------------------------------
+        # Usuario docente
+        # -----------------------------------------
+
+        self.usuario_docente = (
+            User.objects.create_user(
+                username="docente_academico",
+                password="123456"
+            )
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=self.usuario_docente,
+            rol=PerfilUsuario.Rol.DOCENTE
+        )
+
+        # -----------------------------------------
+        # Nivel y curso
+        # -----------------------------------------
+
+        self.nivel = NivelEducativo.objects.create(
+            nombre="Secundario",
+            estado=True
+        )
+
+        self.curso = Curso.objects.create(
+            nombre="4°",
+            division="A",
+            turno="MANANA",
+            nivel=self.nivel,
+            estado=True
+        )
+
+        # -----------------------------------------
+        # Profesor
+        # -----------------------------------------
+
+        self.profesor = Profesor.objects.create(
+            usuario=self.usuario_docente,
+            dni="71111111",
+            legajo="PROFA001",
+            nombre="Carlos",
+            apellido="Gómez",
+            especialidad="Historia",
+            correo="carlos.academico@test.com",
+            telefono="111111",
+            estado=True
+        )
+
+        # -----------------------------------------
+        # Materia y horario
+        # -----------------------------------------
+
+        self.materia = Materia.objects.create(
+            nombre="Historia",
+            estado=True
+        )
+
+        self.horario = Horario.objects.create(
+            dia_semana="MIERCOLES",
+            hora_inicio="10:00",
+            hora_fin="11:00"
+        )
+
+        self.dictado = DictadoMateria.objects.create(
+            materia=self.materia,
+            profesor=self.profesor,
+            curso=self.curso,
+            horario=self.horario
+        )
+
+        # -----------------------------------------
+        # Alumno autenticado
+        # -----------------------------------------
+
+        self.alumno = Alumno.objects.create(
+            usuario=self.usuario_alumno,
+            dni="72222222",
+            legajo="ALUA001",
+            nombre="Luciano",
+            apellido="Castillo",
+            fecha_nacimiento="2011-01-10",
+            domicilio="Calle 1",
+            telefono="222222",
+            correo="luciano@test.com",
+            curso=self.curso,
+            estado=True
+        )
+
+        # -----------------------------------------
+        # Otro alumno del mismo curso
+        # -----------------------------------------
+
+        self.otro_alumno = Alumno.objects.create(
+            dni="73333333",
+            legajo="ALUA002",
+            nombre="Otro",
+            apellido="Alumno",
+            fecha_nacimiento="2011-02-15",
+            domicilio="Calle 2",
+            telefono="333333",
+            correo="otro@test.com",
+            curso=self.curso,
+            estado=True
+        )
+
+        self.fecha = (
+            timezone.localdate()
+            - timedelta(days=1)
+        )
+
+        # -----------------------------------------
+        # Nota del alumno autenticado
+        # -----------------------------------------
+
+        self.nota = Nota.objects.create(
+            alumno=self.alumno,
+            dictado=self.dictado,
+            periodo="1° Trimestre",
+            evaluacion="Parcial N°1",
+            calificacion=Decimal("8.50"),
+            fecha=self.fecha,
+            observaciones="Buen trabajo"
+        )
+
+        # -----------------------------------------
+        # Nota de otro alumno
+        # -----------------------------------------
+
+        Nota.objects.create(
+            alumno=self.otro_alumno,
+            dictado=self.dictado,
+            periodo="1° Trimestre",
+            evaluacion="Parcial N°1",
+            calificacion=Decimal("4.25"),
+            fecha=self.fecha,
+            observaciones="PRIVADO_OTRO_ALUMNO"
+        )
+
+        # -----------------------------------------
+        # Asistencias del alumno
+        # -----------------------------------------
+
+        Asistencia.objects.create(
+            alumno=self.alumno,
+            dictado=self.dictado,
+            fecha=self.fecha,
+            estado="PRESENTE"
+        )
+
+        Asistencia.objects.create(
+            alumno=self.alumno,
+            dictado=self.dictado,
+            fecha=(
+                self.fecha
+                - timedelta(days=1)
+            ),
+            estado="AUSENTE",
+            observaciones="Sin justificar"
+        )
+
+        # -----------------------------------------
+        # Asistencia de otro alumno
+        # -----------------------------------------
+
+        Asistencia.objects.create(
+            alumno=self.otro_alumno,
+            dictado=self.dictado,
+            fecha=self.fecha,
+            estado="TARDE",
+            observaciones="PRIVADO_ASISTENCIA_OTRO"
+        )
+
+
+    def test_alumno_accede_a_su_informacion_academica(self):
+
+        self.client.force_login(
+            self.usuario_alumno
+        )
+
+        response = self.client.get(
+            reverse(
+                "alumno_academico"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertEqual(
+            response.context["alumno"],
+            self.alumno
+        )
+
+        materias = response.context[
+            "materias"
+        ]
+
+        self.assertEqual(
+            len(materias),
+            1
+        )
+
+        self.assertEqual(
+            materias[0]["dictado"],
+            self.dictado
+        )
+
+
+    def test_alumno_ve_sus_notas_y_asistencias(self):
+
+        self.client.force_login(
+            self.usuario_alumno
+        )
+
+        response = self.client.get(
+            reverse(
+                "alumno_academico"
+            )
+        )
+
+        materia = response.context[
+            "materias"
+        ][0]
+
+        notas = list(
+            materia["notas"]
+        )
+
+        asistencias = list(
+            materia["asistencias"]
+        )
+
+        self.assertEqual(
+            len(notas),
+            1
+        )
+
+        self.assertEqual(
+            notas[0].alumno,
+            self.alumno
+        )
+
+        self.assertEqual(
+            notas[0].calificacion,
+            Decimal("8.50")
+        )
+
+        self.assertEqual(
+            len(asistencias),
+            2
+        )
+
+        self.assertTrue(
+            all(
+                asistencia.alumno
+                == self.alumno
+                for asistencia
+                in asistencias
+            )
+        )
+
+        resumen = materia[
+            "resumen_asistencia"
+        ]
+
+        self.assertEqual(
+            resumen["total"],
+            2
+        )
+
+        self.assertEqual(
+            resumen["presentes"],
+            1
+        )
+
+        self.assertEqual(
+            resumen["ausentes"],
+            1
+        )
+
+        self.assertEqual(
+            resumen["tardes"],
+            0
+        )
+
+        self.assertEqual(
+            resumen["justificados"],
+            0
+        )
+
+
+    def test_alumno_no_ve_datos_de_otro_alumno(self):
+
+        self.client.force_login(
+            self.usuario_alumno
+        )
+
+        response = self.client.get(
+            reverse(
+                "alumno_academico"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200
+        )
+
+        self.assertNotContains(
+            response,
+            "PRIVADO_OTRO_ALUMNO"
+        )
+
+        self.assertNotContains(
+            response,
+            "PRIVADO_ASISTENCIA_OTRO"
+        )
+
+        self.assertNotContains(
+            response,
+            "4.25"
+        )
+
+
+    def test_docente_no_puede_acceder_vista_alumno(self):
+
+        self.client.force_login(
+            self.usuario_docente
+        )
+
+        response = self.client.get(
+            reverse(
+                "alumno_academico"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302
+        )
+
+        self.assertEqual(
+            response.url,
+            reverse(
+                "inicio_por_rol"
+            )
+        )
+
+
+    def test_usuario_no_autenticado_es_redirigido(self):
+
+        response = self.client.get(
+            reverse(
+                "alumno_academico"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302
+        )
+
+        self.assertEqual(
+            response.url,
+            reverse(
+                "login"
+            )
+        )

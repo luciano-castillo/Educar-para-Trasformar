@@ -200,6 +200,129 @@ def alumno_editar_mis_datos(request):
             "alumno": alumno
         }
     )
+    
+@alumno_required
+def alumno_academico(request):
+
+    try:
+
+        alumno = request.user.alumno
+
+    except Alumno.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictados = (
+        DictadoMateria.objects
+        .filter(
+            curso=alumno.curso,
+            materia__estado=True,
+            profesor__estado=True,
+            curso__estado=True
+        )
+        .select_related(
+            "materia",
+            "profesor",
+            "horario",
+            "curso",
+            "curso__nivel",
+        )
+        .order_by(
+            "materia__nombre"
+        )
+    )
+
+    materias = []
+
+    for dictado in dictados:
+
+        notas = (
+            Nota.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha",
+                "periodo",
+                "evaluacion"
+            )
+        )
+
+        asistencias = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha"
+            )
+        )
+
+        resumen_asistencia = (
+            asistencias.aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+
+                ausentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="AUSENTE"
+                    )
+                ),
+
+                tardes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="TARDE"
+                    )
+                ),
+
+                justificados=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="JUSTIFICADO"
+                    )
+                ),
+            )
+        )
+
+        materias.append(
+            {
+                "dictado": dictado,
+                "notas": notas,
+                "asistencias": asistencias,
+                "resumen_asistencia": (
+                    resumen_asistencia
+                ),
+            }
+        )
+
+    return render(
+        request,
+        "academic/alumnos/academico.html",
+        {
+            "alumno": alumno,
+            "materias": materias,
+        }
+    )
 
 #Profesores
 @admin_required

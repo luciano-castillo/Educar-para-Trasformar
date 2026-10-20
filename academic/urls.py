@@ -39,6 +39,12 @@ urlpatterns = [
         views.alumno_editar_mis_datos,
         name="alumno_editar_mis_datos"
     ),
+    path(
+        "alumno/academico/",
+        views.alumno_academico,
+        name="alumno_academico"
+    ),
+    
     #profesores
     
     path(
