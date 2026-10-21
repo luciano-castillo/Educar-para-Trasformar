@@ -6,7 +6,12 @@
 
 {% block content %}
 
-<div class="login-pagina">
+<div class="    
+    login-pagina
+    {% if perfil_seleccionado %}
+        login-perfil-{{ perfil_seleccionado|lower }}
+    {% endif %}
+">
 
     <div class="login-cabecera">
 
@@ -43,7 +48,7 @@
 
                 <a
                     href="{% url 'login' %}?perfil=ALUMNO"
-                    class="login-rol
+                    class="login-rol login-rol-alumno
                     {% if perfil_seleccionado == 'ALUMNO' %}
                         login-rol-activo
                     {% endif %}"
@@ -69,7 +74,7 @@
 
                 <a
                     href="{% url 'login' %}?perfil=TUTOR"
-                    class="login-rol
+                    class="login-rol login-rol-tutor
                     {% if perfil_seleccionado == 'TUTOR' %}
                         login-rol-activo
                     {% endif %}"
@@ -95,7 +100,7 @@
 
                 <a
                     href="{% url 'login' %}?perfil=DOCENTE"
-                    class="login-rol
+                    class="login-rol login-rol-docente
                     {% if perfil_seleccionado == 'DOCENTE' %}
                         login-rol-activo
                     {% endif %}"
@@ -121,7 +126,7 @@
 
                 <a
                     href="{% url 'login' %}?perfil=ADMIN"
-                    class="login-rol
+                    class="login-rol login-rol-admin
                     {% if perfil_seleccionado == 'ADMIN' %}
                         login-rol-activo
                     {% endif %}"

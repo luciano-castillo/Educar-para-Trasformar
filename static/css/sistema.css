@@ -5069,3 +5069,747 @@ textarea:focus {
     }
 
 }
+
+/* ========================================================= */
+/* LOGIN - SISTEMA VISUAL CLARO                              */
+/* ========================================================= */
+
+
+.login-pagina {
+
+    --login-accent: #52657d;
+    --login-soft: #f3f6fa;
+    --login-border: #dce5ef;
+    --login-rgb: 82, 101, 125;
+
+    max-width: 1050px;
+
+    margin:
+        10px auto 40px;
+}
+
+
+/* ========================================================= */
+/* COLOR DEL FORMULARIO SEGÚN PERFIL                         */
+/* ========================================================= */
+
+
+.login-perfil-alumno {
+
+    --login-accent: #1f7fb5;
+    --login-soft: #e8f4fa;
+    --login-border: #b9dcec;
+    --login-rgb: 31, 127, 181;
+}
+
+
+.login-perfil-tutor {
+
+    --login-accent: #298754;
+    --login-soft: #e9f6ee;
+    --login-border: #bfe0cc;
+    --login-rgb: 41, 135, 84;
+}
+
+
+.login-perfil-docente {
+
+    --login-accent: #7131cf;
+    --login-soft: #f1eaff;
+    --login-border: #d7c1fb;
+    --login-rgb: 113, 49, 207;
+}
+
+
+.login-perfil-admin {
+
+    --login-accent: #e8751a;
+    --login-soft: #fff0e3;
+    --login-border: #f5cfaf;
+    --login-rgb: 232, 117, 26;
+}
+
+
+/* ========================================================= */
+/* CABECERA                                                  */
+/* ========================================================= */
+
+
+.login-cabecera {
+
+    text-align: center;
+
+    margin-bottom: 35px;
+}
+
+
+.login-logo {
+
+    width: 64px;
+    height: 64px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin:
+        0 auto 18px;
+
+    color:
+        var(--texto-principal);
+
+    background:
+        var(--fondo-superficie);
+
+    border:
+        1px solid
+        var(--borde);
+
+    border-radius:
+        18px;
+
+    font-size:
+        28px;
+
+    font-weight:
+        700;
+
+    box-shadow:
+        var(--sombra-media);
+}
+
+
+.login-cabecera h1 {
+
+    margin:
+        0 0 8px;
+
+    color:
+        var(--texto-principal);
+}
+
+
+.login-cabecera p {
+
+    margin: 0;
+
+    color:
+        var(--texto-secundario);
+
+    font-size:
+        15px;
+}
+
+
+/* ========================================================= */
+/* CONTENIDO                                                 */
+/* ========================================================= */
+
+
+.login-contenido {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.15fr)
+        minmax(320px, 0.85fr);
+
+    gap:
+        24px;
+
+    align-items:
+        stretch;
+}
+
+
+.login-selector,
+.login-formulario-contenedor,
+.login-ayuda {
+
+    padding:
+        30px;
+
+    background:
+        var(--fondo-superficie);
+
+    border:
+        1px solid
+        var(--borde);
+
+    border-radius:
+        var(--radio-grande);
+
+    box-shadow:
+        var(--sombra-suave);
+}
+
+
+.login-selector h2,
+.login-formulario-contenedor h2,
+.login-ayuda h2 {
+
+    margin-top: 0;
+    margin-bottom: 8px;
+
+    color:
+        var(--texto-principal);
+}
+
+
+.login-texto-secundario {
+
+    margin-top: 0;
+    margin-bottom: 24px;
+
+    color:
+        var(--texto-secundario);
+}
+
+
+/* ========================================================= */
+/* TARJETAS DE PERFILES                                      */
+/* ========================================================= */
+
+
+.login-roles {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap:
+        14px;
+}
+
+
+.login-rol {
+
+    min-height:
+        130px;
+
+    display: flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        12px;
+
+    padding:
+        20px;
+
+    color:
+        var(--texto-principal);
+
+    background:
+        var(--fondo-superficie);
+
+    border:
+        1px solid
+        var(--borde);
+
+    border-radius:
+        var(--radio-medio);
+
+    text-decoration:
+        none;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* COLOR PROPIO DE CADA TARJETA */
+
+
+.login-rol-alumno {
+
+    --rol-accent: #1f7fb5;
+    --rol-soft: #e8f4fa;
+}
+
+
+.login-rol-tutor {
+
+    --rol-accent: #298754;
+    --rol-soft: #e9f6ee;
+}
+
+
+.login-rol-docente {
+
+    --rol-accent: #7131cf;
+    --rol-soft: #f1eaff;
+}
+
+
+.login-rol-admin {
+
+    --rol-accent: #e8751a;
+    --rol-soft: #fff0e3;
+}
+
+
+.login-rol:hover {
+
+    color:
+        var(--texto-principal);
+
+    transform:
+        translateY(-2px);
+
+    border-color:
+        var(--rol-accent);
+
+    background:
+        var(--rol-soft);
+
+    box-shadow:
+        var(--sombra-media);
+}
+
+
+.login-rol-activo {
+
+    border-color:
+        var(--rol-accent);
+
+    background:
+        var(--rol-soft);
+
+    box-shadow:
+        0 0 0 1px
+        var(--rol-accent);
+}
+
+
+.login-rol-icono {
+
+    width:
+        44px;
+
+    height:
+        44px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        var(--rol-soft);
+
+    border-radius:
+        12px;
+
+    font-size:
+        24px;
+}
+
+
+.login-rol strong {
+
+    display: block;
+
+    margin-bottom:
+        6px;
+
+    color:
+        var(--texto-principal);
+
+    font-size:
+        15px;
+}
+
+
+.login-rol span {
+
+    display: block;
+
+    color:
+        var(--texto-secundario);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ========================================================= */
+/* FORMULARIO                                                */
+/* ========================================================= */
+
+
+.login-formulario-contenedor {
+
+    display: flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    border-color:
+        var(--login-border);
+}
+
+
+.login-formulario-cabecera {
+
+    margin-bottom:
+        25px;
+}
+
+
+.login-formulario-cabecera p {
+
+    margin-bottom:
+        0;
+
+    color:
+        var(--texto-secundario);
+}
+
+
+.login-perfil-etiqueta {
+
+    display:
+        inline-block;
+
+    margin-bottom:
+        14px;
+
+    padding:
+        6px 11px;
+
+    color:
+        var(--login-accent);
+
+    background:
+        var(--login-soft);
+
+    border:
+        1px solid
+        var(--login-border);
+
+    border-radius:
+        999px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .6px;
+}
+
+
+/* CAMPOS */
+
+
+.login-campo {
+
+    margin-bottom:
+        18px;
+}
+
+
+.login-campo label {
+
+    display:
+        block;
+
+    margin-bottom:
+        8px;
+
+    color:
+        var(--texto-principal);
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+}
+
+
+.login-campo input {
+
+    box-sizing:
+        border-box;
+
+    width:
+        100%;
+
+    padding:
+        12px 14px;
+
+    color:
+        var(--texto-principal);
+
+    background:
+        var(--fondo-superficie);
+
+    border:
+        1px solid
+        var(--borde);
+
+    border-radius:
+        var(--radio-pequeno);
+
+    outline:
+        none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-campo input::placeholder {
+
+    color:
+        var(--texto-suave);
+}
+
+
+.login-campo input:focus {
+
+    border-color:
+        var(--login-accent);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            var(--login-rgb),
+            0.10
+        );
+}
+
+
+/* ========================================================= */
+/* BOTÓN                                                     */
+/* ========================================================= */
+
+
+.login-boton {
+
+    width:
+        100%;
+
+    margin-top:
+        5px;
+
+    padding:
+        13px 18px;
+
+    color:
+        white;
+
+    background:
+        var(--login-accent);
+
+    border:
+        1px solid
+        var(--login-accent);
+
+    border-radius:
+        var(--radio-pequeno);
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-boton:hover {
+
+    background:
+        var(--login-accent);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 7px 18px
+        rgba(
+            var(--login-rgb),
+            0.20
+        );
+}
+
+
+.login-cambiar-perfil {
+
+    display:
+        block;
+
+    margin-top:
+        20px;
+
+    color:
+        var(--login-accent);
+
+    text-align:
+        center;
+
+    text-decoration:
+        none;
+
+    font-size:
+        13px;
+}
+
+
+.login-cambiar-perfil:hover {
+
+    text-decoration:
+        underline;
+}
+
+
+/* ========================================================= */
+/* AYUDA                                                     */
+/* ========================================================= */
+
+
+.login-ayuda {
+
+    min-height:
+        350px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    text-align:
+        center;
+}
+
+
+.login-ayuda-icono {
+
+    width:
+        62px;
+
+    height:
+        62px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-bottom:
+        16px;
+
+    background:
+        var(--fondo-suave);
+
+    border:
+        1px solid
+        var(--borde);
+
+    border-radius:
+        18px;
+
+    font-size:
+        30px;
+}
+
+
+.login-ayuda p {
+
+    max-width:
+        300px;
+
+    margin-bottom:
+        0;
+
+    color:
+        var(--texto-secundario);
+
+    line-height:
+        1.6;
+}
+
+
+/* ========================================================= */
+/* RESPONSIVE                                                */
+/* ========================================================= */
+
+
+@media (max-width: 850px) {
+
+    .login-contenido {
+
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+@media (max-width: 560px) {
+
+    .login-roles {
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .login-selector,
+    .login-formulario-contenedor,
+    .login-ayuda {
+
+        padding:
+            22px;
+    }
+
+
+    .login-pagina {
+
+        margin-top:
+            0;
+    }
+
+}
