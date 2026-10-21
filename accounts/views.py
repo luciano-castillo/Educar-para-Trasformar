@@ -1,11 +1,32 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import (
+    authenticate,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import (
+    render,
+    redirect,
+    get_object_or_404,
+)
+from django.core.exceptions import ValidationError
 
+from academic.models import (
+    Alumno,
+    Profesor,
+    Tutor,
+)
+
+from .services import (
+    crear_cuenta_acceso,
+    restablecer_password_acceso,
+)
 from .models import PerfilUsuario
 from accounts.decorators import admin_required
+from .forms import CambioPasswordInicialForm
 
 def login_usuario(request):
 
@@ -91,7 +112,15 @@ def login_usuario(request):
                             usuario_autenticado
                         )
 
-                        return redirect("inicio_por_rol")
+                        if perfil.debe_cambiar_password:
+
+                            return redirect(
+                                "cambiar_password_inicial"
+                            )
+
+                        return redirect(
+                            "inicio_por_rol"
+                        )
 
     return render(
         request,
@@ -108,7 +137,8 @@ def login_usuario(request):
 def inicio_por_rol(request):
 
     try:
-        rol = request.user.perfil.rol
+        perfil = request.user.perfil
+        rol = perfil.rol
 
     except PerfilUsuario.DoesNotExist:
 
@@ -120,6 +150,12 @@ def inicio_por_rol(request):
         )
 
         return redirect("login")
+
+    if perfil.debe_cambiar_password:
+
+        return redirect(
+            "cambiar_password_inicial"
+        )
 
     if rol == PerfilUsuario.Rol.ADMIN:
         return redirect("admin_dashboard")
@@ -148,6 +184,88 @@ def logout_usuario(request):
 
     return redirect("login")
 
+@login_required
+def cambiar_password_inicial(request):
+
+    try:
+
+        perfil = request.user.perfil
+
+    except PerfilUsuario.DoesNotExist:
+
+        logout(request)
+
+        messages.error(
+            request,
+            "El usuario no tiene un perfil asignado."
+        )
+
+        return redirect("login")
+
+
+    # Si ya realizó el cambio obligatorio,
+    # no debe volver a esta pantalla.
+
+    if not perfil.debe_cambiar_password:
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+
+    if request.method == "POST":
+
+        form = CambioPasswordInicialForm(
+            request.user,
+            request.POST
+        )
+
+        if form.is_valid():
+
+            usuario = form.save()
+
+            perfil.debe_cambiar_password = False
+
+            perfil.save(
+                update_fields=[
+                    "debe_cambiar_password"
+                ]
+            )
+
+            # Mantiene la sesión abierta después
+            # de modificar la contraseña.
+
+            update_session_auth_hash(
+                request,
+                usuario
+            )
+
+            messages.success(
+                request,
+                (
+                    "Tu contraseña fue actualizada "
+                    "correctamente."
+                )
+            )
+
+            return redirect(
+                "inicio_por_rol"
+            )
+
+    else:
+
+        form = CambioPasswordInicialForm(
+            request.user
+        )
+
+
+    return render(
+        request,
+        "accounts/cambiar_password_inicial.html",
+        {
+            "form": form,
+        }
+    )
 
 @admin_required
 def admin_dashboard(request):
@@ -155,4 +273,279 @@ def admin_dashboard(request):
     return render(
         request,
         "accounts/admin_dashboard.html"
+    )
+    
+def _procesar_creacion_cuenta(
+    request,
+    *,
+    persona,
+    rol,
+    volver_url
+):
+
+    if request.method != "POST":
+
+        return redirect(
+            volver_url
+        )
+
+
+    try:
+
+        usuario, password_temporal = (
+            crear_cuenta_acceso(
+                persona=persona,
+                rol=rol,
+            )
+        )
+
+    except ValidationError as error:
+
+        messages.error(
+            request,
+            error.messages[0]
+        )
+
+        return redirect(
+            volver_url
+        )
+
+
+    request.session[
+        "credenciales_temporales"
+    ] = {
+        "nombre": (
+            f"{persona.nombre} "
+            f"{persona.apellido}"
+        ),
+        "rol": (
+            usuario.perfil
+            .get_rol_display()
+        ),
+        "username": (
+            usuario.username
+        ),
+        "password": (
+            password_temporal
+        ),
+        "volver_url": (
+            volver_url
+        ),
+    }
+
+
+    return redirect(
+        "credenciales_temporales"
+    )
+
+def _procesar_restablecimiento_password(
+    request,
+    *,
+    persona,
+    volver_url
+):
+
+    if request.method != "POST":
+
+        return redirect(
+            volver_url
+        )
+
+
+    try:
+
+        usuario, password_temporal = (
+            restablecer_password_acceso(
+                persona=persona
+            )
+        )
+
+    except ValidationError as error:
+
+        messages.error(
+            request,
+            error.messages[0]
+        )
+
+        return redirect(
+            volver_url
+        )
+
+
+    request.session[
+        "credenciales_temporales"
+    ] = {
+        "nombre": (
+            f"{persona.nombre} "
+            f"{persona.apellido}"
+        ),
+        "rol": (
+            usuario.perfil
+            .get_rol_display()
+        ),
+        "username": (
+            usuario.username
+        ),
+        "password": (
+            password_temporal
+        ),
+        "volver_url": (
+            volver_url
+        ),
+        "titulo": (
+            "Contraseña restablecida correctamente"
+        ),
+    }
+
+
+    return redirect(
+        "credenciales_temporales"
+    )
+
+@admin_required
+def restablecer_password_alumno(
+    request,
+    id_alumno
+):
+
+    alumno = get_object_or_404(
+        Alumno,
+        id_alumno=id_alumno
+    )
+
+    return _procesar_restablecimiento_password(
+        request,
+        persona=alumno,
+        volver_url="alumno_lista",
+    )
+
+
+@admin_required
+def restablecer_password_profesor(
+    request,
+    id_profesor
+):
+
+    profesor = get_object_or_404(
+        Profesor,
+        id_profesor=id_profesor
+    )
+
+    return _procesar_restablecimiento_password(
+        request,
+        persona=profesor,
+        volver_url="profesor_lista",
+    )
+
+
+@admin_required
+def restablecer_password_tutor(
+    request,
+    id_tutor
+):
+
+    tutor = get_object_or_404(
+        Tutor,
+        id_tutor=id_tutor
+    )
+
+    return _procesar_restablecimiento_password(
+        request,
+        persona=tutor,
+        volver_url="tutor_lista",
+    )
+
+@admin_required
+def crear_cuenta_alumno(
+    request,
+    id_alumno
+):
+
+    alumno = get_object_or_404(
+        Alumno,
+        id_alumno=id_alumno
+    )
+
+    return _procesar_creacion_cuenta(
+        request,
+        persona=alumno,
+        rol=PerfilUsuario.Rol.ALUMNO,
+        volver_url="alumno_lista",
+    )
+
+
+@admin_required
+def crear_cuenta_profesor(
+    request,
+    id_profesor
+):
+
+    profesor = get_object_or_404(
+        Profesor,
+        id_profesor=id_profesor
+    )
+
+    return _procesar_creacion_cuenta(
+        request,
+        persona=profesor,
+        rol=PerfilUsuario.Rol.DOCENTE,
+        volver_url="profesor_lista",
+    )
+
+
+@admin_required
+def crear_cuenta_tutor(
+    request,
+    id_tutor
+):
+
+    tutor = get_object_or_404(
+        Tutor,
+        id_tutor=id_tutor
+    )
+
+    return _procesar_creacion_cuenta(
+        request,
+        persona=tutor,
+        rol=PerfilUsuario.Rol.TUTOR,
+        volver_url="tutor_lista",
+    )
+
+
+@admin_required
+def credenciales_temporales(
+    request
+):
+
+    credenciales = (
+        request.session.pop(
+            "credenciales_temporales",
+            None
+        )
+    )
+
+
+    if not credenciales:
+
+        messages.info(
+            request,
+            (
+                "No existen credenciales "
+                "temporales para mostrar."
+            )
+        )
+
+        return redirect(
+            "admin_dashboard"
+        )
+
+
+    return render(
+        request,
+        "accounts/credenciales_temporales.html",
+        {
+            "credenciales": (
+                credenciales
+            )
+        }
     )

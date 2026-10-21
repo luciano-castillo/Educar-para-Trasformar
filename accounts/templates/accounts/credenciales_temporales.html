@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Credenciales temporales | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="gestion-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión de cuentas
+        </div>
+
+        <h1>
+            {{ credenciales.titulo }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Entregá estas credenciales
+            a la persona correspondiente.
+        </p>
+
+    </div>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" %}
+
+
+<section class="formulario-admin-contenedor">
+
+    <div class="formulario-admin-cabecera">
+
+        <div class="formulario-admin-icono">
+            🔐
+        </div>
+
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Credenciales temporales
+            </div>
+
+            <h2>
+                {{ credenciales.nombre }}
+            </h2>
+
+            <p>
+                Perfil:
+                {{ credenciales.rol }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="formulario-admin">
+
+        <div class="credenciales-aviso">
+
+            <strong>
+                Importante
+            </strong>
+
+            <p>
+                La contraseña temporal
+                se mostrará únicamente en esta pantalla.
+                El usuario deberá cambiarla
+                cuando ingrese por primera vez.
+            </p>
+
+        </div>
+
+
+        <div class="credenciales-grid">
+
+
+            <div class="credencial-item">
+
+                <span>
+                    Usuario
+                </span>
+
+                <strong>
+                    {{ credenciales.username }}
+                </strong>
+
+            </div>
+
+
+            <div class="credencial-item">
+
+                <span>
+                    Contraseña temporal
+                </span>
+
+                <strong>
+                    {{ credenciales.password }}
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="formulario-admin-acciones">
+
+            <a
+                href="{% url credenciales.volver_url %}"
+                class="boton"
+            >
+                Volver al listado
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

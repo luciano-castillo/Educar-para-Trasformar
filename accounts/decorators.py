@@ -31,6 +31,12 @@ def admin_required(view_func):
             )
 
             return redirect("login")
+        
+        if perfil.debe_cambiar_password:
+
+            return redirect(
+                "cambiar_password_inicial"
+            )
 
         # Comprobamos que realmente sea ADMIN
         if perfil.rol != PerfilUsuario.Rol.ADMIN:
@@ -71,6 +77,12 @@ def alumno_required(view_func):
                 "Su usuario no tiene un perfil asignado."
             )
             return redirect("login")
+        
+        if perfil.debe_cambiar_password:
+
+            return redirect(
+                "cambiar_password_inicial"
+            )
 
         if perfil.rol != PerfilUsuario.Rol.ALUMNO:
             messages.error(
@@ -112,7 +124,13 @@ def docente_required(view_func):
             )
 
             return redirect("login")
+        
+        if perfil.debe_cambiar_password:
 
+            return redirect(
+                "cambiar_password_inicial"
+            )
+        
         if perfil.rol != PerfilUsuario.Rol.DOCENTE:
 
             messages.error(
@@ -145,6 +163,12 @@ def tutor_required(view_func):
                 "El usuario no posee un perfil asignado."
             )
             return redirect("login")
+        
+        if perfil.debe_cambiar_password:
+
+            return redirect(
+                "cambiar_password_inicial"
+            )
 
         if perfil.rol != PerfilUsuario.Rol.TUTOR:
 

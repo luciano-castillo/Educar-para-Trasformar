@@ -115,6 +115,7 @@
                         <th>DNI</th>
                         <th>Especialidad</th>
                         <th>Contacto</th>
+                        <th>Cuenta</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -210,6 +211,43 @@
 
                             </td>
 
+                            <!-- CUENTA -->
+                            <td>
+
+                                {% if profesor.usuario %}
+
+                                    {% if profesor.usuario.is_active %}
+
+                                        <span class="badge badge-exito">
+                                            Cuenta activa
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge badge-peligro">
+                                            Cuenta deshabilitada
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    <div class="tabla-contacto">
+
+                                        <small>
+                                            {{ profesor.usuario.username }}
+                                        </small>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="badge badge-advertencia">
+                                        Sin cuenta
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
 
                             <!-- ESTADO -->
 
@@ -237,6 +275,50 @@
                             <td>
 
                                 <div class="tabla-acciones">
+
+                                    {% if profesor.estado %}
+
+                                        {% if not profesor.usuario %}
+
+                                            <form
+                                                method="post"
+                                                action="{% url 'crear_cuenta_profesor' profesor.id_profesor %}"
+                                                class="form-accion-inline"
+                                            >
+
+                                                {% csrf_token %}
+
+                                                <button
+                                                    type="submit"
+                                                    class="boton boton-tabla"
+                                                >
+                                                    Crear cuenta
+                                                </button>
+
+                                            </form>
+
+                                        {% else %}
+
+                                            <form
+                                                method="post"
+                                                action="{% url 'restablecer_password_profesor' profesor.id_profesor %}"
+                                                class="form-accion-inline"
+                                            >
+
+                                                {% csrf_token %}
+
+                                                <button
+                                                    type="submit"
+                                                    class="boton-secundario boton-tabla"
+                                                >
+                                                    Restablecer clave
+                                                </button>
+
+                                            </form>
+
+                                        {% endif %}
+
+                                    {% endif %}
 
                                     <a
                                         href="{% url 'profesor_editar' profesor.id_profesor %}"

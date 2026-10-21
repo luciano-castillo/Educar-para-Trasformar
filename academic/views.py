@@ -34,15 +34,27 @@ from .forms import (
 #Alumnos
 @admin_required
 def alumno_lista(request):
-    alumnos = Alumno.objects.select_related(
-        "curso",
-        "curso__nivel"
-    ).all().order_by("apellido", "nombre")
+
+    alumnos = (
+        Alumno.objects
+        .select_related(
+            "curso",
+            "curso__nivel",
+            "usuario",
+        )
+        .all()
+        .order_by(
+            "apellido",
+            "nombre"
+        )
+    )
 
     return render(
         request,
         "academic/alumnos/lista.html",
-        {"alumnos": alumnos}
+        {
+            "alumnos": alumnos
+        }
     )
     
 @admin_required
@@ -90,14 +102,34 @@ def alumno_editar(request, id_alumno):
         )
 
         if form.is_valid():
-            form.save()
+
+            alumno = form.save()
+
+            if alumno.usuario_id:
+
+                if (
+                    alumno.usuario.is_active
+                    != alumno.estado
+                ):
+
+                    alumno.usuario.is_active = (
+                        alumno.estado
+                    )
+
+                    alumno.usuario.save(
+                        update_fields=[
+                            "is_active"
+                        ]
+                    )
 
             messages.success(
                 request,
                 "Alumno modificado correctamente."
             )
 
-            return redirect("alumno_lista")
+            return redirect(
+                "alumno_lista"
+            )
 
     else:
         form = AlumnoForm(instance=alumno)
@@ -118,16 +150,33 @@ def alumno_desactivar(request, id_alumno):
         Alumno,
         id_alumno=id_alumno
     )
-
+    
     if request.method == "POST":
 
         alumno.estado = False
-        alumno.save()
+
+        alumno.save(
+            update_fields=[
+                "estado"
+            ]
+        )
+
+        if alumno.usuario_id:
+
+            alumno.usuario.is_active = False
+
+            alumno.usuario.save(
+                update_fields=[
+                    "is_active"
+                ]
+            )
 
         messages.success(
             request,
             "Alumno desactivado correctamente."
         )
+
+
 
     return redirect("alumno_lista")
 
@@ -701,9 +750,16 @@ def alumno_academico(request):
 @admin_required
 def profesor_lista(request):
 
-    profesores = Profesor.objects.all().order_by(
-        "apellido",
-        "nombre"
+    profesores = (
+        Profesor.objects
+        .select_related(
+            "usuario"
+        )
+        .all()
+        .order_by(
+            "apellido",
+            "nombre"
+        )
     )
 
     return render(
@@ -762,12 +818,24 @@ def profesor_editar(request, id_profesor):
 
         if form.is_valid():
 
-            form.save()
+            profesor = form.save()
 
-            messages.success(
-                request,
-                "Profesor modificado correctamente."
-            )
+            if profesor.usuario_id:
+
+                if (
+                    profesor.usuario.is_active
+                    != profesor.estado
+                ):
+
+                    profesor.usuario.is_active = (
+                        profesor.estado
+                    )
+
+                    profesor.usuario.save(
+                        update_fields=[
+                            "is_active"
+                        ]
+                    )
 
             return redirect("profesor_lista")
 
@@ -795,9 +863,24 @@ def profesor_desactivar(request, id_profesor):
     )
 
     if request.method == "POST":
-
+        
         profesor.estado = False
-        profesor.save()
+
+        profesor.save(
+            update_fields=[
+                "estado"
+            ]
+        )
+
+        if profesor.usuario_id:
+
+            profesor.usuario.is_active = False
+
+            profesor.usuario.save(
+                update_fields=[
+                    "is_active"
+                ]
+            )
 
         messages.success(
             request,
@@ -2237,6 +2320,9 @@ def tutor_lista(request):
 
     tutores = (
         Tutor.objects
+        .select_related(
+            "usuario"
+        )
         .all()
         .order_by(
             "apellido",
@@ -2307,12 +2393,24 @@ def tutor_editar(
 
         if form.is_valid():
 
-            form.save()
+            tutor = form.save()
 
-            messages.success(
-                request,
-                "Los datos del tutor fueron modificados correctamente."
-            )
+            if tutor.usuario_id:
+
+                if (
+                    tutor.usuario.is_active
+                    != tutor.estado
+                ):
+
+                    tutor.usuario.is_active = (
+                        tutor.estado
+                    )
+
+                    tutor.usuario.save(
+                        update_fields=[
+                            "is_active"
+                        ]
+                    )
 
             return redirect(
                 "tutor_lista"
@@ -2347,7 +2445,22 @@ def tutor_desactivar(
     if request.method == "POST":
 
         tutor.estado = False
-        tutor.save()
+
+        tutor.save(
+            update_fields=[
+                "estado"
+            ]
+        )
+
+        if tutor.usuario_id:
+
+            tutor.usuario.is_active = False
+
+            tutor.usuario.save(
+                update_fields=[
+                    "is_active"
+                ]
+            )
 
         messages.success(
             request,
