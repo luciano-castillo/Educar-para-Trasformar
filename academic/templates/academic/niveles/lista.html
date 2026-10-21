@@ -1,112 +1,205 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Niveles educativos | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Niveles educativos</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los niveles educativos.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            Niveles educativos
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los niveles de enseñanza
+            disponibles en la institución.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'nivel_crear' %}"
         class="boton"
     >
-        Nuevo nivel
+        + Nuevo nivel
     </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Niveles registrados
+        </span>
+
+        <strong>
+            {{ niveles|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Organizá la estructura educativa
+        de la institución.
+    </p>
 
 </div>
 
 
-<div class="tarjeta">
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Registros
+            </div>
+
+            <h2>
+                Listado de niveles
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ niveles|length }} registros
+        </span>
+
+    </div>
+
 
     {% if niveles %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nivel</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+            <table>
 
-            <tbody>
-
-                {% for nivel in niveles %}
+                <thead>
 
                     <tr>
-
-                        <td>
-                            {{ nivel.id_nivel }}
-                        </td>
-
-                        <td>
-                            {{ nivel.nombre }}
-                        </td>
-
-                        <td>
-
-                            {% if nivel.estado %}
-                                Activo
-                            {% else %}
-                                Inactivo
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'nivel_editar' nivel.id_nivel %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-                            {% if nivel.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'nivel_desactivar' nivel.id_nivel %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </td>
-
+                        <th>ID</th>
+                        <th>Nivel educativo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
 
-                {% endfor %}
+                </thead>
 
-            </tbody>
 
-        </table>
+                <tbody>
+
+                    {% for nivel in niveles %}
+
+                        <tr>
+
+                            <td>
+                                #{{ nivel.id_nivel }}
+                            </td>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ nivel.nombre }}
+                                </strong>
+
+                            </td>
+
+                            <td>
+
+                                {% if nivel.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'nivel_editar' nivel.id_nivel %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if nivel.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'nivel_desactivar' nivel.id_nivel %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
+
             No existen niveles educativos registrados.
-        </p>
+
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

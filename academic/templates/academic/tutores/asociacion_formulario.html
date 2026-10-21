@@ -1,43 +1,51 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Asociar alumno a tutor | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        {{ titulo }}
-    </h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Seleccione un tutor y el alumno
-        que desea asociar.
-    </p>
+    <div>
 
-    <form
-        method="post"
-        class="formulario"
+        <div class="pagina-etiqueta">
+            Personas
+        </div>
+
+        <h1>
+            Asociar alumno a tutor
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Seleccioná el tutor y el alumno
+            que querés vincular.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'tutor_alumno_lista' %}"
+        class="boton-secundario"
     >
+        ← Volver a asociaciones
+    </a>
 
-        {% csrf_token %}
+</section>
 
-        {{ form.as_p }}
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Asociar
-        </button>
+{% include "accounts/_admin_navegacion.html" with modulo_activo="personas" %}
 
-        <a
-            href="{% url 'tutor_alumno_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
 
-    </form>
+{% url 'tutor_alumno_lista' as volver_url %}
 
-</div>
+
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Tutor y alumno" descripcion_formulario="Seleccioná un tutor activo y el alumno que quedará asociado a su cuenta." texto_registrar="Asociar alumno" volver_url=volver_url %}
+
 
 {% endblock %}

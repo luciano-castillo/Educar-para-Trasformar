@@ -1,116 +1,203 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Materias | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Materias</h1>
+<section class="gestion-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            Materias
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá las materias disponibles
+            en la institución.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'materia_crear' %}"
+        class="boton"
+    >
+        + Nueva materia
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Materias registradas
+        </span>
+
+        <strong>
+            {{ materias|length }}
+        </strong>
+
+    </div>
 
     <p>
-        Administración de las materias del centro educativo.
+        Gestioná las materias que posteriormente
+        podrán asignarse a cursos y docentes.
     </p>
-
-    <a href="{% url 'materia_crear' %}" class="boton">
-        Nueva materia
-    </a>
 
 </div>
 
 
-<div class="tarjeta">
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Registros
+            </div>
+
+            <h2>
+                Listado de materias
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ materias|length }} registros
+        </span>
+
+    </div>
+
 
     {% if materias %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>ID</th>
-                    <th>Materia</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for materia in materias %}
+                <thead>
 
                     <tr>
-
-                        <td>
-                            {{ materia.id_materia }}
-                        </td>
-
-                        <td>
-                            {{ materia.nombre }}
-                        </td>
-
-                        <td>
-
-                            {% if materia.estado %}
-
-                                Activa
-
-                            {% else %}
-
-                                Inactiva
-
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'materia_editar' materia.id_materia %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-
-                            {% if materia.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'materia_desactivar' materia.id_materia %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </td>
-
+                        <th>ID</th>
+                        <th>Materia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
 
-                {% endfor %}
+                </thead>
 
-            </tbody>
 
-        </table>
+                <tbody>
+
+                    {% for materia in materias %}
+
+                        <tr>
+
+                            <td>
+                                #{{ materia.id_materia }}
+                            </td>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ materia.nombre }}
+                                </strong>
+
+                            </td>
+
+                            <td>
+
+                                {% if materia.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactiva
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'materia_editar' materia.id_materia %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if materia.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'materia_desactivar' materia.id_materia %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
             No hay materias registradas.
-        </p>
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

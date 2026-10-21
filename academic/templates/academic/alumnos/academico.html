@@ -1,273 +1,457 @@
 {% extends "base.html" %}
 
+
 {% block title %}
-    Mi información académica
+    Información académica | Educar Para Transformar
 {% endblock %}
+
 
 {% block content %}
 
-<h1>
-    Mi información académica
-</h1>
 
-<p>
-    Consultá tus materias,
-    calificaciones y asistencias.
-</p>
+<!-- ============================== -->
+<!-- CABECERA                       -->
+<!-- ============================== -->
+
+{% include "academic/alumnos/_cabecera.html" with titulo_pagina="Información académica" subtitulo_pagina="Consultá tus materias, calificaciones y asistencias." %}
 
 
-<div class="tarjeta">
+<!-- ============================== -->
+<!-- NAVEGACIÓN DEL ALUMNO          -->
+<!-- ============================== -->
+
+{% include "academic/alumnos/_navegacion.html" %}
+
+
+<!-- ============================== -->
+<!-- DATOS ACADÉMICOS GENERALES     -->
+<!-- ============================== -->
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Académico
+    </div>
 
     <h2>
-        Datos académicos
+        Mi situación académica
     </h2>
 
-    <p>
-        <strong>Alumno:</strong>
-        {{ alumno.apellido }},
-        {{ alumno.nombre }}
-    </p>
-
-    <p>
-        <strong>Legajo:</strong>
-        {{ alumno.legajo }}
-    </p>
-
-    <p>
-        <strong>Curso:</strong>
-        {{ alumno.curso.nombre }}
-        {{ alumno.curso.division }}
-    </p>
-
-    <p>
-        <strong>Nivel:</strong>
-        {{ alumno.curso.nivel.nombre }}
+    <p class="pagina-subtitulo">
+        Información general de tu curso,
+        notas y registros de asistencia.
     </p>
 
 </div>
 
+
+<div class="tarjeta">
+
+    <div class="datos-lista">
+
+        <div class="datos-fila">
+
+            <span>
+                Alumno
+            </span>
+
+            <strong>
+                {{ alumno.apellido }},
+                {{ alumno.nombre }}
+            </strong>
+
+        </div>
+
+
+        <div class="datos-fila">
+
+            <span>
+                Legajo
+            </span>
+
+            <strong>
+                {{ alumno.legajo }}
+            </strong>
+
+        </div>
+
+
+        <div class="datos-fila">
+
+            <span>
+                Curso
+            </span>
+
+            <strong>
+                {{ alumno.curso.nombre }}
+                {{ alumno.curso.division }}
+            </strong>
+
+        </div>
+
+
+        <div class="datos-fila">
+
+            <span>
+                Nivel
+            </span>
+
+            <strong>
+                {{ alumno.curso.nivel.nombre }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================== -->
+<!-- MATERIAS                       -->
+<!-- ============================== -->
 
 {% if materias %}
 
     {% for materia in materias %}
 
-        <div class="tarjeta">
-
-            <h2>
-                {{ materia.dictado.materia.nombre }}
-            </h2>
-
-            <p>
-                <strong>Profesor:</strong>
-
-                {{ materia.dictado.profesor.apellido }},
-                {{ materia.dictado.profesor.nombre }}
-            </p>
-
-            <p>
-                <strong>Día:</strong>
-
-                {{ materia.dictado.horario.get_dia_semana_display }}
-            </p>
-
-            <p>
-                <strong>Horario:</strong>
-
-                {{ materia.dictado.horario.hora_inicio|time:"H:i" }}
-                -
-                {{ materia.dictado.horario.hora_fin|time:"H:i" }}
-            </p>
+        <section class="tarjeta">
 
 
-            <h3>
-                Mis notas
-            </h3>
+            <!-- CABECERA DE LA MATERIA -->
+
+            <div class="dashboard-seccion-cabecera">
+
+                <div>
+
+                    <div class="pagina-etiqueta">
+                        Materia
+                    </div>
+
+                    <h2>
+                        {{ materia.dictado.materia.nombre }}
+                    </h2>
+
+                    <p class="pagina-subtitulo">
+
+                        Prof.
+                        {{ materia.dictado.profesor.apellido }},
+                        {{ materia.dictado.profesor.nombre }}
+
+                    </p>
+
+                </div>
+
+
+                <span class="badge badge-acento">
+
+                    {{ materia.dictado.horario.get_dia_semana_display }}
+
+                    ·
+
+                    {{ materia.dictado.horario.hora_inicio|time:"H:i" }}
+
+                </span>
+
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- NOTAS                          -->
+            <!-- ============================== -->
+
+            <div class="pagina-cabecera">
+
+                <div class="pagina-etiqueta">
+                    Calificaciones
+                </div>
+
+                <h3>
+                    Mis notas
+                </h3>
+
+            </div>
+
 
             {% if materia.notas %}
 
-                <table>
+                <div class="tabla-contenedor">
 
-                    <thead>
+                    <table>
 
-                        <tr>
-                            <th>Período</th>
-                            <th>Evaluación</th>
-                            <th>Fecha</th>
-                            <th>Calificación</th>
-                            <th>Observaciones</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for nota in materia.notas %}
+                        <thead>
 
                             <tr>
-
-                                <td>
-                                    {{ nota.periodo }}
-                                </td>
-
-                                <td>
-                                    {{ nota.evaluacion }}
-                                </td>
-
-                                <td>
-                                    {{ nota.fecha|date:"d/m/Y" }}
-                                </td>
-
-                                <td>
-                                    {{ nota.calificacion }}
-                                </td>
-
-                                <td>
-
-                                    {% if nota.observaciones %}
-
-                                        {{ nota.observaciones }}
-
-                                    {% else %}
-
-                                        -
-
-                                    {% endif %}
-
-                                </td>
-
+                                <th>Período</th>
+                                <th>Evaluación</th>
+                                <th>Fecha</th>
+                                <th>Calificación</th>
+                                <th>Observaciones</th>
                             </tr>
 
-                        {% endfor %}
+                        </thead>
 
-                    </tbody>
 
-                </table>
+                        <tbody>
+
+                            {% for nota in materia.notas %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ nota.periodo }}
+                                    </td>
+
+                                    <td>
+                                        {{ nota.evaluacion }}
+                                    </td>
+
+                                    <td>
+                                        {{ nota.fecha|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge badge-acento">
+                                            {{ nota.calificacion }}
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if nota.observaciones %}
+
+                                            {{ nota.observaciones }}
+
+                                        {% else %}
+
+                                            -
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             {% else %}
 
-                <p>
+                <div class="estado-vacio">
+
                     Todavía no tenés notas
                     registradas en esta materia.
-                </p>
+
+                </div>
 
             {% endif %}
 
 
-            <h3>
-                Mi asistencia
-            </h3>
+            <!-- ============================== -->
+            <!-- ASISTENCIA                     -->
+            <!-- ============================== -->
 
-            <p>
-                <strong>Total de clases registradas:</strong>
-                {{ materia.resumen_asistencia.total }}
-            </p>
+            <div
+                class="pagina-cabecera"
+                style="margin-top: 30px;"
+            >
 
-            <p>
-                <strong>Presentes:</strong>
-                {{ materia.resumen_asistencia.presentes }}
-            </p>
+                <div class="pagina-etiqueta">
+                    Asistencia
+                </div>
 
-            <p>
-                <strong>Ausentes:</strong>
-                {{ materia.resumen_asistencia.ausentes }}
-            </p>
+                <h3>
+                    Mi asistencia
+                </h3>
 
-            <p>
-                <strong>Tardes:</strong>
-                {{ materia.resumen_asistencia.tardes }}
-            </p>
+            </div>
 
-            <p>
-                <strong>Justificadas:</strong>
-                {{ materia.resumen_asistencia.justificados }}
-            </p>
+
+            <div class="asistencia-resumen-grid">
+
+
+                <div class="dato-resumen">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        {{ materia.resumen_asistencia.total }}
+                    </strong>
+
+                </div>
+
+
+                <div class="dato-resumen">
+
+                    <span>
+                        Presentes
+                    </span>
+
+                    <strong class="texto-exito">
+                        {{ materia.resumen_asistencia.presentes }}
+                    </strong>
+
+                </div>
+
+
+                <div class="dato-resumen">
+
+                    <span>
+                        Ausentes
+                    </span>
+
+                    <strong class="texto-peligro">
+                        {{ materia.resumen_asistencia.ausentes }}
+                    </strong>
+
+                </div>
+
+
+                <div class="dato-resumen">
+
+                    <span>
+                        Tardes
+                    </span>
+
+                    <strong class="texto-advertencia">
+                        {{ materia.resumen_asistencia.tardes }}
+                    </strong>
+
+                </div>
+
+
+                <div class="dato-resumen">
+
+                    <span>
+                        Justificadas
+                    </span>
+
+                    <strong>
+                        {{ materia.resumen_asistencia.justificados }}
+                    </strong>
+
+                </div>
+
+
+            </div>
 
 
             {% if materia.asistencias %}
 
-                <table>
+                <div class="tabla-contenedor">
 
-                    <thead>
+                    <table>
 
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                            <th>Observaciones</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for asistencia in materia.asistencias %}
+                        <thead>
 
                             <tr>
-
-                                <td>
-                                    {{ asistencia.fecha|date:"d/m/Y" }}
-                                </td>
-
-                                <td>
-                                    {{ asistencia.get_estado_display }}
-                                </td>
-
-                                <td>
-
-                                    {% if asistencia.observaciones %}
-
-                                        {{ asistencia.observaciones }}
-
-                                    {% else %}
-
-                                        -
-
-                                    {% endif %}
-
-                                </td>
-
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
                             </tr>
 
-                        {% endfor %}
+                        </thead>
 
-                    </tbody>
 
-                </table>
+                        <tbody>
+
+                            {% for asistencia in materia.asistencias %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ asistencia.fecha|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if asistencia.estado == "PRESENTE" %}
+
+                                            <span class="badge badge-exito">
+                                                {{ asistencia.get_estado_display }}
+                                            </span>
+
+                                        {% elif asistencia.estado == "AUSENTE" %}
+
+                                            <span class="badge badge-peligro">
+                                                {{ asistencia.get_estado_display }}
+                                            </span>
+
+                                        {% elif asistencia.estado == "TARDE" %}
+
+                                            <span class="badge badge-advertencia">
+                                                {{ asistencia.get_estado_display }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge badge-info">
+                                                {{ asistencia.get_estado_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if asistencia.observaciones %}
+
+                                            {{ asistencia.observaciones }}
+
+                                        {% else %}
+
+                                            -
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             {% else %}
 
-                <p>
+                <div class="estado-vacio">
+
                     Todavía no existen asistencias
                     registradas en esta materia.
-                </p>
+
+                </div>
 
             {% endif %}
 
-        </div>
+
+        </section>
 
     {% endfor %}
 
+
 {% else %}
 
-    <div class="tarjeta">
+    <div class="estado-vacio">
 
-        <p>
-            Actualmente no tenés materias asignadas.
-        </p>
+        Actualmente no tenés materias asignadas.
 
     </div>
 
 {% endif %}
 
-
-<div class="tarjeta">
-
-    <a
-        href="{% url 'alumno_mis_datos' %}"
-        class="boton-secundario"
-    >
-        Volver a mis datos
-    </a>
-
-</div>
 
 {% endblock %}

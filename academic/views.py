@@ -8,6 +8,7 @@ from django.db.models import (
     Count,
     Q,
     Max,
+    Avg,
 )
 
 from accounts.decorators import admin_required, alumno_required, docente_required, tutor_required
@@ -130,10 +131,12 @@ def alumno_desactivar(request, id_alumno):
 
     return redirect("alumno_lista")
 
+
 @alumno_required
 def alumno_mis_datos(request):
 
     try:
+
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
@@ -143,13 +146,382 @@ def alumno_mis_datos(request):
             "Su cuenta no está asociada a un alumno."
         )
 
-        return redirect("inicio_por_rol")
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    # -----------------------------------------
+    # Materias del alumno
+    # -----------------------------------------
+
+    dictados = (
+        DictadoMateria.objects
+        .filter(
+            curso=alumno.curso,
+            curso__estado=True,
+            materia__estado=True,
+            profesor__estado=True,
+        )
+        .select_related(
+            "materia",
+            "profesor",
+            "horario",
+        )
+        .order_by(
+            "materia__nombre"
+        )
+    )
+
+    cantidad_materias = (
+        dictados.count()
+    )
+
+    # -----------------------------------------
+    # Notas
+    # -----------------------------------------
+
+    notas = (
+        Nota.objects
+        .filter(
+            alumno=alumno
+        )
+        .select_related(
+            "dictado",
+            "dictado__materia",
+        )
+        .order_by(
+            "-fecha",
+            "-fecha_registro",
+        )
+    )
+
+    promedio_general = (
+        notas.aggregate(
+            promedio=Avg(
+                "calificacion"
+            )
+        )["promedio"]
+    )
+
+    notas_recientes = (
+        notas[:5]
+    )
+
+    # -----------------------------------------
+    # Asistencia
+    # -----------------------------------------
+
+    asistencias = (
+        Asistencia.objects
+        .filter(
+            alumno=alumno
+        )
+    )
+
+    resumen_asistencia = (
+        asistencias.aggregate(
+
+            total=Count(
+                "id_asistencia"
+            ),
+
+            presentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="PRESENTE"
+                )
+            ),
+
+            ausentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="AUSENTE"
+                )
+            ),
+
+            tardes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="TARDE"
+                )
+            ),
+
+            justificados=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="JUSTIFICADO"
+                )
+            ),
+        )
+    )
+
+    # -----------------------------------------
+    # Deportes activos
+    # -----------------------------------------
+
+    cantidad_deportes = (
+        InscripcionDeporte.objects
+        .filter(
+            alumno=alumno,
+            estado=True,
+            grupo__estado=True,
+            grupo__deporte__estado=True,
+        )
+        .count()
+    )
 
     return render(
         request,
         "academic/alumnos/mis_datos.html",
         {
-            "alumno": alumno
+            "alumno": alumno,
+            "cantidad_materias": cantidad_materias,
+            "promedio_general": promedio_general,
+            "cantidad_deportes": cantidad_deportes,
+            "resumen_asistencia": resumen_asistencia,
+            "notas_recientes": notas_recientes,
+            "seccion_activa": "resumen",
+        }
+    )
+
+@alumno_required
+def alumno_materias(request):
+
+    try:
+
+        alumno = request.user.alumno
+
+    except Alumno.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictados = (
+        DictadoMateria.objects
+        .filter(
+            curso=alumno.curso,
+            curso__estado=True,
+            materia__estado=True,
+            profesor__estado=True,
+        )
+        .select_related(
+            "materia",
+            "profesor",
+            "horario",
+            "curso",
+            "curso__nivel",
+        )
+        .order_by(
+            "materia__nombre"
+        )
+    )
+
+    materias = []
+
+    for dictado in dictados:
+
+        promedio = (
+            Nota.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .aggregate(
+                promedio=Avg(
+                    "calificacion"
+                )
+            )["promedio"]
+        )
+
+        resumen_asistencia = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+            )
+        )
+
+        total = (
+            resumen_asistencia["total"]
+            or 0
+        )
+
+        presentes = (
+            resumen_asistencia["presentes"]
+            or 0
+        )
+
+        if total:
+
+            porcentaje_asistencia = round(
+                presentes * 100 / total
+            )
+
+        else:
+
+            porcentaje_asistencia = None
+
+        materias.append(
+            {
+                "dictado": dictado,
+                "promedio": promedio,
+                "porcentaje_asistencia": (
+                    porcentaje_asistencia
+                ),
+            }
+        )
+
+    return render(
+        request,
+        "academic/alumnos/materias.html",
+        {
+            "alumno": alumno,
+            "materias": materias,
+            "seccion_activa": "materias",
+        }
+    )
+    
+@alumno_required
+def alumno_horarios(request):
+
+    try:
+
+        alumno = request.user.alumno
+
+    except Alumno.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictados = list(
+        DictadoMateria.objects
+        .filter(
+            curso=alumno.curso,
+            curso__estado=True,
+            materia__estado=True,
+            profesor__estado=True,
+        )
+        .select_related(
+            "materia",
+            "profesor",
+            "horario",
+        )
+    )
+
+    dias_semana = [
+        ("LUNES", "Lunes"),
+        ("MARTES", "Martes"),
+        ("MIERCOLES", "Miércoles"),
+        ("JUEVES", "Jueves"),
+        ("VIERNES", "Viernes"),
+        ("SABADO", "Sábado"),
+    ]
+
+    horarios_por_dia = []
+
+    for codigo, nombre in dias_semana:
+
+        clases = [
+            dictado
+            for dictado in dictados
+            if dictado.horario.dia_semana == codigo
+        ]
+
+        clases.sort(
+            key=lambda dictado:
+            dictado.horario.hora_inicio
+        )
+
+        if clases:
+
+            horarios_por_dia.append(
+                {
+                    "codigo": codigo,
+                    "nombre": nombre,
+                    "clases": clases,
+                }
+            )
+
+    return render(
+        request,
+        "academic/alumnos/horarios.html",
+        {
+            "alumno": alumno,
+            "horarios_por_dia": horarios_por_dia,
+            "seccion_activa": "horarios",
+        }
+    )
+
+@alumno_required
+def alumno_deportes(request):
+
+    try:
+
+        alumno = request.user.alumno
+
+    except Alumno.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    inscripciones = (
+        InscripcionDeporte.objects
+        .filter(
+            alumno=alumno,
+            estado=True,
+            grupo__estado=True,
+            grupo__deporte__estado=True,
+        )
+        .select_related(
+            "grupo",
+            "grupo__deporte",
+            "grupo__profesor",
+            "grupo__horario",
+            "grupo__nivel",
+        )
+        .order_by(
+            "grupo__deporte__nombre"
+        )
+    )
+
+    return render(
+        request,
+        "academic/alumnos/deportes.html",
+        {
+            "alumno": alumno,
+            "inscripciones": inscripciones,
+            "seccion_activa": "deportes",
         }
     )
     
@@ -321,6 +693,7 @@ def alumno_academico(request):
         {
             "alumno": alumno,
             "materias": materias,
+            "seccion_activa": "academico",
         }
     )
 
@@ -437,6 +810,7 @@ def profesor_desactivar(request, id_profesor):
 def profesor_mis_datos(request):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
@@ -446,19 +820,70 @@ def profesor_mis_datos(request):
             "Su cuenta no está asociada a un profesor."
         )
 
-        return redirect("inicio_por_rol")
+        return redirect(
+            "inicio_por_rol"
+        )
 
-    dictados = profesor.dictados.select_related(
-        "materia",
-        "curso",
-        "curso__nivel",
-        "horario"
-    ).filter(
-        materia__estado=True,
-        curso__estado=True
-    ).order_by(
-        "materia__nombre",
-        "curso__nombre"
+    dictados = (
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre"
+        )
+    )
+
+    # -----------------------------------------
+    # Resumen del docente
+    # -----------------------------------------
+
+    cantidad_dictados = (
+        dictados.count()
+    )
+
+    cantidad_materias = (
+        dictados
+        .values(
+            "materia_id"
+        )
+        .distinct()
+        .count()
+    )
+
+    cantidad_cursos = (
+        dictados
+        .values(
+            "curso_id"
+        )
+        .distinct()
+        .count()
+    )
+
+    cursos_ids = (
+        dictados
+        .values_list(
+            "curso_id",
+            flat=True
+        )
+        .distinct()
+    )
+
+    cantidad_alumnos = (
+        Alumno.objects
+        .filter(
+            curso_id__in=cursos_ids,
+            estado=True
+        )
+        .count()
     )
 
     return render(
@@ -467,6 +892,152 @@ def profesor_mis_datos(request):
         {
             "profesor": profesor,
             "dictados": dictados,
+            "cantidad_dictados": cantidad_dictados,
+            "cantidad_materias": cantidad_materias,
+            "cantidad_cursos": cantidad_cursos,
+            "cantidad_alumnos": cantidad_alumnos,
+            "seccion_activa": "resumen",
+        }
+    )
+
+@docente_required
+def profesor_cursos(request):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictados = (
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre",
+            "curso__division"
+        )
+    )
+
+    return render(
+        request,
+        "academic/profesores/cursos.html",
+        {
+            "profesor": profesor,
+            "dictados": dictados,
+            "seccion_activa": "cursos",
+        }
+    )
+
+@docente_required
+def profesor_asistencias(request):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictados = (
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre",
+            "curso__division"
+        )
+    )
+
+    return render(
+        request,
+        "academic/profesores/asistencias.html",
+        {
+            "profesor": profesor,
+            "dictados": dictados,
+            "seccion_activa": "asistencias",
+        }
+    )
+
+@docente_required
+def profesor_calificaciones(request):
+
+    try:
+
+        profesor = request.user.profesor
+
+    except Profesor.DoesNotExist:
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
+
+    dictados = (
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre",
+            "curso__division"
+        )
+    )
+
+    return render(
+        request,
+        "academic/profesores/calificaciones.html",
+        {
+            "profesor": profesor,
+            "dictados": dictados,
+            "seccion_activa": "calificaciones",
         }
     )
 
@@ -707,6 +1278,7 @@ def asistencia_tomar(
             ),
             "filas": filas,
             "estados": Asistencia.ESTADOS,
+            "seccion_activa": "asistencias",
         }
     )
 
@@ -797,6 +1369,7 @@ def asistencia_historial(
             "profesor": profesor,
             "dictado": dictado,
             "historial": historial,
+            "seccion_activa": "asistencias",
         }
     )
 
@@ -1040,6 +1613,7 @@ def nota_registrar(
                 fecha_seleccionada
             ),
             "filas": filas,
+            "seccion_activa": "calificaciones",
         }
     )
 
@@ -1107,6 +1681,7 @@ def nota_historial(
             "profesor": profesor,
             "dictado": dictado,
             "historial": historial,
+            "seccion_activa": "calificaciones",
         }
     )
 
@@ -1904,12 +2479,126 @@ def tutor_mis_hijos(request):
         )
     )
 
+    alumnos_resumen = []
+
+    for relacion in relaciones:
+
+        alumno = relacion.alumno
+
+        # -----------------------------------------
+        # Promedio
+        # -----------------------------------------
+
+        promedio = (
+            Nota.objects
+            .filter(
+                alumno=alumno
+            )
+            .aggregate(
+                promedio=Avg(
+                    "calificacion"
+                )
+            )["promedio"]
+        )
+
+        # -----------------------------------------
+        # Asistencia
+        # -----------------------------------------
+
+        resumen_asistencia = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno
+            )
+            .aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+            )
+        )
+
+        total_asistencias = (
+            resumen_asistencia["total"]
+            or 0
+        )
+
+        presentes = (
+            resumen_asistencia["presentes"]
+            or 0
+        )
+
+        if total_asistencias:
+
+            porcentaje_asistencia = round(
+                presentes
+                * 100
+                / total_asistencias
+            )
+
+        else:
+
+            porcentaje_asistencia = None
+
+        # -----------------------------------------
+        # Materias
+        # -----------------------------------------
+
+        cantidad_materias = (
+            DictadoMateria.objects
+            .filter(
+                curso=alumno.curso,
+                curso__estado=True,
+                materia__estado=True,
+                profesor__estado=True,
+            )
+            .count()
+        )
+
+        # -----------------------------------------
+        # Deportes
+        # -----------------------------------------
+
+        cantidad_deportes = (
+            InscripcionDeporte.objects
+            .filter(
+                alumno=alumno,
+                estado=True,
+                grupo__estado=True,
+                grupo__deporte__estado=True,
+            )
+            .count()
+        )
+
+        alumnos_resumen.append(
+            {
+                "alumno": alumno,
+                "promedio": promedio,
+                "porcentaje_asistencia": (
+                    porcentaje_asistencia
+                ),
+                "cantidad_materias": (
+                    cantidad_materias
+                ),
+                "cantidad_deportes": (
+                    cantidad_deportes
+                ),
+            }
+        )
+
     return render(
         request,
         "academic/tutores/mis_hijos.html",
         {
             "tutor": tutor,
-            "relaciones": relaciones,
+            "alumnos_resumen": alumnos_resumen,
         }
     )
 
@@ -2056,6 +2745,98 @@ def tutor_detalle_alumno(
         )
     )
 
+    # -----------------------------------------
+    # Resumen general del alumno
+    # -----------------------------------------
+
+    promedio_general = (
+        Nota.objects
+        .filter(
+            alumno=alumno
+        )
+        .aggregate(
+            promedio=Avg(
+                "calificacion"
+            )
+        )["promedio"]
+    )
+
+
+    resumen_asistencia_general = (
+        Asistencia.objects
+        .filter(
+            alumno=alumno
+        )
+        .aggregate(
+
+            total=Count(
+                "id_asistencia"
+            ),
+
+            presentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="PRESENTE"
+                )
+            ),
+
+            ausentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="AUSENTE"
+                )
+            ),
+
+            tardes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="TARDE"
+                )
+            ),
+
+            justificados=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="JUSTIFICADO"
+                )
+            ),
+        )
+    )
+
+
+    total_asistencias = (
+        resumen_asistencia_general["total"]
+        or 0
+    )
+
+    presentes = (
+        resumen_asistencia_general["presentes"]
+        or 0
+    )
+
+
+    if total_asistencias:
+
+        porcentaje_asistencia = round(
+            presentes
+            * 100
+            / total_asistencias
+        )
+
+    else:
+
+        porcentaje_asistencia = None
+
+
+    cantidad_materias = (
+        dictados.count()
+    )
+
+
+    cantidad_deportes = (
+        deportes.count()
+    )
+
     return render(
         request,
         "academic/tutores/detalle_alumno.html",
@@ -2065,5 +2846,22 @@ def tutor_detalle_alumno(
             "dictados": dictados,
             "materias": materias,
             "deportes": deportes,
+            "promedio_general": promedio_general,
+            
+            "resumen_asistencia_general": (
+                resumen_asistencia_general
+            ),
+
+            "porcentaje_asistencia": (
+                porcentaje_asistencia
+            ),
+
+            "cantidad_materias": (
+                cantidad_materias
+            ),
+
+            "cantidad_deportes": (
+                cantidad_deportes
+            ),
         }
     )

@@ -1,0 +1,42 @@
+<section class="perfil-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Alumno
+        </div>
+
+        <h1>
+            {{ titulo_pagina }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            {{ subtitulo_pagina }}
+        </p>
+
+    </div>
+
+
+    <div class="perfil-identidad">
+
+        <div class="perfil-avatar">
+            {{ alumno.nombre|first }}
+            {{ alumno.apellido|first }}
+        </div>
+
+        <div>
+
+            <span class="badge badge-acento">
+                Alumno
+            </span>
+
+            <small>
+                {{ alumno.curso.nombre }}
+                {{ alumno.curso.division }}
+            </small>
+
+        </div>
+
+    </div>
+
+</section>

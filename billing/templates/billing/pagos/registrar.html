@@ -1,81 +1,250 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Registrar transferencia | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Registrar transferencia</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        <strong>Factura:</strong>
-        N° {{ factura.id_factura }}
-    </p>
+    <div>
 
-    <p>
-        <strong>Alumno:</strong>
-        {{ factura.alumno.apellido }},
-        {{ factura.alumno.nombre }}
-    </p>
+        <div class="pagina-etiqueta">
+            Gestión económica
+        </div>
 
-    <p>
-        <strong>Período:</strong>
-        {{ factura.get_mes_display }}
-        {{ factura.anio }}
-    </p>
+        <h1>
+            Registrar transferencia
+        </h1>
 
-    <p>
-        <strong>Total:</strong>
-        $ {{ factura.total }}
-    </p>
+        <p class="pagina-subtitulo">
+            Registrá el comprobante y distribuí
+            el pago entre los conceptos pendientes.
+        </p>
 
-    <p>
-        <strong>Pagado:</strong>
-        $ {{ factura.total_pagado }}
-    </p>
-
-    <p>
-        <strong>Saldo:</strong>
-        $ {{ factura.saldo }}
-    </p>
-
-</div>
+    </div>
 
 
-<div class="tarjeta">
+    <a
+        href="{% url 'factura_detalle' factura.id_factura %}"
+        class="boton-secundario"
+    >
+        ← Volver a la factura
+    </a>
 
-    <h2>Datos de la transferencia</h2>
+</section>
 
-    <p>
-        Ingrese el importe que desea aplicar
-        a cada concepto.
-    </p>
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="economia" %}
+
+
+<!-- ============================== -->
+<!-- RESUMEN DE FACTURA             -->
+<!-- ============================== -->
+
+<section class="factura-contexto">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Factura N° {{ factura.id_factura }}
+        </div>
+
+        <h2>
+            {{ factura.alumno.apellido }},
+            {{ factura.alumno.nombre }}
+        </h2>
+
+        <p>
+            {{ factura.get_mes_display }}
+            {{ factura.anio }}
+        </p>
+
+    </div>
+
+
+    <div class="factura-contexto-valores">
+
+        <div>
+
+            <span>
+                Total
+            </span>
+
+            <strong>
+                $ {{ factura.total }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                Pagado
+            </span>
+
+            <strong class="texto-exito">
+                $ {{ factura.total_pagado }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                Saldo
+            </span>
+
+            <strong class="texto-peligro">
+                $ {{ factura.saldo }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================== -->
+<!-- FORMULARIO                     -->
+<!-- ============================== -->
+
+<section class="formulario-admin-contenedor">
+
+    <div class="formulario-admin-cabecera">
+
+        <div class="formulario-admin-icono">
+            $
+        </div>
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Transferencia
+            </div>
+
+            <h2>
+                Datos del pago
+            </h2>
+
+            <p>
+                Indicá los datos de la transferencia,
+                los importes aplicados y adjuntá
+                al menos un comprobante.
+            </p>
+
+        </div>
+
+    </div>
+
 
     <form
         method="post"
         enctype="multipart/form-data"
-        class="formulario"
+        class="formulario-admin"
     >
 
         {% csrf_token %}
 
-        {{ form.as_p }}
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Registrar pago
-        </button>
+        {% if form.non_field_errors %}
 
-        <a
-            href="{% url 'factura_detalle' factura.id_factura %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
+            <div class="formulario-error-general">
+
+                {% for error in form.non_field_errors %}
+
+                    <p>
+                        {{ error }}
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="formulario-grid">
+
+            {% for field in form %}
+
+                <div class="campo-formulario">
+
+                    <label for="{{ field.id_for_label }}">
+
+                        {{ field.label }}
+
+                        {% if field.field.required %}
+                            <span class="campo-requerido">*</span>
+                        {% endif %}
+
+                    </label>
+
+
+                    {{ field }}
+
+
+                    {% if field.help_text %}
+
+                        <small class="campo-ayuda">
+                            {{ field.help_text }}
+                        </small>
+
+                    {% endif %}
+
+
+                    {% if field.errors %}
+
+                        <div class="campo-error">
+
+                            {% for error in field.errors %}
+
+                                <span>
+                                    {{ error }}
+                                </span>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="formulario-admin-acciones">
+
+            <button
+                type="submit"
+                class="boton"
+            >
+                Registrar pago
+            </button>
+
+
+            <a
+                href="{% url 'factura_detalle' factura.id_factura %}"
+                class="boton-secundario"
+            >
+                Cancelar
+            </a>
+
+        </div>
 
     </form>
 
-</div>
+</section>
+
 
 {% endblock %}

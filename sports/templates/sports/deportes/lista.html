@@ -1,120 +1,239 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Deportes | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Deportes</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los deportes
-        ofrecidos por la institución.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Deportes
+        </div>
+
+        <h1>
+            Deportes
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá las actividades deportivas
+            ofrecidas por la institución.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'deporte_crear' %}"
         class="boton"
     >
-        Nuevo deporte
+        + Nuevo deporte
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="deportes" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Deportes registrados
+        </span>
+
+        <strong>
+            {{ deportes|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Configurá las actividades disponibles,
+        su valor mensual y estado.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Actividades
+            </div>
+
+            <h2>
+                Deportes disponibles
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ deportes|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if deportes %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Deporte</th>
+                        <th>Descripción</th>
+                        <th>Valor mensual</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for deporte in deportes %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ deporte.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                {{ deporte.descripcion|default:"Sin descripción" }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    $ {{ deporte.valor_mensual }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if deporte.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'deporte_editar' deporte.id_deporte %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if deporte.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'deporte_desactivar' deporte.id_deporte %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen deportes registrados.
+
+            <br><br>
+
+            <a
+                href="{% url 'deporte_crear' %}"
+                class="boton"
+            >
+                Registrar primer deporte
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#deportes"
+        class="boton-secundario"
+    >
+        ← Volver a Deportes
     </a>
 
 </div>
 
-
-<div class="tarjeta">
-
-    {% if deportes %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Deporte</th>
-                    <th>Descripción</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for deporte in deportes %}
-
-                    <tr>
-
-                        <td>
-                            {{ deporte.id_deporte }}
-                        </td>
-
-                        <td>
-                            {{ deporte.nombre }}
-                        </td>
-
-                        <td>
-                            {{ deporte.descripcion|default:"-" }}
-                        </td>
-
-                        <td>
-
-                            {% if deporte.estado %}
-                                Activo
-                            {% else %}
-                                Inactivo
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'deporte_editar' deporte.id_deporte %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-                            {% if deporte.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'deporte_desactivar' deporte.id_deporte %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen deportes registrados.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}

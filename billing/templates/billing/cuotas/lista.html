@@ -1,126 +1,242 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Cuotas mensuales | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Cuotas Mensuales</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los valores mensuales
-        de la cuota educativa.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión económica
+        </div>
+
+        <h1>
+            Cuotas mensuales
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los valores y vencimientos
+            de las cuotas educativas.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'cuota_crear' %}"
         class="boton"
     >
-        Nueva cuota
+        + Nueva cuota
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="economia" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Cuotas registradas
+        </span>
+
+        <strong>
+            {{ cuotas|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Cada período puede tener una única cuota
+        mensual activa o inactiva.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Valores educativos
+            </div>
+
+            <h2>
+                Historial de cuotas
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ cuotas|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if cuotas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Período</th>
+                        <th>Valor mensual</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for cuota in cuotas %}
+
+                        <tr>
+
+                            <td>
+
+                                <span class="badge badge-acento">
+
+                                    {{ cuota.get_mes_display }}
+                                    {{ cuota.anio }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    $ {{ cuota.valor }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                {{ cuota.fecha_vencimiento|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td>
+
+                                {% if cuota.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactiva
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'cuota_editar' cuota.id_cuota %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if cuota.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'cuota_desactivar' cuota.id_cuota %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen cuotas mensuales registradas.
+
+            <br><br>
+
+            <a
+                href="{% url 'cuota_crear' %}"
+                class="boton"
+            >
+                Registrar primera cuota
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#economia"
+        class="boton-secundario"
+    >
+        ← Volver a Gestión económica
     </a>
 
 </div>
 
-
-<div class="tarjeta">
-
-    {% if cuotas %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Período</th>
-                    <th>Valor</th>
-                    <th>Vencimiento</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for cuota in cuotas %}
-
-                <tr>
-
-                    <td>
-                        {{ cuota.id_cuota }}
-                    </td>
-
-                    <td>
-                        {{ cuota.get_mes_display }}
-                        {{ cuota.anio }}
-                    </td>
-
-                    <td>
-                        $ {{ cuota.valor }}
-                    </td>
-
-                    <td>
-                        {{ cuota.fecha_vencimiento|date:"d/m/Y" }}
-                    </td>
-
-                    <td>
-
-                        {% if cuota.estado %}
-                            Activa
-                        {% else %}
-                            Inactiva
-                        {% endif %}
-
-                    </td>
-
-                    <td>
-
-                        <a
-                            href="{% url 'cuota_editar' cuota.id_cuota %}"
-                            class="boton-secundario"
-                        >
-                            Editar
-                        </a>
-
-                        {% if cuota.estado %}
-
-                        <form
-                            method="post"
-                            action="{% url 'cuota_desactivar' cuota.id_cuota %}"
-                            style="display:inline;"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="boton-peligro"
-                            >
-                                Desactivar
-                            </button>
-
-                        </form>
-
-                        {% endif %}
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen cuotas mensuales registradas.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}

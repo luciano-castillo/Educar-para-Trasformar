@@ -1,122 +1,230 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Comedor escolar | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Comedor Escolar</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los servicios
-        y valores del comedor escolar.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Servicios
+        </div>
+
+        <h1>
+            Comedor escolar
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los servicios disponibles
+            y sus valores mensuales.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'comedor_crear' %}"
         class="boton"
     >
-        Nuevo servicio
+        + Nuevo servicio
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="servicios" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Servicios registrados
+        </span>
+
+        <strong>
+            {{ servicios|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Configurá las opciones disponibles
+        del comedor escolar.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Comedor
+            </div>
+
+            <h2>
+                Servicios disponibles
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ servicios|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if servicios %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Descripción</th>
+                        <th>Valor mensual</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for servicio in servicios %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ servicio.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                {{ servicio.descripcion|default:"Sin descripción" }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    $ {{ servicio.valor_mensual }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if servicio.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'comedor_editar' servicio.id_servicio_comedor %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if servicio.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'comedor_desactivar' servicio.id_servicio_comedor %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen servicios de comedor registrados.
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#servicios"
+        class="boton-secundario"
+    >
+        ← Volver a Servicios
     </a>
 
 </div>
 
-<div class="tarjeta">
-
-    {% if servicios %}
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Servicio</th>
-                    <th>Descripción</th>
-                    <th>Valor mensual</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for servicio in servicios %}
-
-                <tr>
-
-                    <td>
-                        {{ servicio.id_servicio_comedor }}
-                    </td>
-
-                    <td>
-                        {{ servicio.nombre }}
-                    </td>
-
-                    <td>
-                        {{ servicio.descripcion|default:"-" }}
-                    </td>
-
-                    <td>
-                        $ {{ servicio.valor_mensual }}
-                    </td>
-
-                    <td>
-
-                        {% if servicio.estado %}
-                            Activo
-                        {% else %}
-                            Inactivo
-                        {% endif %}
-
-                    </td>
-
-                    <td>
-
-                        <a
-                            href="{% url 'comedor_editar' servicio.id_servicio_comedor %}"
-                            class="boton-secundario"
-                        >
-                            Editar
-                        </a>
-
-                        {% if servicio.estado %}
-
-                        <form
-                            method="post"
-                            action="{% url 'comedor_desactivar' servicio.id_servicio_comedor %}"
-                            style="display:inline;"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="boton-peligro"
-                            >
-                                Desactivar
-                            </button>
-
-                        </form>
-
-                        {% endif %}
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen servicios de comedor registrados.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}

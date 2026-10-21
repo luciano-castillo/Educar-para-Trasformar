@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Calificaciones | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+{% include "academic/profesores/_cabecera.html" with titulo_pagina="Calificaciones" subtitulo_pagina="Seleccioná una materia y curso para registrar o consultar calificaciones." %}
+
+
+{% include "academic/profesores/_navegacion.html" %}
+
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Gestión de calificaciones
+    </div>
+
+    <h2>
+        Mis cursos
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Elegí la asignación sobre la que querés trabajar.
+    </p>
+
+</div>
+
+
+{% if dictados %}
+
+    <div class="docente-gestion-grid">
+
+        {% for dictado in dictados %}
+
+            <article class="docente-gestion-card">
+
+                <div class="docente-gestion-card-cabecera">
+
+                    <div class="docente-gestion-card-icono">
+                        ★
+                    </div>
+
+                    <span class="badge badge-acento">
+
+                        {{ dictado.curso.nombre }}
+                        {{ dictado.curso.division }}
+
+                    </span>
+
+                </div>
+
+
+                <h3>
+                    {{ dictado.materia.nombre }}
+                </h3>
+
+
+                <p class="docente-gestion-descripcion">
+
+                    {{ dictado.curso.nivel.nombre }}
+
+                    ·
+
+                    {{ dictado.horario.get_dia_semana_display }}
+
+                    ·
+
+                    {{ dictado.horario.hora_inicio|time:"H:i" }}
+
+                    -
+
+                    {{ dictado.horario.hora_fin|time:"H:i" }}
+
+                </p>
+
+
+                <div class="docente-gestion-card-acciones">
+
+                    <a
+                        href="{% url 'nota_registrar' dictado.id_dictado %}"
+                        class="boton"
+                    >
+                        Registrar notas
+                    </a>
+
+
+                    <a
+                        href="{% url 'nota_historial' dictado.id_dictado %}"
+                        class="boton-secundario"
+                    >
+                        Ver historial
+                    </a>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+
+{% else %}
+
+    <div class="estado-vacio">
+
+        No tenés cursos disponibles
+        para gestionar calificaciones.
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

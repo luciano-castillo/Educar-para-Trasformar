@@ -1,38 +1,61 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>{{ titulo }}</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Seleccione el alumno,
-        servicio y período.
-    </p>
+    <div>
 
-    <form method="post" class="formulario">
+        <div class="pagina-etiqueta">
+            Servicios
+        </div>
 
-        {% csrf_token %}
+        <h1>
+            {{ titulo }}
+        </h1>
 
-        {{ form.as_p }}
+        <p class="pagina-subtitulo">
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Guardar
-        </button>
+            {% if form.instance.pk %}
 
-        <a
-            href="{% url 'comedor_contratacion_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
+                Modificá la contratación
+                de comedor seleccionada.
 
-    </form>
+            {% else %}
 
-</div>
+                Asigná un servicio de comedor
+                a un alumno para un período determinado.
+
+            {% endif %}
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'comedor_contratacion_lista' %}"
+        class="boton-secundario"
+    >
+        ← Volver a contrataciones
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="servicios" %}
+
+
+{% url 'comedor_contratacion_lista' as volver_url %}
+
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Contratación de comedor" descripcion_formulario="Seleccioná alumno, servicio, mes, año y estado de la contratación." texto_registrar="Registrar contratación" volver_url=volver_url %}
+
 
 {% endblock %}

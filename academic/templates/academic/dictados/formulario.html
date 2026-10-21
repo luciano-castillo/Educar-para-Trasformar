@@ -1,43 +1,66 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        {{ titulo }}
-    </h1>
+<!-- ============================== -->
+<!-- CABECERA                       -->
+<!-- ============================== -->
 
-    <p>
-        Seleccione la materia, profesor,
-        curso y horario correspondiente.
-    </p>
+<section class="gestion-cabecera">
 
-    <form
-        method="post"
-        class="formulario"
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            {{ titulo }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+
+            {% if form.instance.pk %}
+
+                Modificá la materia, profesor,
+                curso u horario de la asignación.
+
+            {% else %}
+
+                Seleccioná la materia, profesor,
+                curso y horario correspondiente.
+
+            {% endif %}
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'dictado_lista' %}"
+        class="boton-secundario"
     >
+        ← Volver a asignaciones
+    </a>
 
-        {% csrf_token %}
+</section>
 
-        {{ form.as_p }}
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Guardar
-        </button>
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
 
-        <a
-            href="{% url 'dictado_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
 
-    </form>
+{% url 'dictado_lista' as volver_url %}
 
-</div>
+
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Asignación académica" descripcion_formulario="Relacioná una materia con el profesor, curso y horario correspondiente." texto_registrar="Registrar asignación" volver_url=volver_url %}
+
 
 {% endblock %}

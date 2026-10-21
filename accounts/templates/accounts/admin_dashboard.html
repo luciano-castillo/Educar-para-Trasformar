@@ -1,365 +1,865 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Panel de administración | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="dashboard-cabecera">
 
-    <h1>Panel de Administración</h1>
+<!-- ===================================================== -->
+<!-- CABECERA                                              -->
+<!-- ===================================================== -->
 
-    <p>
-        Desde aquí puede acceder a los distintos módulos
-        de gestión del sistema.
+<section class="admin-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Administración
+        </div>
+
+        <h1>
+            Panel de Administración
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Gestioná la información académica,
+            los servicios y la administración económica
+            de la institución.
+        </p>
+
+    </div>
+
+
+    <div class="admin-identidad">
+
+        <div class="admin-avatar">
+            A
+        </div>
+
+        <div>
+
+            <span class="badge badge-acento">
+                Administrador
+            </span>
+
+            <small>
+                {{ request.user.username }}
+            </small>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- NAVEGACIÓN INTERNA                                    -->
+<!-- ===================================================== -->
+
+<nav class="admin-navegacion">
+
+    <a href="#resumen">
+        Resumen
+    </a>
+
+    <a href="#academico">
+        Académico
+    </a>
+
+    <a href="#personas">
+        Personas
+    </a>
+
+    <a href="#deportes">
+        Deportes
+    </a>
+
+    <a href="#servicios">
+        Servicios
+    </a>
+
+    <a href="#economia">
+        Economía
+    </a>
+
+</nav>
+
+
+<!-- ===================================================== -->
+<!-- ACCIONES RÁPIDAS                                      -->
+<!-- ===================================================== -->
+
+<section id="resumen">
+
+    <div class="pagina-cabecera">
+
+        <div class="pagina-etiqueta">
+            Accesos rápidos
+        </div>
+
+        <h2>
+            Acciones frecuentes
+        </h2>
+
+        <p class="pagina-subtitulo">
+            Accedé directamente a algunas de las operaciones
+            más utilizadas.
+        </p>
+
+    </div>
+
+
+    <div class="admin-acciones-rapidas">
+
+
+        <a
+            href="{% url 'alumno_crear' %}"
+            class="admin-accion"
+        >
+
+            <div class="admin-accion-icono">
+                +
+            </div>
+
+            <div>
+
+                <strong>
+                    Registrar alumno
+                </strong>
+
+                <span>
+                    Crear un nuevo alumno
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <a
+            href="{% url 'profesor_crear' %}"
+            class="admin-accion"
+        >
+
+            <div class="admin-accion-icono">
+                +
+            </div>
+
+            <div>
+
+                <strong>
+                    Registrar profesor
+                </strong>
+
+                <span>
+                    Crear un nuevo docente
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <a
+            href="{% url 'inscripcion_crear' %}"
+            class="admin-accion"
+        >
+
+            <div class="admin-accion-icono">
+                +
+            </div>
+
+            <div>
+
+                <strong>
+                    Inscripción deportiva
+                </strong>
+
+                <span>
+                    Inscribir un alumno
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <a
+            href="{% url 'factura_generar' %}"
+            class="admin-accion"
+        >
+
+            <div class="admin-accion-icono">
+                +
+            </div>
+
+            <div>
+
+                <strong>
+                    Generar factura
+                </strong>
+
+                <span>
+                    Crear una nueva factura
+                </span>
+
+            </div>
+
+        </a>
+
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- MÓDULOS                                               -->
+<!-- ===================================================== -->
+
+<div class="pagina-cabecera admin-modulos-titulo">
+
+    <div class="pagina-etiqueta">
+        Gestión
+    </div>
+
+    <h2>
+        Módulos del sistema
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Las funciones están organizadas por área
+        para facilitar la administración.
     </p>
 
 </div>
 
 
-<h2 class="dashboard-seccion-titulo">
-    Gestión académica
-</h2>
+<div class="admin-modulos-grid">
 
-<div class="dashboard-grid">
 
-    <a href="{% url 'alumno_lista' %}" class="dashboard-panel">
+    <!-- ================================================= -->
+    <!-- ACADÉMICO                                         -->
+    <!-- ================================================= -->
 
-        <div class="dashboard-icono">
-            👨‍🎓
-        </div>
-
-        <h3>Alumnos</h3>
-
-        <p>
-            Registrar, modificar y administrar alumnos.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'profesor_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            👨‍🏫
-        </div>
-
-        <h3>Profesores</h3>
-
-        <p>
-            Gestionar profesores y sus datos.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'nivel_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            🏫
-        </div>
-
-        <h3>Niveles educativos</h3>
-
-        <p>
-            Administrar los niveles de enseñanza.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'curso_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            📚
-        </div>
-
-        <h3>Cursos</h3>
-
-        <p>
-            Crear y administrar cursos y divisiones.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'materia_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            📖
-        </div>
-
-        <h3>Materias</h3>
-
-        <p>
-            Administrar las materias de la institución.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'horario_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            🕐
-        </div>
-
-        <h3>Horarios</h3>
-
-        <p>
-            Configurar días y horarios académicos.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'dictado_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            🗂️
-        </div>
-
-        <h3>Asignación de materias</h3>
-
-        <p>
-            Vincular materias, profesores, cursos y horarios.
-        </p>
-
-    </a>
-
-</div>
-
-
-<h2 class="dashboard-seccion-titulo">
-    Deportes
-</h2>
-
-<div class="dashboard-grid">
-
-    <a href="{% url 'deporte_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            ⚽
-        </div>
-
-        <h3>Deportes</h3>
-
-        <p>
-            Administrar los deportes disponibles.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'grupo_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            🏃
-        </div>
-
-        <h3>Grupos deportivos</h3>
-
-        <p>
-            Gestionar profesores, niveles y horarios deportivos.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'inscripcion_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            📝
-        </div>
-
-        <h3>Inscripciones deportivas</h3>
-
-        <p>
-            Administrar alumnos inscriptos en deportes.
-        </p>
-
-    </a>
-
-</div>
-
-
-<h2 class="dashboard-seccion-titulo">
-    Padres y tutores
-</h2>
-
-<div class="dashboard-grid">
-
-    <a href="{% url 'tutor_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            👨‍👩‍👧
-        </div>
-
-        <h3>Padres / Tutores</h3>
-
-        <p>
-            Registrar y administrar tutores.
-        </p>
-
-    </a>
-
-
-    <a href="{% url 'tutor_alumno_lista' %}" class="dashboard-panel">
-
-        <div class="dashboard-icono">
-            🔗
-        </div>
-
-        <h3>Asociar alumnos</h3>
-
-        <p>
-            Relacionar alumnos con sus padres o tutores.
-        </p>
-
-    </a>
-
-</div>
-
-<h2 class="dashboard-seccion-titulo">
-    Servicios
-</h2>
-
-<div class="dashboard-grid">
-    
-    <a
-        href="{% url 'ruta_lista' %}"
-        class="dashboard-panel"
+    <section
+        class="admin-modulo"
+        id="academico"
     >
 
-        <div class="dashboard-icono">
-            🚌
+        <div class="admin-modulo-cabecera">
+
+            <div class="admin-modulo-icono">
+                🎓
+            </div>
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Académico
+                </span>
+
+                <h2>
+                    Gestión académica
+                </h2>
+
+            </div>
+
         </div>
 
-        <h3>Rutas de transporte</h3>
 
-        <p>
-            Administrar rutas y valores mensuales.
+        <p class="admin-modulo-descripcion">
+            Administración de alumnos, docentes,
+            cursos, materias y estructura académica.
         </p>
 
-    </a>
+
+        <div class="admin-enlaces">
 
 
-    <a
-        href="{% url 'transporte_contratacion_lista' %}"
-        class="dashboard-panel"
+            <a href="{% url 'alumno_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Alumnos
+                    </strong>
+
+                    <span>
+                        Registrar y administrar alumnos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'profesor_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Profesores
+                    </strong>
+
+                    <span>
+                        Gestionar docentes
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'nivel_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Niveles educativos
+                    </strong>
+
+                    <span>
+                        Configurar niveles de enseñanza
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'curso_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Cursos
+                    </strong>
+
+                    <span>
+                        Cursos, divisiones y turnos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'materia_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Materias
+                    </strong>
+
+                    <span>
+                        Administrar materias
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'horario_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Horarios
+                    </strong>
+
+                    <span>
+                        Días y horarios académicos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'dictado_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Asignación de materias
+                    </strong>
+
+                    <span>
+                        Materia · docente · curso · horario
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- PERSONAS                                          -->
+    <!-- ================================================= -->
+
+    <section
+        class="admin-modulo"
+        id="personas"
     >
 
-        <div class="dashboard-icono">
-            🎫
+        <div class="admin-modulo-cabecera">
+
+            <div class="admin-modulo-icono">
+                👥
+            </div>
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Personas
+                </span>
+
+                <h2>
+                    Padres y tutores
+                </h2>
+
+            </div>
+
         </div>
 
-        <h3>Contrataciones de transporte</h3>
 
-        <p>
-            Asignar mensualmente el servicio
-            de transporte a los alumnos.
+        <p class="admin-modulo-descripcion">
+            Gestión de tutores y sus asociaciones
+            con alumnos.
         </p>
 
-    </a>
 
-    <a
-        href="{% url 'comedor_lista' %}"
-        class="dashboard-panel"
+        <div class="admin-enlaces">
+
+
+            <a href="{% url 'tutor_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Padres / Tutores
+                    </strong>
+
+                    <span>
+                        Registrar y administrar tutores
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'tutor_alumno_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Asociar alumnos
+                    </strong>
+
+                    <span>
+                        Relacionar alumnos con sus tutores
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- DEPORTES                                          -->
+    <!-- ================================================= -->
+
+    <section
+        class="admin-modulo"
+        id="deportes"
     >
 
-        <div class="dashboard-icono">
-            🍽️
+        <div class="admin-modulo-cabecera">
+
+            <div class="admin-modulo-icono">
+                ⚽
+            </div>
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Actividades
+                </span>
+
+                <h2>
+                    Deportes
+                </h2>
+
+            </div>
+
         </div>
 
-        <h3>Comedor escolar</h3>
 
-        <p>
-            Administrar servicios y valores
-            del comedor.
+        <p class="admin-modulo-descripcion">
+            Administración de deportes,
+            grupos e inscripciones.
         </p>
 
-    </a>
+
+        <div class="admin-enlaces">
 
 
-    <a
-        href="{% url 'comedor_contratacion_lista' %}"
-        class="dashboard-panel"
+            <a href="{% url 'deporte_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Deportes
+                    </strong>
+
+                    <span>
+                        Actividades deportivas disponibles
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'grupo_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Grupos deportivos
+                    </strong>
+
+                    <span>
+                        Profesores, niveles y horarios
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'inscripcion_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Inscripciones
+                    </strong>
+
+                    <span>
+                        Alumnos inscriptos en deportes
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- SERVICIOS                                         -->
+    <!-- ================================================= -->
+
+    <section
+        class="admin-modulo"
+        id="servicios"
     >
 
-        <div class="dashboard-icono">
-            🍴
+        <div class="admin-modulo-cabecera">
+
+            <div class="admin-modulo-icono">
+                ◈
+            </div>
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Servicios
+                </span>
+
+                <h2>
+                    Servicios escolares
+                </h2>
+
+            </div>
+
         </div>
 
-        <h3>Contrataciones de comedor</h3>
 
-        <p>
-            Gestionar mensualmente
-            el comedor de los alumnos.
+        <p class="admin-modulo-descripcion">
+            Gestión del transporte y comedor escolar.
         </p>
 
-    </a>
+
+        <div class="admin-enlaces">
 
 
-</div>
+            <a href="{% url 'ruta_lista' %}">
 
-<h2 class="dashboard-seccion-titulo">
-    Gestión económica
-</h2>
+                <div>
 
-<div class="dashboard-grid">
+                    <strong>
+                        Rutas de transporte
+                    </strong>
 
-    <a
-        href="{% url 'cuota_lista' %}"
-        class="dashboard-panel"
+                    <span>
+                        Administrar rutas y valores
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'transporte_contratacion_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Contrataciones de transporte
+                    </strong>
+
+                    <span>
+                        Servicios asignados a alumnos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'comedor_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Comedor escolar
+                    </strong>
+
+                    <span>
+                        Servicios y valores mensuales
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'comedor_contratacion_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Contrataciones de comedor
+                    </strong>
+
+                    <span>
+                        Alumnos con servicio contratado
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- ECONOMÍA                                          -->
+    <!-- ================================================= -->
+
+    <section
+        class="admin-modulo admin-modulo-ancho"
+        id="economia"
     >
 
-        <div class="dashboard-icono">
-            💰
+        <div class="admin-modulo-cabecera">
+
+            <div class="admin-modulo-icono">
+                $
+            </div>
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Administración
+                </span>
+
+                <h2>
+                    Gestión económica
+                </h2>
+
+            </div>
+
         </div>
 
-        <h3>Cuotas mensuales</h3>
 
-        <p>
-            Administrar valores y vencimientos
-            de las cuotas educativas.
+        <p class="admin-modulo-descripcion">
+            Cuotas, facturación, pagos
+            e información económica.
         </p>
 
-    </a>
 
-    <a
-        href="{% url 'factura_lista' %}"
-        class="dashboard-panel"
-    >
+        <div class="admin-enlaces admin-enlaces-economia">
 
-        <div class="dashboard-icono">
-            🧾
+
+            <a href="{% url 'cuota_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Cuotas mensuales
+                    </strong>
+
+                    <span>
+                        Valores y vencimientos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'factura_lista' %}">
+
+                <div>
+
+                    <strong>
+                        Facturación
+                    </strong>
+
+                    <span>
+                        Facturas y pagos de alumnos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'reporte_pagos' %}">
+
+                <div>
+
+                    <strong>
+                        Reporte de pagos
+                    </strong>
+
+                    <span>
+                        Ingresos, deuda y pagos
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'reporte_deportes' %}">
+
+                <div>
+
+                    <strong>
+                        Reporte de deportes
+                    </strong>
+
+                    <span>
+                        Información económica deportiva
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
+            <a href="{% url 'reporte_transporte' %}">
+
+                <div>
+
+                    <strong>
+                        Reporte de transporte
+                    </strong>
+
+                    <span>
+                        Información del servicio
+                    </span>
+
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+
         </div>
 
-        <h3>Facturación</h3>
+    </section>
 
-        <p>
-            Generar y consultar las facturas
-            mensuales de los alumnos.
-        </p>
-
-    </a>
-
-    <a
-        href="{% url 'reporte_pagos' %}"
-        class="dashboard-panel"
-    >
-
-        <div class="dashboard-icono">
-            📊
-        </div>
-
-        <h3>
-            Reportes de pagos
-        </h3>
-
-        <p>
-            Consultar ingresos, deuda y pagos
-            por período y alumno.
-        </p>
-
-    </a>
 
 </div>
 

@@ -1,33 +1,42 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>{{ titulo }}</h1>
+<section class="gestion-cabecera">
 
-    <form method="post" class="formulario">
+    <div>
 
-        {% csrf_token %}
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
 
-        {{ form.as_p }}
+        <h1>
+            {{ titulo }}
+        </h1>
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Guardar
-        </button>
+        <p class="pagina-subtitulo">
+            Configurá la información
+            del nivel educativo.
+        </p>
 
-        <a
-            href="{% url 'nivel_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
+    </div>
 
-    </form>
+</section>
 
-</div>
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
+
+
+{% url 'nivel_lista' as volver_url %}
+
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Nivel educativo" descripcion_formulario="Ingresá el nombre y estado del nivel educativo." texto_registrar="Registrar nivel" volver_url=volver_url %}
+
 
 {% endblock %}

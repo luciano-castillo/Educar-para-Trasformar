@@ -1,0 +1,42 @@
+<section class="perfil-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Padre / Tutor
+        </div>
+
+        <h1>
+            {{ titulo_pagina }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            {{ subtitulo_pagina }}
+        </p>
+
+    </div>
+
+
+    <div class="perfil-identidad">
+
+        <div class="perfil-avatar">
+            {{ tutor.nombre|first }}
+            {{ tutor.apellido|first }}
+        </div>
+
+        <div>
+
+            <span class="badge badge-acento">
+                Padre / Tutor
+            </span>
+
+            <small>
+                {{ tutor.nombre }}
+                {{ tutor.apellido }}
+            </small>
+
+        </div>
+
+    </div>
+
+</section>

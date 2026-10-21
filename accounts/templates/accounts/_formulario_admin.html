@@ -1,0 +1,193 @@
+<section class="formulario-admin-contenedor">
+
+    <div class="formulario-admin-cabecera">
+
+        <div class="formulario-admin-icono">
+
+            {% if form.instance.pk %}
+                ✎
+            {% else %}
+                +
+            {% endif %}
+
+        </div>
+
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                {{ etiqueta_formulario }}
+            </div>
+
+            <h2>
+
+                {% if form.instance.pk %}
+                    Modificar registro
+                {% else %}
+                    Nuevo registro
+                {% endif %}
+
+            </h2>
+
+            <p>
+                {{ descripcion_formulario }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <form
+        method="post"
+        class="formulario-admin"
+    >
+
+        {% csrf_token %}
+
+
+        {% if form.non_field_errors %}
+
+            <div class="formulario-error-general">
+
+                {% for error in form.non_field_errors %}
+
+                    <p>
+                        {{ error }}
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="formulario-grid">
+
+            {% for field in form %}
+
+
+                {% if field.field.widget.input_type == "checkbox" %}
+
+                    <div class="campo-formulario campo-checkbox">
+
+                        <label class="checkbox-contenedor">
+
+                            {{ field }}
+
+                            <span>
+                                {{ field.label }}
+                            </span>
+
+                        </label>
+
+
+                        {% if field.help_text %}
+
+                            <small class="campo-ayuda">
+                                {{ field.help_text }}
+                            </small>
+
+                        {% endif %}
+
+
+                        {% if field.errors %}
+
+                            <div class="campo-error">
+
+                                {% for error in field.errors %}
+
+                                    <span>
+                                        {{ error }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                {% else %}
+
+                    <div class="campo-formulario">
+
+                        <label for="{{ field.id_for_label }}">
+
+                            {{ field.label }}
+
+                            {% if field.field.required %}
+                                <span class="campo-requerido">*</span>
+                            {% endif %}
+
+                        </label>
+
+
+                        {{ field }}
+
+
+                        {% if field.help_text %}
+
+                            <small class="campo-ayuda">
+                                {{ field.help_text }}
+                            </small>
+
+                        {% endif %}
+
+
+                        {% if field.errors %}
+
+                            <div class="campo-error">
+
+                                {% for error in field.errors %}
+
+                                    <span>
+                                        {{ error }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="formulario-admin-acciones">
+
+            <button
+                type="submit"
+                class="boton"
+            >
+
+                {% if form.instance.pk %}
+                    Guardar cambios
+                {% else %}
+                    {{ texto_registrar }}
+                {% endif %}
+
+            </button>
+
+
+            <a
+                href="{{ volver_url }}"
+                class="boton-secundario"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</section>

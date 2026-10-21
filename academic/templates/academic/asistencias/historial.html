@@ -1,133 +1,177 @@
 {% extends "base.html" %}
 
+
 {% block title %}
-    Historial de asistencia
+    Historial de asistencia | Educar Para Transformar
 {% endblock %}
+
 
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        Historial de asistencia
-    </h1>
-
-    <p>
-        <strong>Materia:</strong>
-        {{ dictado.materia.nombre }}
-    </p>
-
-    <p>
-        <strong>Curso:</strong>
-        {{ dictado.curso.nombre }}
-        {{ dictado.curso.division }}
-    </p>
-
-    <p>
-        <strong>Nivel:</strong>
-        {{ dictado.curso.nivel.nombre }}
-    </p>
-
-</div>
+{% include "academic/profesores/_cabecera.html" with titulo_pagina="Historial de asistencia" subtitulo_pagina="Consultá los registros anteriores de esta materia y curso." %}
 
 
-<div class="tarjeta">
+{% include "academic/profesores/_navegacion.html" %}
+
+
+{% include "academic/profesores/_dictado_resumen.html" %}
+
+
+<!-- ============================== -->
+<!-- HISTORIAL                      -->
+<!-- ============================== -->
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Historial
+            </div>
+
+            <h2>
+                Clases registradas
+            </h2>
+
+        </div>
+
+
+        <a
+            href="{% url 'asistencia_tomar' dictado.id_dictado %}"
+            class="boton"
+        >
+            Tomar asistencia
+        </a>
+
+    </div>
+
 
     {% if historial %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>Fecha</th>
-                    <th>Presentes</th>
-                    <th>Ausentes</th>
-                    <th>Tarde</th>
-                    <th>Justificados</th>
-                    <th>Total</th>
-                    <th>Acciones</th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Presentes</th>
+                        <th>Ausentes</th>
+                        <th>Tardes</th>
+                        <th>Justificados</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
 
-            <tbody>
+                </thead>
 
-                {% for fila in historial %}
 
-                <tr>
+                <tbody>
 
-                    <td>
-                        {{ fila.fecha|date:"d/m/Y" }}
-                    </td>
+                    {% for fila in historial %}
 
-                    <td>
-                        {{ fila.presentes }}
-                    </td>
+                        <tr>
 
-                    <td>
-                        {{ fila.ausentes }}
-                    </td>
+                            <td>
 
-                    <td>
-                        {{ fila.tardes }}
-                    </td>
+                                <strong>
+                                    {{ fila.fecha|date:"d/m/Y" }}
+                                </strong>
 
-                    <td>
-                        {{ fila.justificados }}
-                    </td>
+                            </td>
 
-                    <td>
-                        {{ fila.total }}
-                    </td>
 
-                    <td>
+                            <td>
 
-                        <a
-                            href="{% url 'asistencia_tomar' dictado.id_dictado %}?fecha={{ fila.fecha|date:'Y-m-d' }}"
-                            class="boton-secundario"
-                        >
-                            Ver
-                        </a>
+                                <span class="badge badge-exito">
+                                    {{ fila.presentes }}
+                                </span>
 
-                    </td>
+                            </td>
 
-                </tr>
 
-                {% endfor %}
+                            <td>
 
-            </tbody>
+                                <span class="badge badge-peligro">
+                                    {{ fila.ausentes }}
+                                </span>
 
-        </table>
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-advertencia">
+                                    {{ fila.tardes }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-info">
+                                    {{ fila.justificados }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                {{ fila.total }}
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{% url 'asistencia_tomar' dictado.id_dictado %}?fecha={{ fila.fecha|date:'Y-m-d' }}"
+                                    class="boton-secundario"
+                                >
+                                    Ver / editar
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
+
             Todavía no existen asistencias
             registradas para esta materia.
-        </p>
+
+        </div>
 
     {% endif %}
 
-</div>
+</section>
 
 
-<div class="tarjeta">
-
-    <a
-        href="{% url 'asistencia_tomar' dictado.id_dictado %}"
-        class="boton"
-    >
-        Tomar asistencia
-    </a>
+<div class="detalle-volver">
 
     <a
-        href="{% url 'profesor_mis_datos' %}"
+        href="{% url 'profesor_asistencias' %}"
         class="boton-secundario"
     >
-        Volver a mis materias
+        ← Volver a Asistencias
     </a>
 
 </div>
+
 
 {% endblock %}

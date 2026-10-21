@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Mis cursos y horarios | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+{% include "academic/profesores/_cabecera.html" with titulo_pagina="Mis cursos y horarios" subtitulo_pagina="Consultá las materias, cursos y horarios que tenés asignados." %}
+
+
+{% include "academic/profesores/_navegacion.html" %}
+
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Docencia
+    </div>
+
+    <h2>
+        Asignaciones actuales
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Materias y cursos en los que estás asignado actualmente.
+    </p>
+
+</div>
+
+
+{% if dictados %}
+
+    <div class="docente-dictados-grid">
+
+        {% for dictado in dictados %}
+
+            <article class="docente-dictado-card">
+
+                <div class="docente-dictado-cabecera">
+
+                    <div class="docente-dictado-icono">
+                        ▣
+                    </div>
+
+                    <span class="badge badge-acento">
+
+                        {{ dictado.curso.nombre }}
+                        {{ dictado.curso.division }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="docente-dictado-contenido">
+
+                    <h3>
+                        {{ dictado.materia.nombre }}
+                    </h3>
+
+                    <p>
+                        {{ dictado.curso.nivel.nombre }}
+                    </p>
+
+                </div>
+
+
+                <div class="docente-dictado-datos">
+
+                    <div>
+
+                        <span>
+                            Día
+                        </span>
+
+                        <strong>
+                            {{ dictado.horario.get_dia_semana_display }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Horario
+                        </span>
+
+                        <strong>
+
+                            {{ dictado.horario.hora_inicio|time:"H:i" }}
+
+                            -
+
+                            {{ dictado.horario.hora_fin|time:"H:i" }}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Turno
+                        </span>
+
+                        <strong>
+                            {{ dictado.curso.get_turno_display }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="docente-acceso-rapido">
+
+                    <a
+                        href="{% url 'asistencia_tomar' dictado.id_dictado %}"
+                        class="boton-secundario"
+                    >
+                        Asistencia
+                    </a>
+
+                    <a
+                        href="{% url 'nota_registrar' dictado.id_dictado %}"
+                        class="boton-secundario"
+                    >
+                        Calificaciones
+                    </a>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+
+{% else %}
+
+    <div class="estado-vacio">
+
+        Actualmente no tenés
+        materias o cursos asignados.
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

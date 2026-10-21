@@ -1,127 +1,217 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Cursos | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Cursos</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los cursos del centro educativo.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            Cursos
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los cursos, divisiones,
+            turnos y niveles educativos.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'curso_crear' %}"
         class="boton"
     >
-        Nuevo curso
+        + Nuevo curso
     </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Cursos registrados
+        </span>
+
+        <strong>
+            {{ cursos|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Consultá y administrá la estructura
+        de cursos de la institución.
+    </p>
 
 </div>
 
 
-<div class="tarjeta">
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Registros
+            </div>
+
+            <h2>
+                Listado de cursos
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ cursos|length }} registros
+        </span>
+
+    </div>
+
 
     {% if cursos %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>ID</th>
-                    <th>Curso</th>
-                    <th>División</th>
-                    <th>Turno</th>
-                    <th>Nivel</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for curso in cursos %}
+                <thead>
 
                     <tr>
-
-                        <td>
-                            {{ curso.id_curso }}
-                        </td>
-
-                        <td>
-                            {{ curso.nombre }}
-                        </td>
-
-                        <td>
-                            {{ curso.division }}
-                        </td>
-
-                        <td>
-                            {{ curso.get_turno_display }}
-                        </td>
-
-                        <td>
-                            {{ curso.nivel.nombre }}
-                        </td>
-
-                        <td>
-
-                            {% if curso.estado %}
-                                Activo
-                            {% else %}
-                                Inactivo
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'curso_editar' curso.id_curso %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-                            {% if curso.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'curso_desactivar' curso.id_curso %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </td>
-
+                        <th>Curso</th>
+                        <th>División</th>
+                        <th>Turno</th>
+                        <th>Nivel</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
 
-                {% endfor %}
+                </thead>
 
-            </tbody>
 
-        </table>
+                <tbody>
+
+                    {% for curso in cursos %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ curso.nombre }}
+                                </strong>
+
+                            </td>
+
+                            <td>
+                                {{ curso.division }}
+                            </td>
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    {{ curso.get_turno_display }}
+                                </span>
+
+                            </td>
+
+                            <td>
+                                {{ curso.nivel.nombre }}
+                            </td>
+
+                            <td>
+
+                                {% if curso.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'curso_editar' curso.id_curso %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if curso.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'curso_desactivar' curso.id_curso %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>No existen cursos registrados.</p>
+        <div class="estado-vacio">
+            No existen cursos registrados.
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

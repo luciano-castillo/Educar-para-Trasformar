@@ -1,0 +1,76 @@
+<section class="docente-contexto">
+
+    <div class="docente-contexto-principal">
+
+        <div class="docente-contexto-icono">
+            ▣
+        </div>
+
+        <div>
+
+            <span class="pagina-etiqueta">
+                Materia seleccionada
+            </span>
+
+            <h2>
+                {{ dictado.materia.nombre }}
+            </h2>
+
+            <p>
+                {{ dictado.curso.nombre }}
+                {{ dictado.curso.division }}
+                ·
+                {{ dictado.curso.nivel.nombre }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="docente-contexto-datos">
+
+        <div>
+
+            <span>
+                Día
+            </span>
+
+            <strong>
+                {{ dictado.horario.get_dia_semana_display }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                Horario
+            </span>
+
+            <strong>
+                {{ dictado.horario.hora_inicio|time:"H:i" }}
+                -
+                {{ dictado.horario.hora_fin|time:"H:i" }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                Curso
+            </span>
+
+            <strong>
+                {{ dictado.curso.nombre }}
+                {{ dictado.curso.division }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>

@@ -2,205 +2,506 @@
 
 
 {% block title %}
-    Mis datos
+    Mi panel docente | Educar Para Transformar
 {% endblock %}
 
 
 {% block content %}
 
-    <h1>
-        Hola, {{ profesor.nombre }}
-    </h1>
 
-    <p>
-        Consultá tu información personal y profesional.
+{% include "academic/profesores/_cabecera.html" with titulo_pagina="Mi panel docente" subtitulo_pagina="Gestioná tus cursos, asistencias y calificaciones." %}
+
+{% include "academic/profesores/_navegacion.html" %}
+
+<!-- ============================== -->
+<!-- RESUMEN                        -->
+<!-- ============================== -->
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Resumen
+    </div>
+
+    <h2>
+        Tu actividad docente
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Información general de tus materias
+        y cursos asignados.
     </p>
 
+</div>
 
-    <div class="tarjeta">
 
-        <h2>
-            Información personal
-        </h2>
+<div class="resumen-grid">
 
-        <p>
-            <strong>DNI:</strong>
-            {{ profesor.dni }}
-        </p>
 
-        <p>
-            <strong>Legajo:</strong>
-            {{ profesor.legajo }}
-        </p>
+    <div class="tarjeta-resumen">
 
-        <p>
-            <strong>Nombre:</strong>
-            {{ profesor.nombre }}
-        </p>
+        <span class="tarjeta-resumen-etiqueta">
+            Materias
+        </span>
 
-        <p>
-            <strong>Apellido:</strong>
-            {{ profesor.apellido }}
-        </p>
+        <span class="tarjeta-resumen-valor">
+            {{ cantidad_materias }}
+        </span>
+
+        <span class="tarjeta-resumen-detalle">
+            Materias asignadas
+        </span>
 
     </div>
 
 
-    <div class="tarjeta">
+    <div class="tarjeta-resumen">
 
-        <h2>
-            Información profesional
-        </h2>
+        <span class="tarjeta-resumen-etiqueta">
+            Cursos
+        </span>
 
-        <p>
-            <strong>Especialidad:</strong>
-            {{ profesor.especialidad }}
-        </p>
+        <span class="tarjeta-resumen-valor">
+            {{ cantidad_cursos }}
+        </span>
 
-        <p>
-            <strong>Estado:</strong>
+        <span class="tarjeta-resumen-detalle">
+            Cursos a cargo
+        </span>
+
+    </div>
+
+
+    <div class="tarjeta-resumen">
+
+        <span class="tarjeta-resumen-etiqueta">
+            Alumnos
+        </span>
+
+        <span class="tarjeta-resumen-valor">
+            {{ cantidad_alumnos }}
+        </span>
+
+        <span class="tarjeta-resumen-detalle">
+            Alumnos de tus cursos
+        </span>
+
+    </div>
+
+
+    <div class="tarjeta-resumen">
+
+        <span class="tarjeta-resumen-etiqueta">
+            Asignaciones
+        </span>
+
+        <span class="tarjeta-resumen-valor">
+            {{ cantidad_dictados }}
+        </span>
+
+        <span class="tarjeta-resumen-detalle">
+            Materia · curso · horario
+        </span>
+
+    </div>
+
+
+</div>
+
+
+<!-- ============================== -->
+<!-- INFORMACIÓN DEL DOCENTE        -->
+<!-- ============================== -->
+
+<div class="dashboard-dos-columnas">
+
+
+    <section class="tarjeta">
+
+        <div class="dashboard-seccion-cabecera">
+
+            <div>
+
+                <div class="pagina-etiqueta">
+                    Perfil
+                </div>
+
+                <h2>
+                    Información profesional
+                </h2>
+
+            </div>
+
 
             {% if profesor.estado %}
-                Activo
+
+                <span class="badge badge-exito">
+                    Activo
+                </span>
+
             {% else %}
-                Inactivo
+
+                <span class="badge badge-peligro">
+                    Inactivo
+                </span>
+
             {% endif %}
-        </p>
 
-    </div>
+        </div>
 
 
-    <div class="tarjeta">
+        <div class="datos-lista">
 
-        <h2>
-            Datos de contacto
-        </h2>
 
-        <p>
-            <strong>Correo:</strong>
-            {{ profesor.correo }}
-        </p>
+            <div class="datos-fila">
 
-        <p>
-            <strong>Teléfono:</strong>
-            {{ profesor.telefono }}
-        </p>
+                <span>
+                    Especialidad
+                </span>
+
+                <strong>
+                    {{ profesor.especialidad }}
+                </strong>
+
+            </div>
+
+
+            <div class="datos-fila">
+
+                <span>
+                    Legajo
+                </span>
+
+                <strong>
+                    {{ profesor.legajo }}
+                </strong>
+
+            </div>
+
+
+            <div class="datos-fila">
+
+                <span>
+                    DNI
+                </span>
+
+                <strong>
+                    {{ profesor.dni }}
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <section class="tarjeta">
+
+        <div class="dashboard-seccion-cabecera">
+
+            <div>
+
+                <div class="pagina-etiqueta">
+                    Contacto
+                </div>
+
+                <h2>
+                    Mis datos
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="datos-lista">
+
+
+            <div class="datos-fila">
+
+                <span>
+                    Correo
+                </span>
+
+                <strong>
+                    {{ profesor.correo }}
+                </strong>
+
+            </div>
+
+
+            <div class="datos-fila">
+
+                <span>
+                    Teléfono
+                </span>
+
+                <strong>
+                    {{ profesor.telefono }}
+                </strong>
+
+            </div>
+
+
+        </div>
 
 
         <a
-            class="boton"
             href="{% url 'profesor_editar_mis_datos' %}"
+            class="boton-secundario"
         >
             Modificar mis datos
         </a>
 
+    </section>
+
+
+</div>
+
+
+<!-- ============================== -->
+<!-- CURSOS Y MATERIAS              -->
+<!-- ============================== -->
+
+<div
+    class="pagina-cabecera docente-cursos-titulo"
+    id="cursos"
+>
+
+    <div class="pagina-etiqueta">
+        Gestión docente
+    </div>
+
+    <h2>
+        Mis materias y cursos
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Desde cada asignación podés gestionar
+        asistencias y calificaciones.
+    </p>
+
+</div>
+
+
+{% if dictados %}
+
+
+    <div class="docente-dictados-grid">
+
+
+        {% for dictado in dictados %}
+
+
+            <article class="docente-dictado-card">
+
+
+                <!-- CABECERA -->
+
+                <div class="docente-dictado-cabecera">
+
+
+                    <div class="docente-dictado-icono">
+                        ▣
+                    </div>
+
+
+                    <span class="badge badge-acento">
+
+                        {{ dictado.curso.nombre }}
+                        {{ dictado.curso.division }}
+
+                    </span>
+
+
+                </div>
+
+
+                <!-- MATERIA -->
+
+                <div class="docente-dictado-contenido">
+
+                    <h3>
+                        {{ dictado.materia.nombre }}
+                    </h3>
+
+                    <p>
+                        {{ dictado.curso.nivel.nombre }}
+                    </p>
+
+                </div>
+
+
+                <!-- HORARIO -->
+
+                <div class="docente-dictado-datos">
+
+
+                    <div>
+
+                        <span>
+                            Día
+                        </span>
+
+                        <strong>
+                            {{ dictado.horario.get_dia_semana_display }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Horario
+                        </span>
+
+                        <strong>
+
+                            {{ dictado.horario.hora_inicio|time:"H:i" }}
+
+                            -
+
+                            {{ dictado.horario.hora_fin|time:"H:i" }}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Turno
+                        </span>
+
+                        <strong>
+                            {{ dictado.curso.get_turno_display }}
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ASISTENCIA -->
+
+                <div class="docente-gestion-bloque">
+
+                    <div class="docente-gestion-titulo">
+
+                        <span class="docente-gestion-icono">
+                            ✓
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Asistencia
+                            </strong>
+
+                            <small>
+                                Registro e historial
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="docente-acciones">
+
+                        <a
+                            href="{% url 'asistencia_tomar' dictado.id_dictado %}"
+                            class="boton"
+                        >
+                            Tomar asistencia
+                        </a>
+
+
+                        <a
+                            href="{% url 'asistencia_historial' dictado.id_dictado %}"
+                            class="boton-secundario"
+                        >
+                            Ver historial
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CALIFICACIONES -->
+
+                <div class="docente-gestion-bloque">
+
+                    <div class="docente-gestion-titulo">
+
+                        <span class="docente-gestion-icono">
+                            ★
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Calificaciones
+                            </strong>
+
+                            <small>
+                                Registro e historial
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="docente-acciones">
+
+                        <a
+                            href="{% url 'nota_registrar' dictado.id_dictado %}"
+                            class="boton"
+                        >
+                            Registrar notas
+                        </a>
+
+
+                        <a
+                            href="{% url 'nota_historial' dictado.id_dictado %}"
+                            class="boton-secundario"
+                        >
+                            Ver historial
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+            </article>
+
+
+        {% endfor %}
+
+
     </div>
 
 
-    <div class="tarjeta">
+{% else %}
 
-        <h2>
-            Mis materias y cursos
-        </h2>
-        
-    
-    
-        {% if dictados %}
-    
-            <table>
-    
-                <thead>
-    
-                    <tr>
-                        <th>Materia</th>
-                        <th>Curso</th>
-                        <th>Nivel</th>
-                        <th>Día</th>
-                        <th>Horario</th>
-                        <th>Acciones</th>
-                    </tr>
-    
-                </thead>
-    
-    
-                <tbody>
-    
-                    {% for dictado in dictados %}
-    
-                        <tr>
-    
-                            <td>
-                                {{ dictado.materia.nombre }}
-                            </td>
-    
-                            <td>
-                                {{ dictado.curso.nombre }}
-                                {{ dictado.curso.division }}
-                            </td>
-    
-                            <td>
-                                {{ dictado.curso.nivel.nombre }}
-                            </td>
-    
-                            <td>
-                                {{ dictado.horario.get_dia_semana_display }}
-                            </td>
-    
-                            <td>
-                                {{ dictado.horario.hora_inicio|time:"H:i" }}
-                                -
-                                {{ dictado.horario.hora_fin|time:"H:i" }}
-                            </td>
-                            
-                            <td>
 
-                                <a
-                                    href="{% url 'asistencia_tomar' dictado.id_dictado %}"
-                                    class="boton"
-                                >
-                                    Tomar asistencia
-                                </a>
+    <div class="estado-vacio">
 
-                                <a
-                                    href="{% url 'asistencia_historial' dictado.id_dictado %}"
-                                    class="boton-secundario"
-                                >
-                                    Ver historial
-                                </a>
-                                
-                                <a
-                                    href="{% url 'nota_registrar' dictado.id_dictado %}"
-                                    class="boton"
-                                >
-                                    Registrar notas
-                                </a>
-                                
-                                <a
-                                    href="{% url 'nota_historial' dictado.id_dictado %}"
-                                    class="boton-secundario"
-                                >
-                                    Historial de notas
-                                </a>
-                                
-                            </td>
-                            
-                        </tr>
-    
-                    {% endfor %}
-    
-                </tbody>
-    
-            </table>
-    
-    
-        {% else %}
-    
-            <p>
-                Actualmente no tenés materias o cursos asignados.
-            </p>
-    
-        {% endif %}
-    
+        Actualmente no tenés
+        materias o cursos asignados.
+
     </div>
+
+
+{% endif %}
+
 
 {% endblock %}

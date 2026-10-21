@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Mis horarios | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+{% include "academic/alumnos/_cabecera.html" with titulo_pagina="Horarios" subtitulo_pagina="Consultá los días y horarios de tus materias." %}
+
+
+{% include "academic/alumnos/_navegacion.html" %}
+
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Agenda semanal
+    </div>
+
+    <h2>
+        Horario de clases
+    </h2>
+
+    <p class="pagina-subtitulo">
+        {{ alumno.curso.nombre }}
+        {{ alumno.curso.division }}
+        ·
+        {{ alumno.curso.nivel.nombre }}
+    </p>
+
+</div>
+
+
+{% if horarios_por_dia %}
+
+    <div class="horarios-grid">
+
+        {% for dia in horarios_por_dia %}
+
+            <section class="horario-dia">
+
+                <div class="horario-dia-cabecera">
+
+                    <div class="horario-dia-icono">
+                        □
+                    </div>
+
+                    <h3>
+                        {{ dia.nombre }}
+                    </h3>
+
+                </div>
+
+
+                <div class="horario-clases">
+
+                    {% for dictado in dia.clases %}
+
+                        <div class="horario-clase">
+
+                            <div class="horario-hora">
+
+                                {{ dictado.horario.hora_inicio|time:"H:i" }}
+
+                                <span>
+                                    a
+                                </span>
+
+                                {{ dictado.horario.hora_fin|time:"H:i" }}
+
+                            </div>
+
+
+                            <div class="horario-materia">
+
+                                <strong>
+                                    {{ dictado.materia.nombre }}
+                                </strong>
+
+                                <span>
+                                    Prof.
+                                    {{ dictado.profesor.apellido }},
+                                    {{ dictado.profesor.nombre }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="estado-vacio">
+
+        Actualmente no existen horarios
+        registrados para tu curso.
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

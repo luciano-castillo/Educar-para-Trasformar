@@ -1,0 +1,71 @@
+<nav class="navegacion-pestanas">
+
+    <a
+        href="{% url 'admin_dashboard' %}"
+        class="pestana"
+    >
+        <span>⌂</span>
+        Panel principal
+    </a>
+
+
+    <a
+        href="{% url 'admin_dashboard' %}#academico"
+        class="pestana
+        {% if modulo_activo == 'academico' %}
+            activa
+        {% endif %}"
+    >
+        <span>▣</span>
+        Académico
+    </a>
+
+
+    <a
+        href="{% url 'admin_dashboard' %}#personas"
+        class="pestana
+        {% if modulo_activo == 'personas' %}
+            activa
+        {% endif %}"
+    >
+        <span>◎</span>
+        Personas
+    </a>
+
+
+    <a
+        href="{% url 'admin_dashboard' %}#deportes"
+        class="pestana
+        {% if modulo_activo == 'deportes' %}
+            activa
+        {% endif %}"
+    >
+        <span>◈</span>
+        Deportes
+    </a>
+
+
+    <a
+        href="{% url 'admin_dashboard' %}#servicios"
+        class="pestana
+        {% if modulo_activo == 'servicios' %}
+            activa
+        {% endif %}"
+    >
+        <span>◇</span>
+        Servicios
+    </a>
+
+
+    <a
+        href="{% url 'admin_dashboard' %}#economia"
+        class="pestana
+        {% if modulo_activo == 'economia' %}
+            activa
+        {% endif %}"
+    >
+        <span>$</span>
+        Economía
+    </a>
+
+</nav>

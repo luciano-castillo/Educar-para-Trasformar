@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Mis deportes | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+{% include "academic/alumnos/_cabecera.html" with titulo_pagina="Deportes" subtitulo_pagina="Consultá tus actividades deportivas activas." %}
+
+
+{% include "academic/alumnos/_navegacion.html" %}
+
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Actividades
+    </div>
+
+    <h2>
+        Mis deportes activos
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Información de tus inscripciones deportivas.
+    </p>
+
+</div>
+
+
+{% if inscripciones %}
+
+    <div class="deportes-grid">
+
+        {% for inscripcion in inscripciones %}
+
+            <article class="deporte-card">
+
+
+                <div class="deporte-card-cabecera">
+
+                    <div class="deporte-icono">
+                        ◎
+                    </div>
+
+                    <span class="badge badge-exito">
+                        Activo
+                    </span>
+
+                </div>
+
+
+                <div class="deporte-card-contenido">
+
+                    <h3>
+                        {{ inscripcion.grupo.deporte.nombre }}
+                    </h3>
+
+                    {% if inscripcion.grupo.deporte.descripcion %}
+
+                        <p>
+                            {{ inscripcion.grupo.deporte.descripcion }}
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="deporte-datos">
+
+                    <div>
+
+                        <span>
+                            Profesor
+                        </span>
+
+                        <strong>
+                            {{ inscripcion.grupo.profesor.apellido }},
+                            {{ inscripcion.grupo.profesor.nombre }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Día
+                        </span>
+
+                        <strong>
+                            {{ inscripcion.grupo.horario.get_dia_semana_display }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Horario
+                        </span>
+
+                        <strong>
+                            {{ inscripcion.grupo.horario.hora_inicio|time:"H:i" }}
+                            -
+                            {{ inscripcion.grupo.horario.hora_fin|time:"H:i" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Inscripción
+                        </span>
+
+                        <strong>
+                            {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="deporte-card-pie">
+
+                    <span>
+                        Valor mensual
+                    </span>
+
+                    <strong>
+                        ${{ inscripcion.grupo.deporte.valor_mensual }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="estado-vacio">
+
+        Actualmente no tenés
+        inscripciones deportivas activas.
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

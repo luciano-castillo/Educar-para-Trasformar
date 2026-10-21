@@ -1,0 +1,77 @@
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Filtros
+            </div>
+
+            <h2>
+                Filtrar información
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <form
+        method="get"
+        class="reporte-filtros"
+    >
+
+        <div class="reporte-filtros-grid">
+
+            {% for field in form %}
+
+                <div class="campo-formulario">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+
+                        <div class="campo-error">
+
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <div class="formulario-admin-acciones">
+
+            <button
+                type="submit"
+                class="boton"
+            >
+                Aplicar filtros
+            </button>
+
+
+            <a
+                href="{{ limpiar_url }}"
+                class="boton-secundario"
+            >
+                Limpiar filtros
+            </a>
+
+        </div>
+
+    </form>
+
+</section>

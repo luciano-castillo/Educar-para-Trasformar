@@ -1,0 +1,45 @@
+<section class="perfil-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Docente
+        </div>
+
+        <h1>
+            {{ titulo_pagina }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            {{ subtitulo_pagina }}
+        </p>
+
+    </div>
+
+
+    <div class="perfil-identidad">
+
+        <div class="perfil-avatar">
+
+            {{ profesor.nombre|first }}
+            {{ profesor.apellido|first }}
+
+        </div>
+
+
+        <div>
+
+            <span class="badge badge-acento">
+                Docente
+            </span>
+
+            <small>
+                {{ profesor.nombre }}
+                {{ profesor.apellido }}
+            </small>
+
+        </div>
+
+    </div>
+
+</section>

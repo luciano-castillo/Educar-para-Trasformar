@@ -1,88 +1,267 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Ingresar al sistema</title>
-</head>
+{% block title %}
+    Ingresar | Educar Para Transformar
+{% endblock %}
 
-<body>
+{% block content %}
 
-    <h1>Ingresar al sistema</h1>
+<div class="login-pagina">
 
+    <div class="login-cabecera">
 
-    {% if perfil_seleccionado %}
+        <div class="login-logo">
+            E
+        </div>
+
+        <h1>
+            Bienvenido
+        </h1>
 
         <p>
-            Ingresando como:
-            <strong>
-                {{ perfil_seleccionado }}
-            </strong>
+            Accedé al sistema de gestión
+            de Educar Para Transformar.
         </p>
 
-    {% endif %}
+    </div>
 
 
-    {% if messages %}
+    <div class="login-contenido">
 
-        {% for message in messages %}
+        <div class="login-selector">
 
-            <p>
-                {{ message }}
+            <h2>
+                Seleccioná tu perfil
+            </h2>
+
+            <p class="login-texto-secundario">
+                Elegí cómo querés ingresar al sistema.
             </p>
 
-        {% endfor %}
 
-    {% endif %}
+            <div class="login-roles">
 
+                <a
+                    href="{% url 'login' %}?perfil=ALUMNO"
+                    class="login-rol
+                    {% if perfil_seleccionado == 'ALUMNO' %}
+                        login-rol-activo
+                    {% endif %}"
+                >
 
-    <form method="POST">
+                    <div class="login-rol-icono">
+                        🎓
+                    </div>
 
-        {% csrf_token %}
+                    <div>
+                        <strong>
+                            Alumno
+                        </strong>
 
-        <input
-            type="hidden"
-            name="perfil"
-            value="{{ perfil_seleccionado }}"
-        >
+                        <span>
+                            Consultar materias,
+                            notas y asistencias
+                        </span>
+                    </div>
 
-
-        <p>
-            <label>
-                Usuario o correo electrónico
-            </label>
-
-            <br>
-
-            <input
-                type="text"
-                name="identificador"
-                required
-            >
-        </p>
+                </a>
 
 
-        <p>
-            <label>
-                Contraseña
-            </label>
+                <a
+                    href="{% url 'login' %}?perfil=TUTOR"
+                    class="login-rol
+                    {% if perfil_seleccionado == 'TUTOR' %}
+                        login-rol-activo
+                    {% endif %}"
+                >
 
-            <br>
+                    <div class="login-rol-icono">
+                        👨‍👩‍👧
+                    </div>
 
-            <input
-                type="password"
-                name="password"
-                required
-            >
-        </p>
+                    <div>
+                        <strong>
+                            Padre / Tutor
+                        </strong>
+
+                        <span>
+                            Consultar información
+                            de alumnos asociados
+                        </span>
+                    </div>
+
+                </a>
 
 
-        <button type="submit">
-            Ingresar
-        </button>
+                <a
+                    href="{% url 'login' %}?perfil=DOCENTE"
+                    class="login-rol
+                    {% if perfil_seleccionado == 'DOCENTE' %}
+                        login-rol-activo
+                    {% endif %}"
+                >
 
-    </form>
+                    <div class="login-rol-icono">
+                        👨‍🏫
+                    </div>
 
-</body>
+                    <div>
+                        <strong>
+                            Docente
+                        </strong>
 
-</html>
+                        <span>
+                            Gestionar notas
+                            y asistencias
+                        </span>
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="{% url 'login' %}?perfil=ADMIN"
+                    class="login-rol
+                    {% if perfil_seleccionado == 'ADMIN' %}
+                        login-rol-activo
+                    {% endif %}"
+                >
+
+                    <div class="login-rol-icono">
+                        ⚙️
+                    </div>
+
+                    <div>
+                        <strong>
+                            Administrador
+                        </strong>
+
+                        <span>
+                            Administración general
+                            del sistema
+                        </span>
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% if perfil_seleccionado %}
+
+            <div class="login-formulario-contenedor">
+
+                <div class="login-formulario-cabecera">
+
+                    <span class="login-perfil-etiqueta">
+                        {{ perfil_nombre }}
+                    </span>
+
+                    <h2>
+                        Iniciar sesión
+                    </h2>
+
+                    <p>
+                        Ingresá tus credenciales
+                        para continuar.
+                    </p>
+
+                </div>
+
+
+                <form method="POST" class="login-formulario">
+
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="perfil"
+                        value="{{ perfil_seleccionado }}"
+                    >
+
+
+                    <div class="login-campo">
+
+                        <label for="identificador">
+                            Usuario o correo electrónico
+                        </label>
+
+                        <input
+                            id="identificador"
+                            type="text"
+                            name="identificador"
+                            value="{{ request.POST.identificador }}"
+                            placeholder="Ingresá tu usuario o correo"
+                            autocomplete="username"
+                            required
+                            autofocus
+                        >
+
+                    </div>
+
+
+                    <div class="login-campo">
+
+                        <label for="password">
+                            Contraseña
+                        </label>
+
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            placeholder="Ingresá tu contraseña"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="login-boton"
+                    >
+                        Ingresar
+                    </button>
+
+                </form>
+
+
+                <a
+                    href="{% url 'login' %}"
+                    class="login-cambiar-perfil"
+                >
+                    ← Elegir otro perfil
+                </a>
+
+            </div>
+
+        {% else %}
+
+            <div class="login-ayuda">
+
+                <div class="login-ayuda-icono">
+                    👋
+                </div>
+
+                <h2>
+                    ¿Cómo querés ingresar?
+                </h2>
+
+                <p>
+                    Seleccioná uno de los perfiles
+                    para mostrar el formulario de acceso.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,142 +1,166 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Reporte de transporte | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        Reporte de pagos de transporte
-    </h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Consulte los ingresos de transporte
-        por período y ruta.
-    </p>
+    <div>
 
-</div>
+        <div class="pagina-etiqueta">
+            Reportes
+        </div>
 
+        <h1>
+            Reporte de pagos de transporte
+        </h1>
 
-<div class="tarjeta">
-
-    <h2>Filtros</h2>
-
-    <form
-        method="get"
-        class="formulario"
-    >
-
-        {{ form.as_p }}
-
-        <button
-            type="submit"
-            class="boton"
-        >
-            Filtrar
-        </button>
-
-        <a
-            href="{% url 'reporte_transporte' %}"
-            class="boton-secundario"
-        >
-            Limpiar filtros
-        </a>
-
-    </form>
-
-</div>
-
-
-<div class="tarjeta">
-
-    <h2>Resumen</h2>
-
-    <p>
-        <strong>
-            Total cobrado en transporte:
-        </strong>
-
-        $ {{ total_cobrado }}
-    </p>
-
-    <p>
-        Solo se consideran pagos
-        que fueron validados.
-    </p>
-
-</div>
-
-
-<div class="tarjeta">
-
-    <h2>Detalle por ruta</h2>
-
-    {% if reporte %}
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Ruta</th>
-                <th>Alumnos</th>
-                <th>Pagos</th>
-                <th>Total cobrado</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            {% for fila in reporte %}
-
-            <tr>
-
-                <td>
-                    {{ fila.detalle_factura__ruta_transporte__nombre }}
-                </td>
-
-                <td>
-                    {{ fila.cantidad_alumnos }}
-                </td>
-
-                <td>
-                    {{ fila.cantidad_pagos }}
-                </td>
-
-                <td>
-                    $ {{ fila.total_cobrado }}
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-
-    {% else %}
-
-        <p>
-            No existen pagos de transporte
-            validados para los filtros
-            seleccionados.
+        <p class="pagina-subtitulo">
+            Consultá los ingresos
+            del transporte escolar por período y ruta.
         </p>
 
-    {% endif %}
+    </div>
 
-</div>
-
-
-<div class="tarjeta">
 
     <a
         href="{% url 'reporte_pagos' %}"
         class="boton-secundario"
     >
-        Volver al reporte general
+        ← Reporte general
     </a>
 
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="economia" %}
+
+
+{% url 'reporte_transporte' as limpiar_url %}
+
+{% include "billing/reportes/_filtros.html" with limpiar_url=limpiar_url %}
+
+
+<div class="reporte-resumen-grid reporte-resumen-unico">
+
+    <div class="reporte-metrica">
+
+        <span>
+            Total cobrado en transporte
+        </span>
+
+        <strong class="texto-exito">
+            $ {{ total_cobrado }}
+        </strong>
+
+        <small>
+            Solo pagos validados
+        </small>
+
+    </div>
+
 </div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Detalle
+            </div>
+
+            <h2>
+                Ingresos por ruta
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    {% if reporte %}
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Ruta</th>
+                        <th>Alumnos</th>
+                        <th>Pagos</th>
+                        <th>Total cobrado</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for fila in reporte %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>
+                                    {{ fila.detalle_factura__ruta_transporte__nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                {{ fila.cantidad_alumnos }}
+                            </td>
+
+
+                            <td>
+                                {{ fila.cantidad_pagos }}
+                            </td>
+
+
+                            <td>
+
+                                <strong class="texto-exito">
+                                    $ {{ fila.total_cobrado }}
+                                </strong>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen pagos de transporte
+            validados para los filtros seleccionados.
+
+        </div>
+
+    {% endif %}
+
+</section>
+
 
 {% endblock %}

@@ -1,91 +1,243 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Mis hijos | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Mis hijos / alumnos asociados</h1>
+{% include "academic/tutores/_cabecera.html" with titulo_pagina="Mis hijos" subtitulo_pagina="Consultá la información de los alumnos asociados a tu cuenta." %}
 
-    <p>
-        Tutor:
-        <strong>
-            {{ tutor.nombre }}
-            {{ tutor.apellido }}
-        </strong>
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Alumnos asociados
+    </div>
+
+    <h2>
+        Información general
+    </h2>
+
+    <p class="pagina-subtitulo">
+        Seleccioná un alumno para consultar
+        su información académica.
     </p>
 
 </div>
 
 
-<div class="tarjeta">
+{% if alumnos_resumen %}
 
-    {% if relaciones %}
+    <div class="tutor-hijos-grid">
 
-        <table>
+        {% for item in alumnos_resumen %}
 
-            <thead>
+            <article class="tutor-hijo-card">
 
-                <tr>
-                    <th>Alumno</th>
-                    <th>Legajo</th>
-                    <th>Curso</th>
-                    <th>Nivel</th>
-                    <th>Acciones</th>
-                </tr>
 
-            </thead>
+                <!-- CABECERA DEL ALUMNO -->
 
-            <tbody>
+                <div class="tutor-hijo-cabecera">
 
-                {% for relacion in relaciones %}
+                    <div class="tutor-hijo-identidad">
 
-                    <tr>
+                        <div class="tutor-hijo-avatar">
 
-                        <td>
-                            {{ relacion.alumno.apellido }},
-                            {{ relacion.alumno.nombre }}
-                        </td>
+                            {{ item.alumno.nombre|first }}
+                            {{ item.alumno.apellido|first }}
 
-                        <td>
-                            {{ relacion.alumno.legajo }}
-                        </td>
+                        </div>
 
-                        <td>
-                            {{ relacion.alumno.curso.nombre }}
-                            {{ relacion.alumno.curso.division }}
-                        </td>
 
-                        <td>
-                            {{ relacion.alumno.curso.nivel.nombre }}
-                        </td>
+                        <div>
 
-                        <td>
+                            <h3>
+                                {{ item.alumno.nombre }}
+                                {{ item.alumno.apellido }}
+                            </h3>
 
-                            <a
-                                href="{% url 'tutor_detalle_alumno' relacion.alumno.id_alumno %}"
-                                class="boton"
-                            >
-                                Ver información
-                            </a>
+                            <p>
 
-                        </td>
+                                {{ item.alumno.curso.nombre }}
+                                {{ item.alumno.curso.division }}
 
-                    </tr>
+                                ·
 
-                {% endfor %}
+                                {{ item.alumno.curso.nivel.nombre }}
 
-            </tbody>
+                            </p>
 
-        </table>
+                        </div>
 
-    {% else %}
+                    </div>
 
-        <p>
-            Actualmente no posee alumnos asociados.
-        </p>
 
-    {% endif %}
+                    <span class="badge badge-exito">
+                        Activo
+                    </span>
 
-</div>
+                </div>
+
+
+                <!-- RESUMEN -->
+
+                <div class="tutor-hijo-resumen">
+
+
+                    <div class="tutor-hijo-metrica">
+
+                        <span>
+                            Promedio
+                        </span>
+
+                        <strong>
+
+                            {% if item.promedio %}
+
+                                {{ item.promedio|floatformat:1 }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </strong>
+
+                        <small>
+
+                            {% if item.promedio %}
+
+                                Promedio general
+
+                            {% else %}
+
+                                Sin notas registradas
+
+                            {% endif %}
+
+                        </small>
+
+                    </div>
+
+
+                    <div class="tutor-hijo-metrica">
+
+                        <span>
+                            Asistencia
+                        </span>
+
+                        <strong>
+
+                            {% if item.porcentaje_asistencia != None %}
+
+                                {{ item.porcentaje_asistencia }}%
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </strong>
+
+                        <small>
+
+                            {% if item.porcentaje_asistencia != None %}
+
+                                Según registros actuales
+
+                            {% else %}
+
+                                Sin asistencias registradas
+
+                            {% endif %}
+
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- DATOS SECUNDARIOS -->
+
+                <div class="tutor-hijo-datos">
+
+                    <div>
+
+                        <span>
+                            Materias
+                        </span>
+
+                        <strong>
+                            {{ item.cantidad_materias }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Deportes activos
+                        </span>
+
+                        <strong>
+                            {{ item.cantidad_deportes }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Legajo
+                        </span>
+
+                        <strong>
+                            {{ item.alumno.legajo }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ACCIÓN -->
+
+                <a
+                    href="{% url 'tutor_detalle_alumno' item.alumno.id_alumno %}"
+                    class="boton tutor-hijo-boton"
+                >
+                    Ver información académica
+                    →
+                </a>
+
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+
+{% else %}
+
+    <div class="estado-vacio">
+
+        Actualmente no posee
+        alumnos asociados.
+
+    </div>
+
+{% endif %}
+
 
 {% endblock %}

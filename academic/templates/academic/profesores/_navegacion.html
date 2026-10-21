@@ -1,0 +1,50 @@
+<nav class="navegacion-pestanas">
+
+    <a
+        href="{% url 'profesor_mis_datos' %}"
+        class="pestana
+        {% if seccion_activa == 'resumen' %}
+            activa
+        {% endif %}"
+    >
+        <span>⌂</span>
+        Resumen
+    </a>
+
+
+    <a
+        href="{% url 'profesor_cursos' %}"
+        class="pestana
+        {% if seccion_activa == 'cursos' %}
+            activa
+        {% endif %}"
+    >
+        <span>▣</span>
+        Mis cursos y horarios
+    </a>
+
+
+    <a
+        href="{% url 'profesor_asistencias' %}"
+        class="pestana
+        {% if seccion_activa == 'asistencias' %}
+            activa
+        {% endif %}"
+    >
+        <span>✓</span>
+        Asistencias
+    </a>
+
+
+    <a
+        href="{% url 'profesor_calificaciones' %}"
+        class="pestana
+        {% if seccion_activa == 'calificaciones' %}
+            activa
+        {% endif %}"
+    >
+        <span>★</span>
+        Calificaciones
+    </a>
+
+</nav>

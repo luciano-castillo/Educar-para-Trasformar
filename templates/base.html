@@ -21,9 +21,23 @@
         rel="stylesheet"
         href="{% static 'css/estilos.css' %}"
     >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/sistema.css' %}"
+    >
+
 </head>
 
-<body>
+<body     
+    class="
+        {% if request.user.is_authenticated %}
+            tema-{{ request.user.perfil.rol|lower }}
+        {% else %}
+            tema-base
+        {% endif %}
+    "
+>
 
     <header class="header">
 

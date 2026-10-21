@@ -1,42 +1,50 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        {{ titulo }}
-    </h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Seleccione el alumno y el grupo deportivo.
-    </p>
+    <div>
 
-    <form
-        method="post"
-        class="formulario"
+        <div class="pagina-etiqueta">
+            Deportes
+        </div>
+
+        <h1>
+            {{ titulo }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Seleccioná el alumno y
+            el grupo deportivo correspondiente.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'inscripcion_lista' %}"
+        class="boton-secundario"
     >
+        ← Volver a inscripciones
+    </a>
 
-        {% csrf_token %}
+</section>
 
-        {{ form.as_p }}
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Inscribir
-        </button>
+{% include "accounts/_admin_navegacion.html" with modulo_activo="deportes" %}
 
-        <a
-            href="{% url 'inscripcion_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
 
-    </form>
+{% url 'inscripcion_lista' as volver_url %}
 
-</div>
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Inscripción deportiva" descripcion_formulario="Seleccioná un alumno activo y el grupo deportivo al que deseas inscribirlo." texto_registrar="Inscribir alumno" volver_url=volver_url %}
+
 
 {% endblock %}

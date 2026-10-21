@@ -1,272 +1,427 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Reporte de pagos | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        Reporte administrativo de pagos
-    </h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Consulte facturación, pagos y deuda
-        según los filtros seleccionados.
-    </p>
+    <div>
 
-    <a
-        href="{% url 'reporte_deportes' %}"
-        class="boton"
-    >
-        Ver reporte de deportes
-    </a>
+        <div class="pagina-etiqueta">
+            Gestión económica
+        </div>
 
-    <a
-        href="{% url 'reporte_transporte' %}"
-        class="boton"
-    >
-        Ver reporte de transporte
-    </a>
-</div>
+        <h1>
+            Reporte administrativo de pagos
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Consultá facturación, pagos,
+            deuda e ingresos por concepto.
+        </p>
+
+    </div>
 
 
-<div class="tarjeta">
-
-    <h2>Filtros</h2>
-
-    <form
-        method="get"
-        class="formulario"
-    >
-
-        {{ form.as_p }}
-
-        <button
-            type="submit"
-            class="boton"
-        >
-            Filtrar
-        </button>
+    <div class="acciones">
 
         <a
-            href="{% url 'reporte_pagos' %}"
-            class="boton boton-secundario"
+            href="{% url 'reporte_deportes' %}"
+            class="boton-secundario"
         >
-            Limpiar filtros
+            Reporte de deportes
         </a>
 
-    </form>
+        <a
+            href="{% url 'reporte_transporte' %}"
+            class="boton-secundario"
+        >
+            Reporte de transporte
+        </a>
+
+    </div>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="economia" %}
+
+
+{% url 'reporte_pagos' as limpiar_url %}
+
+{% include "billing/reportes/_filtros.html" with limpiar_url=limpiar_url %}
+
+
+<!-- ============================== -->
+<!-- RESUMEN ECONÓMICO              -->
+<!-- ============================== -->
+
+<div class="reporte-resumen-grid">
+
+    <div class="reporte-metrica">
+
+        <span>
+            Total facturado
+        </span>
+
+        <strong>
+            $ {{ total_facturado }}
+        </strong>
+
+        <small>
+            Importe total emitido
+        </small>
+
+    </div>
+
+
+    <div class="reporte-metrica">
+
+        <span>
+            Total pagado
+        </span>
+
+        <strong class="texto-exito">
+            $ {{ total_pagado }}
+        </strong>
+
+        <small>
+            Pagos validados
+        </small>
+
+    </div>
+
+
+    <div class="reporte-metrica">
+
+        <span>
+            Deuda pendiente
+        </span>
+
+        <strong class="texto-peligro">
+            $ {{ total_deuda }}
+        </strong>
+
+        <small>
+            Saldo aún pendiente
+        </small>
+
+    </div>
 
 </div>
 
 
-<div class="tarjeta">
+<!-- ============================== -->
+<!-- ESTADOS                        -->
+<!-- ============================== -->
 
-    <h2>Resumen económico</h2>
+<section class="tarjeta">
 
-    <p>
-        <strong>Total facturado:</strong>
-        $ {{ total_facturado }}
-    </p>
+    <div class="dashboard-seccion-cabecera">
 
-    <p>
-        <strong>Total pagado:</strong>
-        $ {{ total_pagado }}
-    </p>
+        <div>
 
-    <p>
-        <strong>Deuda pendiente:</strong>
-        $ {{ total_deuda }}
-    </p>
+            <div class="pagina-etiqueta">
+                Facturación
+            </div>
 
-</div>
+            <h2>
+                Estado de facturas
+            </h2>
 
+        </div>
 
-<div class="tarjeta">
-
-    <h2>Estado de facturas</h2>
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Pendientes</th>
-                <th>Parciales</th>
-                <th>Pagadas</th>
-                <th>Vencidas</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-
-                <td>
-                    {{ cantidad_pendientes }}
-                </td>
-
-                <td>
-                    {{ cantidad_parciales }}
-                </td>
-
-                <td>
-                    {{ cantidad_pagadas }}
-                </td>
-
-                <td>
-                    {{ cantidad_vencidas }}
-                </td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
+    </div>
 
 
-<div class="tarjeta">
+    <div class="reporte-estados-grid">
 
-    <h2>
-        Ingresos por concepto
-    </h2>
+        <div>
 
-    <table>
+            <span class="badge badge-advertencia">
+                Pendientes
+            </span>
 
-        <thead>
+            <strong>
+                {{ cantidad_pendientes }}
+            </strong>
 
-            <tr>
-                <th>Concepto</th>
-                <th>Total cobrado</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Cuotas mensuales</td>
-                <td>$ {{ total_cuotas }}</td>
-            </tr>
-
-            <tr>
-                <td>Deportes</td>
-                <td>$ {{ total_deportes }}</td>
-            </tr>
-
-            <tr>
-                <td>Transporte</td>
-                <td>$ {{ total_transporte }}</td>
-            </tr>
-
-            <tr>
-                <td>Comedor</td>
-                <td>$ {{ total_comedor }}</td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
+        </div>
 
 
-<div class="tarjeta">
+        <div>
 
-    <h2>
-        Detalle de facturas
-    </h2>
+            <span class="badge badge-info">
+                Parciales
+            </span>
+
+            <strong>
+                {{ cantidad_parciales }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span class="badge badge-exito">
+                Pagadas
+            </span>
+
+            <strong>
+                {{ cantidad_pagadas }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span class="badge badge-peligro">
+                Vencidas
+            </span>
+
+            <strong>
+                {{ cantidad_vencidas }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================== -->
+<!-- INGRESOS POR CONCEPTO          -->
+<!-- ============================== -->
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Ingresos
+            </div>
+
+            <h2>
+                Pagos por concepto
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="reporte-conceptos-grid">
+
+        <div>
+            <span>Cuotas</span>
+            <strong>$ {{ total_cuotas }}</strong>
+        </div>
+
+        <div>
+            <span>Deportes</span>
+            <strong>$ {{ total_deportes }}</strong>
+        </div>
+
+        <div>
+            <span>Transporte</span>
+            <strong>$ {{ total_transporte }}</strong>
+        </div>
+
+        <div>
+            <span>Comedor</span>
+            <strong>$ {{ total_comedor }}</strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================== -->
+<!-- FACTURAS                       -->
+<!-- ============================== -->
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Detalle
+            </div>
+
+            <h2>
+                Facturas
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ facturas|length }} resultados
+        </span>
+
+    </div>
+
 
     {% if facturas %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>N°</th>
-                    <th>Alumno</th>
-                    <th>Período</th>
-                    <th>Nivel</th>
-                    <th>Total</th>
-                    <th>Pagado</th>
-                    <th>Deuda</th>
-                    <th>Estado</th>
-                    <th></th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Alumno</th>
+                        <th>Período</th>
+                        <th>Nivel</th>
+                        <th>Total</th>
+                        <th>Pagado</th>
+                        <th>Deuda</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
 
-            <tbody>
+                </thead>
 
-                {% for factura in facturas %}
 
-                <tr>
+                <tbody>
 
-                    <td>
-                        {{ factura.id_factura }}
-                    </td>
+                    {% for factura in facturas %}
 
-                    <td>
-                        {{ factura.alumno.apellido }},
-                        {{ factura.alumno.nombre }}
-                    </td>
+                        <tr>
 
-                    <td>
-                        {{ factura.get_mes_display }}
-                        {{ factura.anio }}
-                    </td>
+                            <td>
+                                #{{ factura.id_factura }}
+                            </td>
 
-                    <td>
-                        {{ factura.alumno.curso.nivel.nombre }}
-                    </td>
 
-                    <td>
-                        $ {{ factura.total }}
-                    </td>
+                            <td>
 
-                    <td>
-                        $ {{ factura.total_pagado }}
-                    </td>
+                                <strong>
+                                    {{ factura.alumno.apellido }},
+                                    {{ factura.alumno.nombre }}
+                                </strong>
 
-                    <td>
-                        $ {{ factura.saldo }}
-                    </td>
+                            </td>
 
-                    <td>
-                        {{ factura.get_estado_display }}
-                    </td>
 
-                    <td>
+                            <td>
 
-                        <a
-                            href="{% url 'factura_detalle' factura.id_factura %}"
-                            class="boton-secundario"
-                        >
-                            Ver
-                        </a>
+                                {{ factura.get_mes_display }}
+                                {{ factura.anio }}
 
-                    </td>
+                            </td>
 
-                </tr>
 
-                {% endfor %}
+                            <td>
+                                {{ factura.alumno.curso.nivel.nombre }}
+                            </td>
 
-            </tbody>
 
-        </table>
+                            <td>
+                                $ {{ factura.total }}
+                            </td>
+
+
+                            <td>
+                                <span class="texto-exito">
+                                    $ {{ factura.total_pagado }}
+                                </span>
+                            </td>
+
+
+                            <td>
+                                <span class="texto-peligro">
+                                    $ {{ factura.saldo }}
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                {% if factura.estado == "PAGADA" %}
+
+                                    <span class="badge badge-exito">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% elif factura.estado == "VENCIDA" %}
+
+                                    <span class="badge badge-peligro">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% elif factura.estado == "PARCIAL" %}
+
+                                    <span class="badge badge-info">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% elif factura.estado == "PENDIENTE" %}
+
+                                    <span class="badge badge-advertencia">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{% url 'factura_detalle' factura.id_factura %}"
+                                    class="boton-secundario boton-tabla"
+                                >
+                                    Ver
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
+
             No se encontraron facturas
             para los filtros seleccionados.
-        </p>
+
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

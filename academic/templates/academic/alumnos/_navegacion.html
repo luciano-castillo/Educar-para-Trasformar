@@ -1,0 +1,62 @@
+<nav class="navegacion-pestanas">
+
+    <a
+        href="{% url 'alumno_mis_datos' %}"
+        class="pestana
+        {% if seccion_activa == 'resumen' %}
+            activa
+        {% endif %}"
+    >
+        <span>⌂</span>
+        Resumen
+    </a>
+
+
+    <a
+        href="{% url 'alumno_materias' %}"
+        class="pestana
+        {% if seccion_activa == 'materias' %}
+            activa
+        {% endif %}"
+    >
+        <span>▣</span>
+        Mis materias
+    </a>
+
+
+    <a
+        href="{% url 'alumno_horarios' %}"
+        class="pestana
+        {% if seccion_activa == 'horarios' %}
+            activa
+        {% endif %}"
+    >
+        <span>□</span>
+        Horarios
+    </a>
+
+
+    <a
+        href="{% url 'alumno_deportes' %}"
+        class="pestana
+        {% if seccion_activa == 'deportes' %}
+            activa
+        {% endif %}"
+    >
+        <span>◎</span>
+        Deportes
+    </a>
+
+
+    <a
+        href="{% url 'alumno_academico' %}"
+        class="pestana
+        {% if seccion_activa == 'academico' %}
+            activa
+        {% endif %}"
+    >
+        <span>◇</span>
+        Información académica
+    </a>
+
+</nav>

@@ -1,132 +1,254 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Contrataciones de comedor | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Contrataciones de Comedor</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Gestión mensual del servicio
-        de comedor de los alumnos.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Servicios
+        </div>
+
+        <h1>
+            Contrataciones de comedor
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá mensualmente el servicio
+            de comedor contratado por los alumnos.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'comedor_contratacion_crear' %}"
         class="boton"
     >
-        Nueva contratación
+        + Nueva contratación
     </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="servicios" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Contrataciones registradas
+        </span>
+
+        <strong>
+            {{ contrataciones|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Consultá alumnos, servicios,
+        períodos y estado de cada contratación.
+    </p>
 
 </div>
 
 
-<div class="tarjeta">
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Comedor escolar
+            </div>
+
+            <h2>
+                Servicios contratados
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ contrataciones|length }} registros
+        </span>
+
+    </div>
+
 
     {% if contrataciones %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table class="tabla-gestion">
 
-                <tr>
-                    <th>Alumno</th>
-                    <th>Legajo</th>
-                    <th>Servicio</th>
-                    <th>Período</th>
-                    <th>Valor</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
+                        <th>Alumno</th>
+                        <th>Servicio</th>
+                        <th>Período</th>
+                        <th>Valor</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
 
-            <tbody>
+                </thead>
 
-                {% for contratacion in contrataciones %}
 
-                <tr>
+                <tbody>
 
-                    <td>
-                        {{ contratacion.alumno.apellido }},
-                        {{ contratacion.alumno.nombre }}
-                    </td>
+                    {% for contratacion in contrataciones %}
 
-                    <td>
-                        {{ contratacion.alumno.legajo }}
-                    </td>
+                        <tr>
 
-                    <td>
-                        {{ contratacion.servicio.nombre }}
-                    </td>
+                            <td>
 
-                    <td>
-                        {{ contratacion.get_mes_display }}
-                        {{ contratacion.anio }}
-                    </td>
+                                <div class="registro-persona">
 
-                    <td>
-                        $ {{ contratacion.servicio.valor_mensual }}
-                    </td>
+                                    <div class="registro-avatar">
 
-                    <td>
+                                        {{ contratacion.alumno.nombre|first }}
+                                        {{ contratacion.alumno.apellido|first }}
 
-                        {% if contratacion.estado %}
-                            Activa
-                        {% else %}
-                            Cancelada
-                        {% endif %}
+                                    </div>
 
-                    </td>
+                                    <div>
 
-                    <td>
+                                        <strong>
+                                            {{ contratacion.alumno.apellido }},
+                                            {{ contratacion.alumno.nombre }}
+                                        </strong>
 
-                        <a
-                            href="{% url 'comedor_contratacion_editar' contratacion.id_contratacion_comedor %}"
-                            class="boton-secundario"
-                        >
-                            Editar
-                        </a>
+                                        <span>
+                                            Legajo {{ contratacion.alumno.legajo }}
+                                            ·
+                                            {{ contratacion.alumno.curso.nombre }}
+                                            {{ contratacion.alumno.curso.division }}
+                                        </span>
 
-                        {% if contratacion.estado %}
+                                    </div>
 
-                        <form
-                            method="post"
-                            action="{% url 'comedor_contratacion_desactivar' contratacion.id_contratacion_comedor %}"
-                            style="display:inline;"
-                        >
+                                </div>
 
-                            {% csrf_token %}
+                            </td>
 
-                            <button
-                                type="submit"
-                                class="boton-peligro"
-                            >
-                                Cancelar
-                            </button>
 
-                        </form>
+                            <td>
 
-                        {% endif %}
+                                <strong class="tabla-dato-destacado">
+                                    {{ contratacion.servicio.nombre }}
+                                </strong>
 
-                    </td>
+                            </td>
 
-                </tr>
 
-                {% endfor %}
+                            <td>
 
-            </tbody>
+                                <span class="badge badge-acento">
 
-        </table>
+                                    {{ contratacion.get_mes_display }}
+                                    {{ contratacion.anio }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                $ {{ contratacion.servicio.valor_mensual }}
+                            </td>
+
+
+                            <td>
+
+                                {% if contratacion.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Cancelada
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'comedor_contratacion_editar' contratacion.id_contratacion_comedor %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if contratacion.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'comedor_contratacion_desactivar' contratacion.id_contratacion_comedor %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Cancelar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
+
             No existen contrataciones de comedor.
-        </p>
+
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

@@ -33,6 +33,24 @@ urlpatterns = [
         views.alumno_mis_datos,
         name="alumno_mis_datos"
     ),
+    
+    path(
+        "alumno/materias/",
+        views.alumno_materias,
+        name="alumno_materias"
+    ),
+    
+    path(
+        "alumno/horarios/",
+        views.alumno_horarios,
+        name="alumno_horarios"
+    ),
+
+    path(
+        "alumno/deportes/",
+        views.alumno_deportes,
+        name="alumno_deportes"
+    ),
 
     path(
         "alumno/mis-datos/editar/",
@@ -75,6 +93,24 @@ urlpatterns = [
         "profesor/mis-datos/",
         views.profesor_mis_datos,
         name="profesor_mis_datos"
+    ),
+    
+    path(
+        "profesor/cursos/",
+        views.profesor_cursos,
+        name="profesor_cursos"
+    ),
+
+    path(
+        "profesor/asistencias/",
+        views.profesor_asistencias,
+        name="profesor_asistencias"
+    ),
+
+    path(
+        "profesor/calificaciones/",
+        views.profesor_calificaciones,
+        name="profesor_calificaciones"
     ),
 
     path(

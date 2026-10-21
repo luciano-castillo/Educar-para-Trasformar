@@ -1,44 +1,276 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-
-    <title>
-        {{ titulo }}
-    </title>
-</head>
+{% extends "base.html" %}
 
 
-<body>
-
-    <h1>
-        {{ titulo }}
-    </h1>
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
 
 
-    <form method="POST">
+{% block content %}
+
+
+<!-- ============================== -->
+<!-- CABECERA                       -->
+<!-- ============================== -->
+
+<section class="gestion-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            {{ titulo }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+
+            {% if form.instance.pk %}
+
+                Modificá la información
+                del alumno seleccionado.
+
+            {% else %}
+
+                Completá los datos para registrar
+                un nuevo alumno.
+
+            {% endif %}
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'alumno_lista' %}"
+        class="boton-secundario"
+    >
+        ← Volver a alumnos
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
+
+
+<!-- ============================== -->
+<!-- FORMULARIO                     -->
+<!-- ============================== -->
+
+<section class="formulario-admin-contenedor">
+
+
+    <div class="formulario-admin-cabecera">
+
+        <div class="formulario-admin-icono">
+            {% if form.instance.pk %}
+                ✎
+            {% else %}
+                +
+            {% endif %}
+        </div>
+
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Datos del alumno
+            </div>
+
+            <h2>
+
+                {% if form.instance.pk %}
+
+                    Modificar registro
+
+                {% else %}
+
+                    Nuevo registro
+
+                {% endif %}
+
+            </h2>
+
+            <p>
+                Los campos del formulario corresponden
+                a la información académica y personal
+                del alumno.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <form
+        method="post"
+        class="formulario-admin"
+    >
 
         {% csrf_token %}
 
-        {{ form.as_p }}
+
+        <!-- ERRORES GENERALES -->
+
+        {% if form.non_field_errors %}
+
+            <div class="formulario-error-general">
+
+                {% for error in form.non_field_errors %}
+
+                    <p>
+                        {{ error }}
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
 
 
-        <button type="submit">
-            Guardar
-        </button>
+        <!-- CAMPOS -->
+
+        <div class="formulario-grid">
+
+            {% for field in form %}
+
+
+                {% if field.field.widget.input_type == "checkbox" %}
+
+                    <div class="campo-formulario campo-checkbox">
+
+                        <label class="checkbox-contenedor">
+
+                            {{ field }}
+
+                            <span>
+                                {{ field.label }}
+                            </span>
+
+                        </label>
+
+
+                        {% if field.help_text %}
+
+                            <small class="campo-ayuda">
+                                {{ field.help_text }}
+                            </small>
+
+                        {% endif %}
+
+
+                        {% if field.errors %}
+
+                            <div class="campo-error">
+
+                                {% for error in field.errors %}
+
+                                    <span>
+                                        {{ error }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                {% else %}
+
+
+                    <div class="campo-formulario">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+
+                            {% if field.field.required %}
+                                <span class="campo-requerido">*</span>
+                            {% endif %}
+                        </label>
+
+
+                        {{ field }}
+
+
+                        {% if field.help_text %}
+
+                            <small class="campo-ayuda">
+                                {{ field.help_text }}
+                            </small>
+
+                        {% endif %}
+
+
+                        {% if field.errors %}
+
+                            <div class="campo-error">
+
+                                {% for error in field.errors %}
+
+                                    <span>
+                                        {{ error }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                {% endif %}
+
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <div class="formulario-admin-acciones">
+
+            <button
+                type="submit"
+                class="boton"
+            >
+
+                {% if form.instance.pk %}
+
+                    Guardar cambios
+
+                {% else %}
+
+                    Registrar alumno
+
+                {% endif %}
+
+            </button>
+
+
+            <a
+                href="{% url 'alumno_lista' %}"
+                class="boton-secundario"
+            >
+                Cancelar
+            </a>
+
+        </div>
 
     </form>
 
 
-    <br>
+</section>
 
 
-    <a href="{% url 'alumno_lista' %}">
-        Volver
-    </a>
-
-
-</body>
-
-</html>
+{% endblock %}

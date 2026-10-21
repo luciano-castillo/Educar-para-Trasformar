@@ -1,110 +1,198 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Horarios | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Horarios</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los horarios académicos.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            Horarios
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los días y franjas
+            horarias académicas.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'horario_crear' %}"
         class="boton"
     >
-        Nuevo horario
+        + Nuevo horario
     </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Horarios registrados
+        </span>
+
+        <strong>
+            {{ horarios|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Estos horarios pueden utilizarse posteriormente
+        para asignar materias y actividades.
+    </p>
 
 </div>
 
 
-<div class="tarjeta">
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Registros
+            </div>
+
+            <h2>
+                Listado de horarios
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ horarios|length }} registros
+        </span>
+
+    </div>
+
 
     {% if horarios %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>ID</th>
-                    <th>Día</th>
-                    <th>Hora inicio</th>
-                    <th>Hora fin</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for horario in horarios %}
+                <thead>
 
                     <tr>
-
-                        <td>
-                            {{ horario.id_horario }}
-                        </td>
-
-                        <td>
-                            {{ horario.get_dia_semana_display }}
-                        </td>
-
-                        <td>
-                            {{ horario.hora_inicio|time:"H:i" }}
-                        </td>
-
-                        <td>
-                            {{ horario.hora_fin|time:"H:i" }}
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'horario_editar' horario.id_horario %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-
-                            <form
-                                method="post"
-                                action="{% url 'horario_eliminar' horario.id_horario %}"
-                                style="display:inline;"
-                            >
-
-                                {% csrf_token %}
-
-                                <button
-                                    type="submit"
-                                    class="boton-peligro"
-                                >
-                                    Eliminar
-                                </button>
-
-                            </form>
-
-                        </td>
-
+                        <th>Día</th>
+                        <th>Hora de inicio</th>
+                        <th>Hora de finalización</th>
+                        <th>Franja horaria</th>
+                        <th>Acciones</th>
                     </tr>
 
-                {% endfor %}
+                </thead>
 
-            </tbody>
 
-        </table>
+                <tbody>
+
+                    {% for horario in horarios %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ horario.get_dia_semana_display }}
+                                </strong>
+
+                            </td>
+
+                            <td>
+                                {{ horario.hora_inicio|time:"H:i" }}
+                            </td>
+
+                            <td>
+                                {{ horario.hora_fin|time:"H:i" }}
+                            </td>
+
+                            <td>
+
+                                <span class="badge badge-acento">
+
+                                    {{ horario.hora_inicio|time:"H:i" }}
+                                    -
+                                    {{ horario.hora_fin|time:"H:i" }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'horario_editar' horario.id_horario %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'horario_eliminar' horario.id_horario %}"
+                                        class="form-accion-inline"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="boton-peligro boton-tabla"
+                                        >
+                                            Eliminar
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
             No hay horarios registrados.
-        </p>
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

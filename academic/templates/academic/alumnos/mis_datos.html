@@ -2,113 +2,433 @@
 
 
 {% block title %}
-    Mis datos
+    Mi resumen | Educar Para Transformar
 {% endblock %}
 
 
 {% block content %}
 
-    <h1>
-        Hola, {{ alumno.nombre }}
-    </h1>
 
-    <p>
-        Consultá tu información personal y académica.
-    </p>
+<!-- ============================== -->
+<!-- CABECERA DEL ALUMNO            -->
+<!-- ============================== -->
+
+{% include "academic/alumnos/_cabecera.html" with titulo_pagina="Mi resumen" subtitulo_pagina="Consultá tu información personal y académica." %}
 
 
-    <div class="tarjeta">
+<!-- ============================== -->
+<!-- NAVEGACIÓN                     -->
+<!-- ============================== -->
 
-        <h2>
-            Información personal
-        </h2>
 
-        <p>
-            <strong>DNI:</strong>
-            {{ alumno.dni }}
-        </p>
+{% include "academic/alumnos/_navegacion.html" %}
 
-        <p>
-            <strong>Legajo:</strong>
-            {{ alumno.legajo }}
-        </p>
+<!-- ============================== -->
+<!-- RESUMEN                        -->
+<!-- ============================== -->
 
-        <p>
-            <strong>Nombre:</strong>
-            {{ alumno.nombre }}
-        </p>
+<div class="pagina-cabecera">
 
-        <p>
-            <strong>Apellido:</strong>
-            {{ alumno.apellido }}
-        </p>
+    <div class="pagina-etiqueta">
+        Alumno
+    </div>
 
-        <p>
-            <strong>Fecha de nacimiento:</strong>
-            {{ alumno.fecha_nacimiento }}
-        </p>
+    <h2>
+        Tu información en un vistazo
+    </h2>
+
+</div>
+
+
+<div class="resumen-grid">
+
+
+    <div class="tarjeta-resumen">
+
+        <span class="tarjeta-resumen-etiqueta">
+            Curso actual
+        </span>
+
+        <span class="tarjeta-resumen-valor">
+            {{ alumno.curso.nombre }}
+            {{ alumno.curso.division }}
+        </span>
+
+        <span class="tarjeta-resumen-detalle">
+            {{ alumno.curso.nivel.nombre }}
+        </span>
 
     </div>
 
 
-    <div class="tarjeta">
+    <div class="tarjeta-resumen">
 
-        <h2>
-            Datos de contacto
-        </h2>
+        <span class="tarjeta-resumen-etiqueta">
+            Materias
+        </span>
 
-        <p>
-            <strong>Correo:</strong>
-            {{ alumno.correo }}
-        </p>
+        <span class="tarjeta-resumen-valor">
+            {{ cantidad_materias }}
+        </span>
 
-        <p>
-            <strong>Teléfono:</strong>
-            {{ alumno.telefono }}
-        </p>
+        <span class="tarjeta-resumen-detalle">
+            Materias asignadas
+        </span>
 
-        <p>
-            <strong>Domicilio:</strong>
-            {{ alumno.domicilio }}
-        </p>
+    </div>
+
+
+    <div class="tarjeta-resumen">
+
+        <span class="tarjeta-resumen-etiqueta">
+            Promedio general
+        </span>
+
+        <span class="tarjeta-resumen-valor">
+
+            {% if promedio_general %}
+
+                {{ promedio_general|floatformat:1 }}
+
+            {% else %}
+
+                -
+
+            {% endif %}
+
+        </span>
+
+        <span class="tarjeta-resumen-detalle">
+
+            {% if promedio_general %}
+
+                Según notas registradas
+
+            {% else %}
+
+                Sin notas registradas
+
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <div class="tarjeta-resumen">
+
+        <span class="tarjeta-resumen-etiqueta">
+            Deportes activos
+        </span>
+
+        <span class="tarjeta-resumen-valor">
+            {{ cantidad_deportes }}
+        </span>
+
+        <span class="tarjeta-resumen-detalle">
+            Inscripciones actuales
+        </span>
+
+    </div>
+
+
+</div>
+
+
+<!-- ============================== -->
+<!-- CONTENIDO EN DOS COLUMNAS      -->
+<!-- ============================== -->
+
+<div class="dashboard-dos-columnas">
+
+
+    <!-- ASISTENCIA -->
+
+    <section class="tarjeta">
+
+        <div class="dashboard-seccion-cabecera">
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Asistencia
+                </span>
+
+                <h2>
+                    Resumen de asistencia
+                </h2>
+
+            </div>
+
+            <span class="badge badge-acento">
+
+                {{ resumen_asistencia.total }}
+                registros
+
+            </span>
+
+        </div>
+
+
+        <div class="asistencia-resumen-grid">
+
+
+            <div class="dato-resumen">
+
+                <span>
+                    Presentes
+                </span>
+
+                <strong class="texto-exito">
+                    {{ resumen_asistencia.presentes }}
+                </strong>
+
+            </div>
+
+
+            <div class="dato-resumen">
+
+                <span>
+                    Ausentes
+                </span>
+
+                <strong class="texto-peligro">
+                    {{ resumen_asistencia.ausentes }}
+                </strong>
+
+            </div>
+
+
+            <div class="dato-resumen">
+
+                <span>
+                    Tardes
+                </span>
+
+                <strong class="texto-advertencia">
+                    {{ resumen_asistencia.tardes }}
+                </strong>
+
+            </div>
+
+
+            <div class="dato-resumen">
+
+                <span>
+                    Justificadas
+                </span>
+
+                <strong>
+                    {{ resumen_asistencia.justificados }}
+                </strong>
+
+            </div>
+
+
+        </div>
 
 
         <a
-            class="boton"
+            href="{% url 'alumno_academico' %}"
+            class="boton-secundario"
+        >
+            Ver información académica
+        </a>
+
+    </section>
+
+
+    <!-- DATOS PERSONALES -->
+
+    <section class="tarjeta">
+
+        <div class="dashboard-seccion-cabecera">
+
+            <div>
+
+                <span class="pagina-etiqueta">
+                    Perfil
+                </span>
+
+                <h2>
+                    Mis datos
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="datos-lista">
+
+            <div class="datos-fila">
+
+                <span>DNI</span>
+
+                <strong>
+                    {{ alumno.dni }}
+                </strong>
+
+            </div>
+
+
+            <div class="datos-fila">
+
+                <span>Correo</span>
+
+                <strong>
+                    {{ alumno.correo }}
+                </strong>
+
+            </div>
+
+
+            <div class="datos-fila">
+
+                <span>Teléfono</span>
+
+                <strong>
+                    {{ alumno.telefono }}
+                </strong>
+
+            </div>
+
+
+            <div class="datos-fila">
+
+                <span>Domicilio</span>
+
+                <strong>
+                    {{ alumno.domicilio }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <a
             href="{% url 'alumno_editar_mis_datos' %}"
+            class="boton-secundario"
         >
             Modificar datos de contacto
         </a>
 
-    </div>
+    </section>
 
 
-    <div class="tarjeta">
+</div>
 
-        <h2>
-            Información académica
-        </h2>
 
-        <p>
-            <strong>Curso:</strong>
+<!-- ============================== -->
+<!-- NOTAS RECIENTES                -->
+<!-- ============================== -->
 
-            {{ alumno.curso.nombre }}
-            {{ alumno.curso.division }}
-        </p>
+<section class="tarjeta">
 
-        <p>
-            <strong>Nivel:</strong>
+    <div class="dashboard-seccion-cabecera">
 
-            {{ alumno.curso.nivel.nombre }}
-        </p>
+        <div>
+
+            <span class="pagina-etiqueta">
+                Académico
+            </span>
+
+            <h2>
+                Notas recientes
+            </h2>
+
+        </div>
+
 
         <a
             href="{% url 'alumno_academico' %}"
-            class="boton"
+            class="enlace-seccion"
         >
-            Ver mi información académica
+            Ver todas
         </a>
 
     </div>
+
+
+    {% if notas_recientes %}
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Materia</th>
+                        <th>Evaluación</th>
+                        <th>Período</th>
+                        <th>Fecha</th>
+                        <th>Nota</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for nota in notas_recientes %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>
+                                    {{ nota.dictado.materia.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                {{ nota.evaluacion }}
+                            </td>
+
+
+                            <td>
+                                {{ nota.periodo }}
+                            </td>
+
+
+                            <td>
+                                {{ nota.fecha|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    {{ nota.calificacion }}
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            Todavía no existen notas registradas.
+
+        </div>
+
+    {% endif %}
+
+</section>
+
 
 {% endblock %}

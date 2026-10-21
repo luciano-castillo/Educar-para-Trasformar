@@ -16,6 +16,10 @@ def login_usuario(request):
     ).upper()
 
     roles_validos = dict(PerfilUsuario.Rol.choices)
+    perfil_nombre = roles_validos.get(
+        perfil_seleccionado,
+        ""
+    )
 
     if perfil_seleccionado not in roles_validos:
         perfil_seleccionado = ""
@@ -94,6 +98,7 @@ def login_usuario(request):
         "accounts/login.html",
         {
             "perfil_seleccionado": perfil_seleccionado,
+            "perfil_nombre": perfil_nombre,
             "roles_validos": roles_validos,
         }
     )

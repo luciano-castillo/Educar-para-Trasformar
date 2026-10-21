@@ -2,141 +2,319 @@
 
 
 {% block title %}
-    Gestión de profesores
+    Gestión de profesores | Educar Para Transformar
 {% endblock %}
 
 
 {% block content %}
 
-    <h1>
-        Gestión de Profesores
-    </h1>
 
-    <p>
-        Administrá los profesores registrados en la institución.
-    </p>
+<!-- ============================== -->
+<!-- CABECERA                       -->
+<!-- ============================== -->
+
+<section class="gestion-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión académica
+        </div>
+
+        <h1>
+            Profesores
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los docentes registrados
+            en la institución.
+        </p>
+
+    </div>
 
 
     <a
-        class="boton"
         href="{% url 'profesor_crear' %}"
+        class="boton"
     >
         + Registrar profesor
     </a>
 
-
-    <br><br>
-
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Legajo</th>
-                <th>DNI</th>
-                <th>Apellido</th>
-                <th>Nombre</th>
-                <th>Especialidad</th>
-                <th>Correo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-
-        </thead>
+</section>
 
 
-        <tbody>
-
-            {% for profesor in profesores %}
-
-                <tr>
-
-                    <td>
-                        {{ profesor.legajo }}
-                    </td>
-
-                    <td>
-                        {{ profesor.dni }}
-                    </td>
-
-                    <td>
-                        {{ profesor.apellido }}
-                    </td>
-
-                    <td>
-                        {{ profesor.nombre }}
-                    </td>
-
-                    <td>
-                        {{ profesor.especialidad }}
-                    </td>
-
-                    <td>
-                        {{ profesor.correo }}
-                    </td>
-
-                    <td>
-
-                        {% if profesor.estado %}
-                            Activo
-                        {% else %}
-                            Inactivo
-                        {% endif %}
-
-                    </td>
+{% include "accounts/_admin_navegacion.html" with modulo_activo="academico" %}
 
 
-                    <td>
+<!-- ============================== -->
+<!-- RESUMEN                        -->
+<!-- ============================== -->
 
-                        <a
-                            class="boton boton-secundario"
-                            href="{% url 'profesor_editar' profesor.id_profesor %}"
-                        >
-                            Editar
-                        </a>
+<div class="gestion-resumen">
 
+    <div>
 
-                        {% if profesor.estado %}
+        <span>
+            Profesores registrados
+        </span>
 
-                            <form
-                                method="POST"
-                                action="{% url 'profesor_desactivar' profesor.id_profesor %}"
-                                style="display:inline;"
-                            >
+        <strong>
+            {{ profesores|length }}
+        </strong>
 
-                                {% csrf_token %}
-
-                                <button
-                                    class="boton boton-peligro"
-                                    type="submit"
-                                >
-                                    Desactivar
-                                </button>
-
-                            </form>
-
-                        {% endif %}
-
-                    </td>
-
-                </tr>
+    </div>
 
 
-            {% empty %}
+    <p>
+        Consultá la información profesional,
+        datos de contacto y estado de los docentes.
+    </p>
 
-                <tr>
+</div>
 
-                    <td colspan="8">
-                        No hay profesores registrados.
-                    </td>
 
-                </tr>
+<!-- ============================== -->
+<!-- TABLA                          -->
+<!-- ============================== -->
 
-            {% endfor %}
+<section class="tarjeta">
 
-        </tbody>
+    <div class="dashboard-seccion-cabecera">
 
-    </table>
+        <div>
+
+            <div class="pagina-etiqueta">
+                Registros
+            </div>
+
+            <h2>
+                Listado de profesores
+            </h2>
+
+        </div>
+
+
+        <span class="badge badge-acento">
+            {{ profesores|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if profesores %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Profesor</th>
+                        <th>Legajo</th>
+                        <th>DNI</th>
+                        <th>Especialidad</th>
+                        <th>Contacto</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for profesor in profesores %}
+
+                        <tr>
+
+
+                            <!-- PROFESOR -->
+
+                            <td>
+
+                                <div class="registro-persona">
+
+                                    <div class="registro-avatar">
+
+                                        {{ profesor.nombre|first }}
+                                        {{ profesor.apellido|first }}
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <strong>
+
+                                            {{ profesor.apellido }},
+                                            {{ profesor.nombre }}
+
+                                        </strong>
+
+                                        <span>
+                                            Docente
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- LEGAJO -->
+
+                            <td>
+                                {{ profesor.legajo }}
+                            </td>
+
+
+                            <!-- DNI -->
+
+                            <td>
+                                {{ profesor.dni }}
+                            </td>
+
+
+                            <!-- ESPECIALIDAD -->
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ profesor.especialidad }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- CONTACTO -->
+
+                            <td>
+
+                                <div class="tabla-contacto">
+
+                                    <span>
+                                        {{ profesor.correo }}
+                                    </span>
+
+                                    {% if profesor.telefono %}
+
+                                        <small>
+                                            {{ profesor.telefono }}
+                                        </small>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- ESTADO -->
+
+                            <td>
+
+                                {% if profesor.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ACCIONES -->
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'profesor_editar' profesor.id_profesor %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if profesor.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'profesor_desactivar' profesor.id_profesor %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No hay profesores registrados.
+
+            <br><br>
+
+            <a
+                href="{% url 'profesor_crear' %}"
+                class="boton"
+            >
+                Registrar primer profesor
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}"
+        class="boton-secundario"
+    >
+        ← Volver al panel de administración
+    </a>
+
+</div>
+
 
 {% endblock %}

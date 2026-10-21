@@ -1,123 +1,153 @@
 {% extends "base.html" %}
 
+
 {% block title %}
-    Historial de notas
+    Historial de notas | Educar Para Transformar
 {% endblock %}
+
 
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        Historial de notas
-    </h1>
-
-    <p>
-        <strong>Materia:</strong>
-        {{ dictado.materia.nombre }}
-    </p>
-
-    <p>
-        <strong>Curso:</strong>
-        {{ dictado.curso.nombre }}
-        {{ dictado.curso.division }}
-    </p>
-
-    <p>
-        <strong>Nivel:</strong>
-        {{ dictado.curso.nivel.nombre }}
-    </p>
-
-</div>
+{% include "academic/profesores/_cabecera.html" with titulo_pagina="Historial de notas" subtitulo_pagina="Consultá las evaluaciones registradas para esta materia y curso." %}
 
 
-<div class="tarjeta">
+{% include "academic/profesores/_navegacion.html" %}
+
+
+{% include "academic/profesores/_dictado_resumen.html" %}
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Historial
+            </div>
+
+            <h2>
+                Evaluaciones registradas
+            </h2>
+
+        </div>
+
+
+        <a
+            href="{% url 'nota_registrar' dictado.id_dictado %}"
+            class="boton"
+        >
+            Nueva evaluación
+        </a>
+
+    </div>
+
 
     {% if historial %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>Período</th>
-                    <th>Evaluación</th>
-                    <th>Fecha</th>
-                    <th>Notas cargadas</th>
-                    <th>Acciones</th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Evaluación</th>
+                        <th>Fecha</th>
+                        <th>Notas cargadas</th>
+                        <th>Acciones</th>
+                    </tr>
 
-            <tbody>
+                </thead>
 
-                {% for fila in historial %}
 
-                <tr>
+                <tbody>
 
-                    <td>
-                        {{ fila.periodo }}
-                    </td>
+                    {% for fila in historial %}
 
-                    <td>
-                        {{ fila.evaluacion }}
-                    </td>
+                        <tr>
 
-                    <td>
-                        {{ fila.fecha|date:"d/m/Y" }}
-                    </td>
+                            <td>
 
-                    <td>
-                        {{ fila.cantidad_notas }}
-                    </td>
+                                <span class="badge badge-acento">
+                                    {{ fila.periodo }}
+                                </span>
 
-                    <td>
+                            </td>
 
-                        <a
-                            href="{% url 'nota_registrar' dictado.id_dictado %}?periodo={{ fila.periodo|urlencode }}&evaluacion={{ fila.evaluacion|urlencode }}"
-                            class="boton-secundario"
-                        >
-                            Ver / editar
-                        </a>
 
-                    </td>
+                            <td>
 
-                </tr>
+                                <strong>
+                                    {{ fila.evaluacion }}
+                                </strong>
 
-                {% endfor %}
+                            </td>
 
-            </tbody>
 
-        </table>
+                            <td>
+                                {{ fila.fecha|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-info">
+                                    {{ fila.cantidad_notas }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{% url 'nota_registrar' dictado.id_dictado %}?periodo={{ fila.periodo|urlencode }}&evaluacion={{ fila.evaluacion|urlencode }}"
+                                    class="boton-secundario"
+                                >
+                                    Ver / editar
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
-            Todavía no existen notas registradas
-            para esta materia.
-        </p>
+        <div class="estado-vacio">
+
+            Todavía no existen notas
+            registradas para esta materia.
+
+        </div>
 
     {% endif %}
 
-</div>
+</section>
 
 
-<div class="tarjeta">
-
-    <a
-        href="{% url 'nota_registrar' dictado.id_dictado %}"
-        class="boton"
-    >
-        Registrar nueva evaluación
-    </a>
+<div class="detalle-volver">
 
     <a
-        href="{% url 'profesor_mis_datos' %}"
+        href="{% url 'profesor_calificaciones' %}"
         class="boton-secundario"
     >
-        Volver a mis materias
+        ← Volver a Calificaciones
     </a>
 
 </div>
+
 
 {% endblock %}

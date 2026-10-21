@@ -1,125 +1,239 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Rutas de transporte | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Rutas de Transporte</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de las rutas
-        de transporte escolar.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Servicios
+        </div>
+
+        <h1>
+            Rutas de transporte
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá las rutas disponibles
+            para el transporte escolar.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'ruta_crear' %}"
         class="boton"
     >
-        Nueva ruta
+        + Nueva ruta
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="servicios" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Rutas registradas
+        </span>
+
+        <strong>
+            {{ rutas|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Configurá recorridos, valores mensuales
+        y disponibilidad del servicio.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Transporte escolar
+            </div>
+
+            <h2>
+                Rutas disponibles
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ rutas|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if rutas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Ruta</th>
+                        <th>Descripción</th>
+                        <th>Valor mensual</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for ruta in rutas %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ ruta.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                {{ ruta.descripcion|default:"Sin descripción" }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    $ {{ ruta.valor_mensual }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if ruta.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactiva
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'ruta_editar' ruta.id_ruta %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if ruta.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'ruta_desactivar' ruta.id_ruta %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen rutas registradas.
+
+            <br><br>
+
+            <a
+                href="{% url 'ruta_crear' %}"
+                class="boton"
+            >
+                Registrar primera ruta
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#servicios"
+        class="boton-secundario"
+    >
+        ← Volver a Servicios
     </a>
 
 </div>
 
-
-<div class="tarjeta">
-
-    {% if rutas %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Ruta</th>
-                    <th>Descripción</th>
-                    <th>Valor mensual</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for ruta in rutas %}
-
-                    <tr>
-
-                        <td>
-                            {{ ruta.id_ruta }}
-                        </td>
-
-                        <td>
-                            {{ ruta.nombre }}
-                        </td>
-
-                        <td>
-                            {{ ruta.descripcion|default:"-" }}
-                        </td>
-
-                        <td>
-                            $ {{ ruta.valor_mensual }}
-                        </td>
-
-                        <td>
-
-                            {% if ruta.estado %}
-                                Activa
-                            {% else %}
-                                Inactiva
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'ruta_editar' ruta.id_ruta %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-                            {% if ruta.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'ruta_desactivar' ruta.id_ruta %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen rutas registradas.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}

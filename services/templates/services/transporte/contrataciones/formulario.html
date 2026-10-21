@@ -1,41 +1,61 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>{{ titulo }}</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Seleccione el alumno, la ruta
-        y el período correspondiente.
-    </p>
+    <div>
 
-    <form
-        method="post"
-        class="formulario"
+        <div class="pagina-etiqueta">
+            Servicios
+        </div>
+
+        <h1>
+            {{ titulo }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+
+            {% if form.instance.pk %}
+
+                Modificá la contratación
+                de transporte seleccionada.
+
+            {% else %}
+
+                Asigná una ruta de transporte
+                a un alumno para un período determinado.
+
+            {% endif %}
+
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'transporte_contratacion_lista' %}"
+        class="boton-secundario"
     >
+        ← Volver a contrataciones
+    </a>
 
-        {% csrf_token %}
+</section>
 
-        {{ form.as_p }}
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Guardar
-        </button>
+{% include "accounts/_admin_navegacion.html" with modulo_activo="servicios" %}
 
-        <a
-            href="{% url 'transporte_contratacion_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
 
-    </form>
+{% url 'transporte_contratacion_lista' as volver_url %}
 
-</div>
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Contratación de transporte" descripcion_formulario="Seleccioná alumno, ruta, mes, año y estado de la contratación." texto_registrar="Registrar contratación" volver_url=volver_url %}
+
 
 {% endblock %}

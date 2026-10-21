@@ -1,189 +1,296 @@
 {% extends "base.html" %}
 
+
 {% block title %}
-    Registrar notas
+    Registrar notas | Educar Para Transformar
 {% endblock %}
+
 
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>
-        Registrar notas
-    </h1>
-
-    <p>
-        <strong>Materia:</strong>
-        {{ dictado.materia.nombre }}
-    </p>
-
-    <p>
-        <strong>Curso:</strong>
-        {{ dictado.curso.nombre }}
-        {{ dictado.curso.division }}
-    </p>
-
-    <p>
-        <strong>Nivel:</strong>
-        {{ dictado.curso.nivel.nombre }}
-    </p>
-
-</div>
+{% include "academic/profesores/_cabecera.html" with titulo_pagina="Registrar notas" subtitulo_pagina="Cargá o modificá las calificaciones de los alumnos del curso." %}
 
 
-<div class="tarjeta">
-
-    <form method="post">
-
-        {% csrf_token %}
-
-        <p>
-
-            <label for="periodo">
-                Período
-            </label>
-
-            <input
-                type="text"
-                id="periodo"
-                name="periodo"
-                value="{{ periodo }}"
-                placeholder="Ej.: 1° Trimestre"
-                required
-            >
-
-        </p>
+{% include "academic/profesores/_navegacion.html" %}
 
 
-        <p>
-
-            <label for="evaluacion">
-                Evaluación
-            </label>
-
-            <input
-                type="text"
-                id="evaluacion"
-                name="evaluacion"
-                value="{{ evaluacion }}"
-                placeholder="Ej.: Trabajo práctico N°1"
-                required
-            >
-
-        </p>
+{% include "academic/profesores/_dictado_resumen.html" %}
 
 
-        <p>
+<form method="post">
 
-            <label for="fecha">
-                Fecha
-            </label>
+    {% csrf_token %}
 
-            <input
-                type="date"
-                id="fecha"
-                name="fecha"
-                value="{{ fecha_seleccionada|date:'Y-m-d' }}"
-                required
-            >
 
-        </p>
+    <!-- ============================== -->
+    <!-- DATOS DE LA EVALUACIÓN        -->
+    <!-- ============================== -->
+
+    <section class="tarjeta">
+
+        <div class="dashboard-seccion-cabecera">
+
+            <div>
+
+                <div class="pagina-etiqueta">
+                    Evaluación
+                </div>
+
+                <h2>
+                    Datos generales
+                </h2>
+
+            </div>
+
+            {% if periodo and evaluacion %}
+
+                <span class="badge badge-acento">
+                    Edición / consulta
+                </span>
+
+            {% else %}
+
+                <span class="badge badge-acento">
+                    Nueva evaluación
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="evaluacion-datos-grid">
+
+
+            <div class="evaluacion-campo">
+
+                <label for="periodo">
+                    Período
+                </label>
+
+                <input
+                    type="text"
+                    id="periodo"
+                    name="periodo"
+                    value="{{ periodo }}"
+                    placeholder="Ej.: 1° Trimestre"
+                    required
+                >
+
+            </div>
+
+
+            <div class="evaluacion-campo">
+
+                <label for="evaluacion">
+                    Evaluación
+                </label>
+
+                <input
+                    type="text"
+                    id="evaluacion"
+                    name="evaluacion"
+                    value="{{ evaluacion }}"
+                    placeholder="Ej.: Trabajo práctico N°1"
+                    required
+                >
+
+            </div>
+
+
+            <div class="evaluacion-campo">
+
+                <label for="fecha">
+                    Fecha
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha"
+                    name="fecha"
+                    value="{{ fecha_seleccionada|date:'Y-m-d' }}"
+                    required
+                >
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================== -->
+    <!-- ALUMNOS                        -->
+    <!-- ============================== -->
+
+    <section class="tarjeta">
+
+        <div class="dashboard-seccion-cabecera">
+
+            <div>
+
+                <div class="pagina-etiqueta">
+                    Calificaciones
+                </div>
+
+                <h2>
+                    Alumnos del curso
+                </h2>
+
+            </div>
+
+
+            {% if filas %}
+
+                <span class="badge badge-acento">
+                    {{ filas|length }} alumnos
+                </span>
+
+            {% endif %}
+
+        </div>
 
 
         {% if filas %}
 
-            <table>
+            <div class="tabla-contenedor">
 
-                <thead>
+                <table class="tabla-registro-docente">
 
-                    <tr>
-                        <th>Alumno</th>
-                        <th>Legajo</th>
-                        <th>Calificación</th>
-                        <th>Observaciones</th>
-                    </tr>
+                    <thead>
 
-                </thead>
+                        <tr>
+                            <th>Alumno</th>
+                            <th>Legajo</th>
+                            <th>Calificación</th>
+                            <th>Observaciones</th>
+                        </tr>
 
-                <tbody>
+                    </thead>
 
-                    {% for fila in filas %}
 
-                    <tr>
+                    <tbody>
 
-                        <td>
-                            {{ fila.alumno.apellido }},
-                            {{ fila.alumno.nombre }}
-                        </td>
+                        {% for fila in filas %}
 
-                        <td>
-                            {{ fila.alumno.legajo }}
-                        </td>
+                            <tr>
 
-                        <td>
+                                <td>
 
-                            <input
-                                type="number"
-                                name="calificacion_{{ fila.alumno.id_alumno }}"
-                                value="{{ fila.calificacion }}"
-                                min="1"
-                                max="10"
-                                step="0.01"
-                                placeholder="1 a 10"
-                            >
+                                    <div class="alumno-tabla">
 
-                        </td>
+                                        <div class="alumno-tabla-avatar">
 
-                        <td>
+                                            {{ fila.alumno.nombre|first }}
+                                            {{ fila.alumno.apellido|first }}
 
-                            <input
-                                type="text"
-                                name="observaciones_{{ fila.alumno.id_alumno }}"
-                                value="{{ fila.observaciones }}"
-                                maxlength="250"
-                                placeholder="Opcional"
-                            >
+                                        </div>
 
-                        </td>
 
-                    </tr>
+                                        <strong>
 
-                    {% endfor %}
+                                            {{ fila.alumno.apellido }},
+                                            {{ fila.alumno.nombre }}
 
-                </tbody>
+                                        </strong>
 
-            </table>
+                                    </div>
 
-            <button
-                type="submit"
-                class="boton"
-            >
-                Guardar notas
-            </button>
+                                </td>
+
+
+                                <td>
+                                    {{ fila.alumno.legajo }}
+                                </td>
+
+
+                                <td>
+
+                                    <input
+                                        class="input-calificacion"
+                                        type="number"
+                                        name="calificacion_{{ fila.alumno.id_alumno }}"
+                                        value="{{ fila.calificacion }}"
+                                        min="1"
+                                        max="10"
+                                        step="0.01"
+                                        placeholder="1 a 10"
+                                    >
+
+                                </td>
+
+
+                                <td>
+
+                                    <input
+                                        type="text"
+                                        name="observaciones_{{ fila.alumno.id_alumno }}"
+                                        value="{{ fila.observaciones }}"
+                                        maxlength="250"
+                                        placeholder="Observación opcional"
+                                    >
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="docente-form-acciones">
+
+                <button
+                    type="submit"
+                    class="boton"
+                >
+                    Guardar notas
+                </button>
+
+
+                <a
+                    href="{% url 'nota_historial' dictado.id_dictado %}"
+                    class="boton-secundario"
+                >
+                    Ver historial
+                </a>
+
+            </div>
+
 
         {% else %}
 
-            <p>
+            <div class="estado-vacio">
+
                 No hay alumnos activos
                 en este curso.
-            </p>
+
+            </div>
 
         {% endif %}
 
-    </form>
+    </section>
 
-</div>
+</form>
 
 
-<div class="tarjeta">
+<div class="detalle-volver">
 
     <a
-        href="{% url 'profesor_mis_datos' %}"
+        href="{% url 'profesor_calificaciones' %}"
         class="boton-secundario"
     >
-        Volver a mis materias
+        ← Volver a Calificaciones
     </a>
 
 </div>
+
 
 {% endblock %}

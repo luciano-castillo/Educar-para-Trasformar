@@ -1,116 +1,277 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Asociaciones de alumnos y tutores | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Alumnos asociados a tutores</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de las relaciones
-        entre padres/tutores y alumnos.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Personas
+        </div>
+
+        <h1>
+            Asociación Tutor–Alumno
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá qué alumnos se encuentran
+            vinculados a cada padre o tutor.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'tutor_alumno_crear' %}"
         class="boton"
     >
-        Nueva asociación
+        + Nueva asociación
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="personas" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Asociaciones registradas
+        </span>
+
+        <strong>
+            {{ relaciones|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Cada asociación permite que un tutor
+        acceda únicamente a la información
+        de sus alumnos vinculados.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Relaciones
+            </div>
+
+            <h2>
+                Alumnos asociados a tutores
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ relaciones|length }} asociaciones
+        </span>
+
+    </div>
+
+
+    {% if relaciones %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Tutor</th>
+                        <th>Alumno asociado</th>
+                        <th>Legajo</th>
+                        <th>Curso</th>
+                        <th>Nivel</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for relacion in relaciones %}
+
+                        <tr>
+
+
+                            <!-- TUTOR -->
+
+                            <td>
+
+                                <div class="registro-persona">
+
+                                    <div class="registro-avatar">
+
+                                        {{ relacion.tutor.nombre|first }}
+                                        {{ relacion.tutor.apellido|first }}
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ relacion.tutor.apellido }},
+                                            {{ relacion.tutor.nombre }}
+                                        </strong>
+
+                                        <span>
+                                            DNI {{ relacion.tutor.dni }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- ALUMNO -->
+
+                            <td>
+
+                                <div class="registro-persona">
+
+                                    <div class="registro-avatar">
+
+                                        {{ relacion.alumno.nombre|first }}
+                                        {{ relacion.alumno.apellido|first }}
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ relacion.alumno.apellido }},
+                                            {{ relacion.alumno.nombre }}
+                                        </strong>
+
+                                        <span>
+                                            Alumno
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- LEGAJO -->
+
+                            <td>
+                                {{ relacion.alumno.legajo }}
+                            </td>
+
+
+                            <!-- CURSO -->
+
+                            <td>
+
+                                <span class="badge badge-acento">
+
+                                    {{ relacion.alumno.curso.nombre }}
+                                    {{ relacion.alumno.curso.division }}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- NIVEL -->
+
+                            <td>
+                                {{ relacion.alumno.curso.nivel.nombre }}
+                            </td>
+
+
+                            <!-- ACCIONES -->
+
+                            <td>
+
+                                <form
+                                    method="post"
+                                    action="{% url 'tutor_alumno_eliminar' relacion.id_relacion %}"
+                                    class="form-accion-inline"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="boton-peligro boton-tabla"
+                                    >
+                                        Desvincular
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen alumnos asociados a tutores.
+
+            <br><br>
+
+            <a
+                href="{% url 'tutor_alumno_crear' %}"
+                class="boton"
+            >
+                Crear primera asociación
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#personas"
+        class="boton-secundario"
+    >
+        ← Volver a Personas
     </a>
 
 </div>
 
-
-<div class="tarjeta">
-
-    {% if relaciones %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Tutor</th>
-                    <th>DNI Tutor</th>
-                    <th>Alumno</th>
-                    <th>Legajo</th>
-                    <th>Curso</th>
-                    <th>Nivel</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for relacion in relaciones %}
-
-                    <tr>
-
-                        <td>
-                            {{ relacion.tutor.apellido }},
-                            {{ relacion.tutor.nombre }}
-                        </td>
-
-                        <td>
-                            {{ relacion.tutor.dni }}
-                        </td>
-
-                        <td>
-                            {{ relacion.alumno.apellido }},
-                            {{ relacion.alumno.nombre }}
-                        </td>
-
-                        <td>
-                            {{ relacion.alumno.legajo }}
-                        </td>
-
-                        <td>
-                            {{ relacion.alumno.curso.nombre }}
-                            {{ relacion.alumno.curso.division }}
-                        </td>
-
-                        <td>
-                            {{ relacion.alumno.curso.nivel.nombre }}
-                        </td>
-
-                        <td>
-
-                            <form
-                                method="post"
-                                action="{% url 'tutor_alumno_eliminar' relacion.id_relacion %}"
-                                style="display:inline;"
-                            >
-
-                                {% csrf_token %}
-
-                                <button
-                                    type="submit"
-                                    class="boton-peligro"
-                                >
-                                    Desvincular
-                                </button>
-
-                            </form>
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen alumnos asociados a tutores.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}

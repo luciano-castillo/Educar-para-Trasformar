@@ -1,41 +1,50 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Nueva factura | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Nueva factura</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Seleccione el alumno y el período
-        que desea facturar.
-    </p>
+    <div>
 
-    <form
-        method="post"
-        class="formulario"
+        <div class="pagina-etiqueta">
+            Gestión económica
+        </div>
+
+        <h1>
+            Nueva factura
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Seleccioná el alumno y el período
+            que querés facturar.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'factura_lista' %}"
+        class="boton-secundario"
     >
+        ← Volver a facturación
+    </a>
 
-        {% csrf_token %}
+</section>
 
-        {{ form.as_p }}
 
-        <button
-            type="submit"
-            class="boton"
-        >
-            Generar factura
-        </button>
+{% include "accounts/_admin_navegacion.html" with modulo_activo="economia" %}
 
-        <a
-            href="{% url 'factura_lista' %}"
-            class="boton-secundario"
-        >
-            Cancelar
-        </a>
 
-    </form>
+{% url 'factura_lista' as volver_url %}
 
-</div>
+{% include "accounts/_formulario_admin.html" with etiqueta_formulario="Generación de factura" descripcion_formulario="Seleccioná un alumno activo, el mes y el año que corresponde facturar." texto_registrar="Generar factura" volver_url=volver_url %}
+
 
 {% endblock %}

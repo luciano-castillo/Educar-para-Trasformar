@@ -1,139 +1,270 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Grupos deportivos | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Grupos deportivos</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de los grupos deportivos
-        de la institución.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Deportes
+        </div>
+
+        <h1>
+            Grupos deportivos
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Organizá los deportes por nivel,
+            profesor y horario.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'grupo_crear' %}"
         class="boton"
     >
-        Nuevo grupo deportivo
+        + Nuevo grupo deportivo
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="deportes" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Grupos registrados
+        </span>
+
+        <strong>
+            {{ grupos|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Cada grupo relaciona un deporte
+        con nivel, profesor y horario.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Organización deportiva
+            </div>
+
+            <h2>
+                Listado de grupos
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ grupos|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if grupos %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Deporte</th>
+                        <th>Nivel</th>
+                        <th>Profesor</th>
+                        <th>Día</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for grupo in grupos %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ grupo.deporte.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    {{ grupo.nivel.nombre }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="registro-persona">
+
+                                    <div class="registro-avatar">
+
+                                        {{ grupo.profesor.nombre|first }}
+                                        {{ grupo.profesor.apellido|first }}
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ grupo.profesor.apellido }},
+                                            {{ grupo.profesor.nombre }}
+                                        </strong>
+
+                                        <span>
+                                            {{ grupo.profesor.especialidad }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                {{ grupo.horario.get_dia_semana_display }}
+                            </td>
+
+
+                            <td>
+
+                                {{ grupo.horario.hora_inicio|time:"H:i" }}
+                                -
+                                {{ grupo.horario.hora_fin|time:"H:i" }}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if grupo.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Inactivo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="tabla-acciones">
+
+                                    <a
+                                        href="{% url 'grupo_editar' grupo.id_grupo %}"
+                                        class="boton-secundario boton-tabla"
+                                    >
+                                        Editar
+                                    </a>
+
+
+                                    {% if grupo.estado %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'grupo_desactivar' grupo.id_grupo %}"
+                                            class="form-accion-inline"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="boton-peligro boton-tabla"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen grupos deportivos registrados.
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#deportes"
+        class="boton-secundario"
+    >
+        ← Volver a Deportes
     </a>
 
 </div>
 
-
-<div class="tarjeta">
-
-    {% if grupos %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Deporte</th>
-                    <th>Nivel</th>
-                    <th>Profesor</th>
-                    <th>Día</th>
-                    <th>Horario</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for grupo in grupos %}
-
-                    <tr>
-
-                        <td>
-                            {{ grupo.id_grupo }}
-                        </td>
-
-                        <td>
-                            {{ grupo.deporte.nombre }}
-                        </td>
-
-                        <td>
-                            {{ grupo.nivel.nombre }}
-                        </td>
-
-                        <td>
-                            {{ grupo.profesor.apellido }},
-                            {{ grupo.profesor.nombre }}
-                        </td>
-
-                        <td>
-                            {{ grupo.horario.get_dia_semana_display }}
-                        </td>
-
-                        <td>
-                            {{ grupo.horario.hora_inicio|time:"H:i" }}
-                            -
-                            {{ grupo.horario.hora_fin|time:"H:i" }}
-                        </td>
-
-                        <td>
-
-                            {% if grupo.estado %}
-                                Activo
-                            {% else %}
-                                Inactivo
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="{% url 'grupo_editar' grupo.id_grupo %}"
-                                class="boton-secundario"
-                            >
-                                Editar
-                            </a>
-
-
-                            {% if grupo.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'grupo_desactivar' grupo.id_grupo %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen grupos deportivos registrados.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Mis materias | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+{% include "academic/alumnos/_cabecera.html" with titulo_pagina="Mis materias" subtitulo_pagina="Consultá las materias correspondientes a tu curso actual." %}
+
+
+{% include "academic/alumnos/_navegacion.html" %}
+
+
+<div class="pagina-cabecera">
+
+    <div class="pagina-etiqueta">
+        Académico
+    </div>
+
+    <h2>
+        Materias del curso
+    </h2>
+
+    <p class="pagina-subtitulo">
+        {{ alumno.curso.nombre }}
+        {{ alumno.curso.division }}
+        ·
+        {{ alumno.curso.nivel.nombre }}
+    </p>
+
+</div>
+
+
+{% if materias %}
+
+    <div class="materias-grid">
+
+        {% for materia in materias %}
+
+            <article class="materia-card">
+
+                <div class="materia-card-cabecera">
+
+                    <div class="materia-icono">
+                        ▣
+                    </div>
+
+                    {% if materia.promedio %}
+
+                        <span class="badge badge-acento">
+                            Promedio
+                            {{ materia.promedio|floatformat:1 }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge">
+                            Sin notas
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="materia-card-contenido">
+
+                    <h3>
+                        {{ materia.dictado.materia.nombre }}
+                    </h3>
+
+                    <p>
+                        Prof.
+                        {{ materia.dictado.profesor.apellido }},
+                        {{ materia.dictado.profesor.nombre }}
+                    </p>
+
+                </div>
+
+
+                <div class="materia-meta">
+
+                    <div>
+
+                        <span>
+                            Día
+                        </span>
+
+                        <strong>
+                            {{ materia.dictado.horario.get_dia_semana_display }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Horario
+                        </span>
+
+                        <strong>
+                            {{ materia.dictado.horario.hora_inicio|time:"H:i" }}
+                            -
+                            {{ materia.dictado.horario.hora_fin|time:"H:i" }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="materia-asistencia">
+
+                    <div class="materia-asistencia-cabecera">
+
+                        <span>
+                            Asistencia
+                        </span>
+
+                        <strong>
+
+                            {% if materia.porcentaje_asistencia != None %}
+
+                                {{ materia.porcentaje_asistencia }}%
+
+                            {% else %}
+
+                                Sin registros
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    {% if materia.porcentaje_asistencia != None %}
+
+                        <progress
+                            class="barra-progreso"
+                            value="{{ materia.porcentaje_asistencia }}"
+                            max="100"
+                        >
+                            {{ materia.porcentaje_asistencia }}%
+                        </progress>
+                    
+                    {% endif %}
+
+                </div>
+
+
+                <a
+                    href="{% url 'alumno_academico' %}"
+                    class="materia-enlace"
+                >
+                    Ver información académica →
+                </a>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="estado-vacio">
+
+        Actualmente no tenés materias
+        asignadas a tu curso.
+
+    </div>
+
+{% endif %}
+
+
+{% endblock %}

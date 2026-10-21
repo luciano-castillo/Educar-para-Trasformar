@@ -1,110 +1,270 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Facturación | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Facturación</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de las facturas
-        mensuales de los alumnos.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Gestión económica
+        </div>
+
+        <h1>
+            Facturación
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Consultá y administrá las facturas
+            mensuales de los alumnos.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'factura_generar' %}"
         class="boton"
     >
-        Nueva factura
+        + Generar factura
     </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="economia" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Facturas registradas
+        </span>
+
+        <strong>
+            {{ facturas|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Visualizá el total facturado,
+        saldo pendiente y estado de cada factura.
+    </p>
 
 </div>
 
 
-<div class="tarjeta">
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Facturación
+            </div>
+
+            <h2>
+                Facturas emitidas
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ facturas|length }} registros
+        </span>
+
+    </div>
+
 
     {% if facturas %}
 
-        <table>
+        <div class="tabla-contenedor">
 
-            <thead>
+            <table class="tabla-gestion">
 
-                <tr>
-                    <th>N°</th>
-                    <th>Alumno</th>
-                    <th>Período</th>
-                    <th>Vencimiento</th>
-                    <th>Total</th>
-                    <th>Saldo</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Alumno</th>
+                        <th>Período</th>
+                        <th>Vencimiento</th>
+                        <th>Total</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
 
-            <tbody>
+                </thead>
 
-                {% for factura in facturas %}
 
-                <tr>
+                <tbody>
 
-                    <td>
-                        {{ factura.id_factura }}
-                    </td>
+                    {% for factura in facturas %}
 
-                    <td>
-                        {{ factura.alumno.apellido }},
-                        {{ factura.alumno.nombre }}
-                    </td>
+                        <tr>
 
-                    <td>
-                        {{ factura.get_mes_display }}
-                        {{ factura.anio }}
-                    </td>
+                            <td>
 
-                    <td>
-                        {{ factura.fecha_vencimiento|date:"d/m/Y" }}
-                    </td>
+                                <strong>
+                                    #{{ factura.id_factura }}
+                                </strong>
 
-                    <td>
-                        $ {{ factura.total }}
-                    </td>
+                            </td>
 
-                    <td>
-                        $ {{ factura.saldo }}
-                    </td>
 
-                    <td>
-                        {{ factura.get_estado_display }}
-                    </td>
+                            <td>
 
-                    <td>
+                                <div class="registro-persona">
 
-                        <a
-                            href="{% url 'factura_detalle' factura.id_factura %}"
-                            class="boton-secundario"
-                        >
-                            Ver detalle
-                        </a>
+                                    <div class="registro-avatar">
 
-                    </td>
+                                        {{ factura.alumno.nombre|first }}
+                                        {{ factura.alumno.apellido|first }}
 
-                </tr>
+                                    </div>
 
-                {% endfor %}
+                                    <div>
 
-            </tbody>
+                                        <strong>
 
-        </table>
+                                            {{ factura.alumno.apellido }},
+                                            {{ factura.alumno.nombre }}
+
+                                        </strong>
+
+                                        <span>
+                                            Legajo {{ factura.alumno.legajo }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+
+                                    {{ factura.get_mes_display }}
+                                    {{ factura.anio }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                {{ factura.fecha_vencimiento|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    $ {{ factura.total }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+                                $ {{ factura.saldo }}
+                            </td>
+
+
+                            <td>
+
+                                {% if factura.estado == "PAGADA" %}
+
+                                    <span class="badge badge-exito">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% elif factura.estado == "VENCIDA" %}
+
+                                    <span class="badge badge-peligro">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% elif factura.estado == "PARCIAL" %}
+
+                                    <span class="badge badge-info">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% elif factura.estado == "PENDIENTE" %}
+
+                                    <span class="badge badge-advertencia">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge">
+                                        {{ factura.get_estado_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <a
+                                    href="{% url 'factura_detalle' factura.id_factura %}"
+                                    class="boton-secundario boton-tabla"
+                                >
+                                    Ver detalle
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
 
     {% else %}
 
-        <p>
+        <div class="estado-vacio">
+
             No existen facturas registradas.
-        </p>
+
+            <br><br>
+
+            <a
+                href="{% url 'factura_generar' %}"
+                class="boton"
+            >
+                Generar primera factura
+            </a>
+
+        </div>
 
     {% endif %}
 
-</div>
+</section>
+
 
 {% endblock %}

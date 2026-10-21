@@ -1,146 +1,292 @@
 {% extends "base.html" %}
 
+
+{% block title %}
+    Inscripciones deportivas | Educar Para Transformar
+{% endblock %}
+
+
 {% block content %}
 
-<div class="tarjeta">
 
-    <h1>Inscripciones deportivas</h1>
+<section class="gestion-cabecera">
 
-    <p>
-        Administración de alumnos inscriptos
-        en los grupos deportivos.
-    </p>
+    <div>
+
+        <div class="pagina-etiqueta">
+            Deportes
+        </div>
+
+        <h1>
+            Inscripciones deportivas
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá los alumnos inscriptos
+            en los grupos deportivos.
+        </p>
+
+    </div>
+
 
     <a
         href="{% url 'inscripcion_crear' %}"
         class="boton"
     >
-        Nueva inscripción
+        + Nueva inscripción
+    </a>
+
+</section>
+
+
+{% include "accounts/_admin_navegacion.html" with modulo_activo="deportes" %}
+
+
+<div class="gestion-resumen">
+
+    <div>
+
+        <span>
+            Inscripciones registradas
+        </span>
+
+        <strong>
+            {{ inscripciones|length }}
+        </strong>
+
+    </div>
+
+    <p>
+        Consultá los alumnos, grupos deportivos
+        y estado de cada inscripción.
+    </p>
+
+</div>
+
+
+<section class="tarjeta">
+
+    <div class="dashboard-seccion-cabecera">
+
+        <div>
+
+            <div class="pagina-etiqueta">
+                Participación
+            </div>
+
+            <h2>
+                Alumnos inscriptos
+            </h2>
+
+        </div>
+
+        <span class="badge badge-acento">
+            {{ inscripciones|length }} registros
+        </span>
+
+    </div>
+
+
+    {% if inscripciones %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-gestion">
+
+                <thead>
+
+                    <tr>
+                        <th>Alumno</th>
+                        <th>Deporte</th>
+                        <th>Nivel</th>
+                        <th>Profesor</th>
+                        <th>Día y horario</th>
+                        <th>Inscripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for inscripcion in inscripciones %}
+
+                        <tr>
+
+                            <td>
+
+                                <div class="registro-persona">
+
+                                    <div class="registro-avatar">
+
+                                        {{ inscripcion.alumno.nombre|first }}
+                                        {{ inscripcion.alumno.apellido|first }}
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+
+                                            {{ inscripcion.alumno.apellido }},
+                                            {{ inscripcion.alumno.nombre }}
+
+                                        </strong>
+
+                                        <span>
+                                            Legajo {{ inscripcion.alumno.legajo }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="tabla-dato-destacado">
+                                    {{ inscripcion.grupo.deporte.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-acento">
+                                    {{ inscripcion.grupo.nivel.nombre }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {{ inscripcion.grupo.profesor.apellido }},
+                                {{ inscripcion.grupo.profesor.nombre }}
+
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    {{ inscripcion.grupo.horario.get_dia_semana_display }}
+                                </strong>
+
+                                <br>
+
+                                <small>
+                                    {{ inscripcion.grupo.horario.hora_inicio|time:"H:i" }}
+                                    -
+                                    {{ inscripcion.grupo.horario.hora_fin|time:"H:i" }}
+                                </small>
+
+                            </td>
+
+
+                            <td>
+                                {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td>
+
+                                {% if inscripcion.estado %}
+
+                                    <span class="badge badge-exito">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-peligro">
+                                        Finalizada
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if inscripcion.estado %}
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'inscripcion_desactivar' inscripcion.id_inscripcion %}"
+                                        class="form-accion-inline"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="boton-peligro boton-tabla"
+                                        >
+                                            Finalizar
+                                        </button>
+
+                                    </form>
+
+                                {% else %}
+
+                                    <span class="badge">
+                                        Sin acciones
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="estado-vacio">
+
+            No existen inscripciones deportivas registradas.
+
+            <br><br>
+
+            <a
+                href="{% url 'inscripcion_crear' %}"
+                class="boton"
+            >
+                Crear primera inscripción
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="detalle-volver">
+
+    <a
+        href="{% url 'admin_dashboard' %}#deportes"
+        class="boton-secundario"
+    >
+        ← Volver a Deportes
     </a>
 
 </div>
 
-
-<div class="tarjeta">
-
-    {% if inscripciones %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Alumno</th>
-                    <th>Legajo</th>
-                    <th>Deporte</th>
-                    <th>Nivel</th>
-                    <th>Profesor</th>
-                    <th>Día</th>
-                    <th>Horario</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for inscripcion in inscripciones %}
-
-                    <tr>
-
-                        <td>
-                            {{ inscripcion.alumno.apellido }},
-                            {{ inscripcion.alumno.nombre }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.alumno.legajo }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.grupo.deporte.nombre }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.grupo.nivel.nombre }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.grupo.profesor.apellido }},
-                            {{ inscripcion.grupo.profesor.nombre }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.grupo.horario.get_dia_semana_display }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.grupo.horario.hora_inicio|time:"H:i" }}
-                            -
-                            {{ inscripcion.grupo.horario.hora_fin|time:"H:i" }}
-                        </td>
-
-                        <td>
-                            {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}
-                        </td>
-
-                        <td>
-
-                            {% if inscripcion.estado %}
-                                Activa
-                            {% else %}
-                                Inactiva
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            {% if inscripcion.estado %}
-
-                                <form
-                                    method="post"
-                                    action="{% url 'inscripcion_desactivar' inscripcion.id_inscripcion %}"
-                                    style="display:inline;"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <button
-                                        type="submit"
-                                        class="boton-peligro"
-                                    >
-                                        Finalizar
-                                    </button>
-
-                                </form>
-
-                            {% else %}
-
-                                -
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No existen inscripciones deportivas registradas.
-        </p>
-
-    {% endif %}
-
-</div>
 
 {% endblock %}
