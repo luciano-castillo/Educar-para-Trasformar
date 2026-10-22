@@ -1,0 +1,991 @@
+{% extends "website/base_publico.html" %}
+
+{% load static %}
+
+{% block body_class %}
+    pagina-home
+{% endblock %}
+
+
+{% block title %}
+    Educar Para Transformar | Centro Educativo
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- ========================================== -->
+<!-- HERO                                       -->
+<!-- ========================================== -->
+
+<section class="web-hero web-hero-home">
+
+
+
+    <div class="web-hero-fondo-color"></div>
+
+
+    <div class="web-contenedor web-hero-grid">
+
+
+        <div class="web-hero-contenido">
+
+            <span class="web-etiqueta">
+                Centro Educativo
+            </span>
+
+
+            <h1>
+                Educar para aprender.
+                <br>
+                Transformar para crecer.
+            </h1>
+
+
+            <p>
+                Una propuesta educativa integral
+                que acompaña a cada estudiante
+                durante su formación académica,
+                personal y social.
+            </p>
+
+
+            <div class="web-hero-acciones">
+
+                <a
+                    href="#institucion"
+                    class="web-boton"
+                >
+                    Conocé la institución
+                </a>
+                
+                <a
+                    href="{% url 'inscripcion' %}"
+                    class="web-boton-secundario"
+                >
+                    Solicitar inscripción
+                </a>
+
+
+
+            </div>
+
+        </div>
+
+        <div class="web-hero-imagen">
+
+            <div
+                class="web-carrusel"
+                data-carrusel
+            >
+        
+                <div class="web-carrusel-ventana">
+        
+        
+                    {% if imagenes_carrusel %}
+        
+        
+                        {% for item in imagenes_carrusel %}
+        
+                            <article
+                                class="
+                                    web-slide
+                                    {% if forloop.first %}
+                                        web-slide-activo
+                                    {% endif %}
+                                "
+                                data-slide
+                            >
+        
+                                <img
+                                    src="{{ item.imagen.url }}"
+                                    alt="{{ item.titulo }}"
+                                    class="web-slide-imagen"
+                                >
+        
+        
+                                <div class="web-slide-contenido">
+        
+                                    <span>
+                                        Educar Para Transformar
+                                    </span>
+        
+                                    <h3>
+                                        {{ item.titulo }}
+                                    </h3>
+        
+        
+                                    {% if item.descripcion %}
+        
+                                        <p>
+                                            {{ item.descripcion }}
+                                        </p>
+        
+                                    {% endif %}
+        
+                                </div>
+        
+                            </article>
+        
+                        {% endfor %}
+        
+        
+                    {% else %}
+        
+        
+                        <!-- ================================= -->
+                        <!-- CONTENIDO DE RESPALDO             -->
+                        <!-- ================================= -->
+        
+                        <article
+                            class="
+                                web-slide
+                                web-slide-activo
+                                web-slide-campus
+                            "
+                            data-slide
+                        >
+        
+                            <div class="web-slide-contenido">
+        
+                                <span>
+                                    Nuestra institución
+                                </span>
+        
+                                <h3>
+                                    Espacios pensados
+                                    para aprender
+                                </h3>
+        
+                                <p>
+                                    Una propuesta educativa
+                                    que integra formación,
+                                    tecnología y bienestar.
+                                </p>
+        
+                            </div>
+        
+                        </article>
+        
+        
+                        <article
+                            class="
+                                web-slide
+                                web-slide-deportes
+                            "
+                            data-slide
+                        >
+        
+                            <div class="web-slide-contenido">
+        
+                                <span>
+                                    Deportes
+                                </span>
+        
+                                <h3>
+                                    Crecer también
+                                    es ponerse en movimiento
+                                </h3>
+        
+                                <p>
+                                    Deportes y actividades
+                                    para acompañar
+                                    el desarrollo integral.
+                                </p>
+        
+                            </div>
+        
+                        </article>
+        
+        
+                        <article
+                            class="
+                                web-slide
+                                web-slide-laboratorios
+                            "
+                            data-slide
+                        >
+        
+                            <div class="web-slide-contenido">
+        
+                                <span>
+                                    Innovación
+                                </span>
+        
+                                <h3>
+                                    Aprender experimentando
+                                </h3>
+        
+                                <p>
+                                    Tecnología y laboratorios
+                                    al servicio del aprendizaje.
+                                </p>
+        
+                            </div>
+        
+                        </article>
+        
+        
+                    {% endif %}
+        
+                </div>
+        
+        
+                <button
+                    type="button"
+                    class="
+                        web-carrusel-control
+                        web-carrusel-anterior
+                    "
+                    data-carrusel-anterior
+                    aria-label="Imagen anterior"
+                >
+                    ‹
+                </button>
+        
+        
+                <button
+                    type="button"
+                    class="
+                        web-carrusel-control
+                        web-carrusel-siguiente
+                    "
+                    data-carrusel-siguiente
+                    aria-label="Imagen siguiente"
+                >
+                    ›
+                </button>
+        
+        
+                <div class="web-carrusel-indicadores">
+        
+        
+                    {% if imagenes_carrusel %}
+        
+        
+                        {% for item in imagenes_carrusel %}
+        
+                            <button
+                                type="button"
+                                class="
+                                    web-indicador
+                                    {% if forloop.first %}
+                                        web-indicador-activo
+                                    {% endif %}
+                                "
+                                data-indicador="{{ forloop.counter0 }}"
+                                aria-label="Ver imagen {{ forloop.counter }}"
+                            ></button>
+        
+                        {% endfor %}
+        
+        
+                    {% else %}
+        
+        
+                        <button
+                            type="button"
+                            class="
+                                web-indicador
+                                web-indicador-activo
+                            "
+                            data-indicador="0"
+                            aria-label="Ver imagen 1"
+                        ></button>
+        
+                        <button
+                            type="button"
+                            class="web-indicador"
+                            data-indicador="1"
+                            aria-label="Ver imagen 2"
+                        ></button>
+        
+                        <button
+                            type="button"
+                            class="web-indicador"
+                            data-indicador="2"
+                            aria-label="Ver imagen 3"
+                        ></button>
+        
+        
+                    {% endif %}
+        
+        
+                </div>
+        
+            </div>
+        
+        
+            <div class="web-carrusel-enlace">
+        
+                <a href="{% url 'galeria' %}">
+                    Ver galería completa →
+                </a>
+        
+            </div>
+        
+        </div>
+
+
+
+
+
+    </div>
+
+</section>
+
+<section class="web-datos">
+
+    <div class="web-contenedor web-datos-grid">
+
+
+        <div>
+
+            <strong>
+                3
+            </strong>
+
+            <span>
+                Niveles educativos
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                3
+            </strong>
+
+            <span>
+                Idiomas
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                7+
+            </strong>
+
+            <span>
+                Propuestas deportivas
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                2027
+            </strong>
+
+            <span>
+                Inicio de actividades
+            </span>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- INSTITUCIÓN                                -->
+<!-- ========================================== -->
+
+<section
+    class="web-seccion web-home-institucion"
+    id="institucion"
+>
+
+    <div class="web-contenedor">
+
+
+        <div class="web-seccion-cabecera">
+
+            <span class="web-etiqueta">
+                Nuestra institución
+            </span>
+
+            <h2>
+                Una educación pensada
+                para el desarrollo integral
+            </h2>
+
+            <p>
+                Educar Para Transformar es un
+                centro educativo orientado a brindar
+                una propuesta académica integral,
+                acompañada por actividades deportivas,
+                idiomas y servicios para los estudiantes.
+            </p>
+
+        </div>
+
+
+        <div class="web-caracteristicas">
+
+
+            <article class="web-card">
+
+                <div class="web-card-icono">
+                    📚
+                </div>
+
+                <h3>
+                    Educación
+                </h3>
+
+                <p>
+                    Formación en los niveles
+                    Inicial, Primario y Secundario.
+                </p>
+
+            </article>
+
+
+            <article class="web-card">
+
+                <div class="web-card-icono">
+                    🌎
+                </div>
+
+                <h3>
+                    Idiomas
+                </h3>
+
+                <p>
+                    Inglés, portugués y francés
+                    como parte de nuestra
+                    propuesta educativa.
+                </p>
+
+            </article>
+
+
+            <article class="web-card">
+
+                <div class="web-card-icono">
+                    ⚽
+                </div>
+
+                <h3>
+                    Deportes
+                </h3>
+
+                <p>
+                    Diferentes actividades deportivas
+                    acompañan el desarrollo integral.
+                </p>
+
+            </article>
+
+
+            <article class="web-card">
+
+                <div class="web-card-icono">
+                    🤝
+                </div>
+
+                <h3>
+                    Acompañamiento
+                </h3>
+
+                <p>
+                    Apoyo estudiantil y servicios
+                    destinados al bienestar
+                    de nuestra comunidad.
+                </p>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================== -->
+<!-- NIVELES                                    -->
+<!-- ========================================== -->
+
+<section
+    class="web-seccion web-seccion-suave"
+    id="niveles"
+>
+
+    <div class="web-contenedor">
+
+
+        <div class="web-seccion-cabecera">
+
+            <span class="web-etiqueta">
+                Propuesta educativa
+            </span>
+
+            <h2>
+                Nuestros niveles
+            </h2>
+
+        </div>
+
+
+        <div class="web-niveles-grid">
+
+
+            <article class="web-nivel">
+
+                <span>
+                    01
+                </span>
+
+                <h3>
+                    Nivel Inicial
+                </h3>
+
+                <p>
+                    Primeros aprendizajes
+                    en un entorno de exploración,
+                    juego y acompañamiento.
+                </p>
+
+            </article>
+
+
+            <article class="web-nivel">
+
+                <span>
+                    02
+                </span>
+
+                <h3>
+                    Nivel Primario
+                </h3>
+
+                <p>
+                    Desarrollo de conocimientos,
+                    autonomía y habilidades
+                    fundamentales.
+                </p>
+
+            </article>
+
+
+            <article class="web-nivel">
+
+                <span>
+                    03
+                </span>
+
+                <h3>
+                    Nivel Secundario
+                </h3>
+
+                <p>
+                    Formación académica y personal
+                    orientada a los desafíos
+                    de la siguiente etapa.
+                </p>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================== -->
+<!-- BIENESTAR                                  -->
+<!-- ========================================== -->
+
+<section
+    class="web-seccion web-home-bienestar"
+    id="bienestar"
+>
+
+    <div class="web-contenedor">
+
+
+        <div class="web-seccion-cabecera">
+
+            <span class="web-etiqueta">
+                Bienestar estudiantil
+            </span>
+
+            <h2>
+                Mucho más que una propuesta académica
+            </h2>
+
+        </div>
+
+
+        <div class="web-servicios-grid">
+
+            <div>
+                🏊 Natación
+            </div>
+
+            <div>
+                ⚽ Fútbol
+            </div>
+
+            <div>
+                🏀 Básquet
+            </div>
+
+            <div>
+                🚌 Transporte
+            </div>
+
+            <div>
+                🍽️ Comedor
+            </div>
+
+            <div>
+                🧪 Laboratorios
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- NOTICIAS                                   -->
+<!-- ========================================== -->
+
+<section class="web-seccion web-home-noticias">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-home-seccion-cabecera">
+
+            <div>
+
+                <span class="web-etiqueta">
+                    Actualidad
+                </span>
+
+                <h2>
+                    Últimas noticias
+                </h2>
+
+                <p>
+                    Novedades y acontecimientos
+                    de nuestra comunidad educativa.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{% url 'noticias' %}"
+                class="web-enlace-seccion"
+            >
+                Ver todas →
+            </a>
+
+        </div>
+
+
+        {% if ultimas_noticias %}
+
+            <div class="web-noticias-grid">
+
+
+                {% for noticia in ultimas_noticias %}
+
+                    <article class="web-noticia-card">
+
+
+                        {% if noticia.imagen %}
+
+                            <div class="web-noticia-imagen">
+
+                                <img
+                                    src="{{ noticia.imagen.url }}"
+                                    alt="{{ noticia.titulo }}"
+                                >
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="
+                                web-noticia-imagen
+                                web-noticia-sin-imagen
+                            ">
+                                📰
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="web-noticia-contenido">
+
+                            <span class="web-noticia-fecha">
+
+                                {{ noticia.fecha_publicacion|date:"d/m/Y" }}
+
+                            </span>
+
+
+                            <h2>
+                                {{ noticia.titulo }}
+                            </h2>
+
+
+                            <p>
+                                {{ noticia.resumen }}
+                            </p>
+
+
+                            <a
+                                href="{% url 'noticia_detalle' noticia.id_noticia %}"
+                                class="web-noticia-enlace"
+                            >
+                                Leer noticia →
+                            </a>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% else %}
+
+            <div class="web-contenido-vacio">
+
+                <strong>
+                    Próximamente habrá novedades.
+                </strong>
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- OPINIONES                                  -->
+<!-- ========================================== -->
+
+<section class="web-seccion web-home-opiniones-seccion">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-home-seccion-cabecera">
+
+            <div>
+
+                <span class="web-etiqueta">
+                    Comunidad educativa
+                </span>
+
+                <h2>
+                    Opiniones de nuestra comunidad
+                </h2>
+
+                <p>
+                    Algunas experiencias compartidas
+                    a través de nuestra página.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{% url 'opiniones' %}"
+                class="web-enlace-seccion"
+            >
+                Ver opiniones →
+            </a>
+
+        </div>
+
+
+        {% if ultimas_opiniones %}
+
+            <div class="web-home-opiniones">
+
+
+                {% for opinion in ultimas_opiniones %}
+
+                    <article class="web-opinion-card">
+
+                        <div class="web-opinion-comillas">
+                            “
+                        </div>
+
+
+                        <p>
+                            {{ opinion.comentario }}
+                        </p>
+
+
+                        <div class="web-opinion-autor">
+
+                            <div class="web-opinion-avatar">
+
+                                {{ opinion.nombre|first|upper }}
+
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    {{ opinion.nombre }}
+                                </strong>
+
+                                <span>
+                                    {{ opinion.fecha_opinion|date:"d/m/Y" }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% else %}
+
+            <div class="web-contenido-vacio">
+
+                <strong>
+                    Todavía no hay opiniones publicadas.
+                </strong>
+
+                <p>
+                    Podés compartir tu experiencia
+                    desde nuestra sección de opiniones.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- INSCRIPCIÓN                                -->
+<!-- ========================================== -->
+
+<section class="web-cta">
+
+    <div class="web-contenedor web-cta-contenido">
+
+        <div>
+
+            <span class="web-etiqueta">
+                Ciclo lectivo 2027
+            </span>
+
+            <h2>
+                ¿Querés formar parte
+                de nuestra comunidad educativa?
+            </h2>
+
+            <p>
+                Iniciá tu solicitud de inscripción
+                completando el formulario online.
+                Nuestro equipo administrativo
+                revisará la información recibida.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'inscripcion' %}"
+            class="web-boton"
+        >
+            Solicitar inscripción
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================== -->
+<!-- CONTACTO                                   -->
+<!-- ========================================== -->
+
+<section
+    class="web-seccion"
+    id="contacto"
+>
+
+    <div class="web-contenedor">
+
+
+        <div class="web-contacto-home">
+
+            <div>
+
+                <span class="web-etiqueta">
+                    Contacto
+                </span>
+
+                <h2>
+                    ¿Necesitás más información?
+                </h2>
+
+                <p>
+                    Enviá una consulta desde nuestra
+                    página y el equipo administrativo
+                    podrá comunicarse con vos.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{% url 'contacto' %}"
+                class="web-boton-secundario"
+            >
+                Enviar una consulta
+            </a>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+{% endblock %}

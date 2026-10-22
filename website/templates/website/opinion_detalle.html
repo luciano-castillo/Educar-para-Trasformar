@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Opinión Web | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Opinión Web
+        </div>
+
+        <h1>
+            {{ opinion.nombre }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Enviada el
+            {{ opinion.fecha_opinion|date:"d/m/Y H:i" }}
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'opinion_lista' %}"
+        class="boton-secundario"
+    >
+        Volver
+    </a>
+
+</div>
+
+
+<div class="solicitud-detalle-grid">
+
+
+    <section class="panel">
+
+        <div class="panel-cabecera">
+
+            <h2>
+                Persona
+            </h2>
+
+        </div>
+
+
+        <div class="detalle-lista">
+
+            <div>
+
+                <span>
+                    Nombre
+                </span>
+
+                <strong>
+                    {{ opinion.nombre }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Correo
+                </span>
+
+                <strong>
+
+                    {% if opinion.correo %}
+                        {{ opinion.correo }}
+                    {% else %}
+                        No informado
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <div class="panel-cabecera">
+
+            <h2>
+                Estado
+            </h2>
+
+        </div>
+
+
+        {% if opinion.estado == "PENDIENTE" %}
+
+            <span class="badge badge-advertencia">
+                Pendiente
+            </span>
+
+        {% elif opinion.estado == "APROBADA" %}
+
+            <span class="badge badge-exito">
+                Aprobada
+            </span>
+
+        {% else %}
+
+            <span class="badge badge-peligro">
+                Rechazada
+            </span>
+
+        {% endif %}
+
+
+        {% if opinion.fecha_revision %}
+
+            <p class="pagina-subtitulo">
+                Revisada el
+                {{ opinion.fecha_revision|date:"d/m/Y H:i" }}
+            </p>
+
+        {% endif %}
+
+    </section>
+
+
+</div>
+
+
+<section class="panel solicitud-observaciones">
+
+    <div class="panel-cabecera">
+
+        <h2>
+            Opinión
+        </h2>
+
+    </div>
+
+    <p>
+        {{ opinion.comentario|linebreaksbr }}
+    </p>
+
+</section>
+
+
+{% if opinion.estado == "PENDIENTE" %}
+
+    <section class="panel solicitud-decision">
+
+
+        <div>
+
+            <span class="pagina-etiqueta">
+                Moderación
+            </span>
+
+            <h2>
+                Revisar publicación
+            </h2>
+
+        </div>
+
+
+        <div class="tabla-acciones">
+
+            <form
+                method="post"
+                action="{% url 'opinion_aprobar' opinion.id_opinion %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="boton"
+                >
+                    Aprobar
+                </button>
+
+            </form>
+
+
+            <form
+                method="post"
+                action="{% url 'opinion_rechazar' opinion.id_opinion %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="boton-peligro"
+                >
+                    Rechazar
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+{% endif %}
+
+
+{% endblock %}

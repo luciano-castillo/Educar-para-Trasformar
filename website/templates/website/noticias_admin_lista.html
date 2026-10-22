@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Gestión de Noticias | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Página Web
+        </div>
+
+        <h1>
+            Noticias
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá las noticias
+            del sitio institucional.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'noticia_admin_crear' %}"
+        class="boton"
+    >
+        + Nueva noticia
+    </a>
+
+</div>
+
+
+<section class="panel">
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Título</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for noticia in noticias %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                {{ noticia.titulo }}
+                            </strong>
+
+                            <div class="tabla-contacto">
+                                <small>
+                                    {{ noticia.resumen|truncatechars:70 }}
+                                </small>
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ noticia.fecha_publicacion|date:"d/m/Y" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if noticia.publicada %}
+
+                                <span class="badge badge-exito">
+                                    Publicada
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-advertencia">
+                                    Oculta
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="tabla-acciones">
+
+                                <a
+                                    href="{% url 'noticia_admin_editar' noticia.id_noticia %}"
+                                    class="boton-secundario boton-tabla"
+                                >
+                                    Editar
+                                </a>
+
+
+                                <form
+                                    method="post"
+                                    action="{% url 'noticia_admin_publicacion' noticia.id_noticia %}"
+                                >
+
+                                    {% csrf_token %}
+
+
+                                    {% if noticia.publicada %}
+
+                                        <button
+                                            type="submit"
+                                            class="boton-peligro boton-tabla"
+                                        >
+                                            Ocultar
+                                        </button>
+
+                                    {% else %}
+
+                                        <button
+                                            type="submit"
+                                            class="boton boton-tabla"
+                                        >
+                                            Publicar
+                                        </button>
+
+                                    {% endif %}
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="4">
+                            Todavía no hay noticias.
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

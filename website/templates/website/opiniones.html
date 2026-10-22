@@ -1,0 +1,234 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    Opiniones | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="web-pagina-hero">
+
+    <div class="web-contenedor">
+
+        <span class="web-etiqueta">
+            Comunidad educativa
+        </span>
+
+        <h1>
+            Tu opinión también importa
+        </h1>
+
+        <p>
+            Conocé las opiniones compartidas
+            por nuestra comunidad o dejá
+            tu propio comentario.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="web-seccion">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-opiniones-layout">
+
+
+            <!-- ================================= -->
+            <!-- OPINIONES PUBLICADAS              -->
+            <!-- ================================= -->
+
+            <div>
+
+                <div class="web-seccion-cabecera">
+
+                    <span class="web-etiqueta">
+                        Opiniones
+                    </span>
+
+                    <h2>
+                        Lo que comparte
+                        nuestra comunidad
+                    </h2>
+
+                </div>
+
+
+                <div class="web-opiniones-grid">
+
+                    {% for opinion in opiniones %}
+
+                        <article class="web-opinion-card">
+
+                            <div class="web-opinion-comillas">
+                                “
+                            </div>
+
+                            <p>
+                                {{ opinion.comentario }}
+                            </p>
+
+                            <div class="web-opinion-autor">
+
+                                <div class="web-opinion-avatar">
+
+                                    {{ opinion.nombre|first|upper }}
+
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ opinion.nombre }}
+                                    </strong>
+
+                                    <span>
+                                        {{ opinion.fecha_opinion|date:"d/m/Y" }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                    {% empty %}
+
+                        <div class="web-opiniones-vacio">
+
+                            <strong>
+                                Todavía no hay opiniones publicadas.
+                            </strong>
+
+                            <p>
+                                Podés ser una de las primeras personas
+                                en compartir una opinión.
+                            </p>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- FORMULARIO                        -->
+            <!-- ================================= -->
+
+            <div>
+
+                <form
+                    method="post"
+                    class="web-formulario web-opinion-formulario"
+                >
+
+                    {% csrf_token %}
+
+
+                    <span class="web-etiqueta">
+                        Compartí tu experiencia
+                    </span>
+
+                    <h2>
+                        Dejanos tu opinión
+                    </h2>
+
+                    <p class="web-formulario-descripcion">
+                        Todas las opiniones son revisadas
+                        antes de ser publicadas.
+                    </p>
+
+
+                    <div class="web-campo">
+
+                        <label>
+                            {{ form.nombre.label }}
+                        </label>
+
+                        {{ form.nombre }}
+
+                        {% for error in form.nombre.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="web-campo web-opinion-campo">
+
+                        <label>
+                            {{ form.correo.label }}
+                        </label>
+
+                        {{ form.correo }}
+
+                        {% for error in form.correo.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="web-campo web-opinion-campo">
+
+                        <label>
+                            {{ form.comentario.label }}
+                        </label>
+
+                        {{ form.comentario }}
+
+                        {% for error in form.comentario.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="web-boton web-formulario-submit"
+                    >
+                        Enviar opinión
+                    </button>
+
+
+                    <p class="web-formulario-legal">
+                        El comentario será visible
+                        únicamente después de su revisión.
+                    </p>
+
+                </form>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Consultas Web | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Página Web
+        </div>
+
+        <h1>
+            Consultas recibidas
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Mensajes enviados desde
+            el formulario de contacto público.
+        </p>
+
+    </div>
+
+</section>
+
+
+<div class="solicitudes-resumen">
+
+    <div>
+
+        <span>
+            Pendientes
+        </span>
+
+        <strong>
+            {{ pendientes }}
+        </strong>
+
+    </div>
+
+</div>
+
+
+<section class="panel">
+
+
+    <div class="panel-cabecera">
+
+        <h2>
+            Consultas
+        </h2>
+
+
+        <form
+            method="get"
+            class="filtros-inline"
+        >
+
+            <select name="estado">
+
+                <option value="">
+                    Todos los estados
+                </option>
+
+                <option
+                    value="PENDIENTE"
+                    {% if estado_seleccionado == "PENDIENTE" %}
+                        selected
+                    {% endif %}
+                >
+                    Pendientes
+                </option>
+
+                <option
+                    value="RESPONDIDA"
+                    {% if estado_seleccionado == "RESPONDIDA" %}
+                        selected
+                    {% endif %}
+                >
+                    Respondidas
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="boton-secundario"
+            >
+                Filtrar
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Persona
+                    </th>
+
+                    <th>
+                        Asunto
+                    </th>
+
+                    <th>
+                        Contacto
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for consulta in consultas %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ consulta.nombre }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            {{ consulta.asunto }}
+                        </td>
+
+
+                        <td>
+
+                            <div class="tabla-contacto">
+
+                                <span>
+                                    {{ consulta.correo }}
+                                </span>
+
+                                {% if consulta.telefono %}
+
+                                    <small>
+                                        {{ consulta.telefono }}
+                                    </small>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ consulta.fecha_consulta|date:"d/m/Y H:i" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if consulta.estado == "PENDIENTE" %}
+
+                                <span class="badge badge-advertencia">
+                                    Pendiente
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-exito">
+                                    Respondida
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'consulta_contacto_detalle' consulta.id_consulta %}"
+                                class="boton-secundario boton-tabla"
+                            >
+                                Ver
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="6">
+                            No hay consultas para mostrar.
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

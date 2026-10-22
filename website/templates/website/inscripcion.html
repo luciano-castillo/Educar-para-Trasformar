@@ -1,0 +1,391 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    Solicitud de Inscripción | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="web-pagina-hero">
+
+    <div class="web-contenedor">
+
+        <span class="web-etiqueta">
+            Ciclo lectivo 2027
+        </span>
+
+        <h1>
+            Solicitud de Inscripción
+        </h1>
+
+        <p>
+            Completá los siguientes datos para
+            iniciar una solicitud de inscripción
+            en nuestra institución.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="web-seccion">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-formulario-layout">
+
+
+            <div class="web-formulario-info">
+
+                <span class="web-etiqueta">
+                    Inscripciones
+                </span>
+
+                <h2>
+                    Primer paso para formar
+                    parte de nuestra comunidad
+                </h2>
+
+                <p>
+                    El envío de este formulario
+                    representa una solicitud.
+                    La inscripción no queda confirmada
+                    hasta que la institución revise
+                    la información presentada.
+                </p>
+
+
+                <div class="web-info-box">
+
+                    <strong>
+                        Importante
+                    </strong>
+
+                    <p>
+                        Una vez recibida la solicitud,
+                        el equipo administrativo podrá
+                        ponerse en contacto utilizando
+                        los datos informados.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="post"
+                class="web-formulario"
+            >
+
+                {% csrf_token %}
+
+
+                <!-- ============================= -->
+                <!-- DATOS DEL ESTUDIANTE          -->
+                <!-- ============================= -->
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            01
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Datos del estudiante
+                            </h3>
+
+                            <p>
+                                Información de quien
+                                desea ingresar.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-form-grid">
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.nombre_alumno.label }}
+                            </label>
+
+                            {{ form.nombre_alumno }}
+
+                            {% for error in form.nombre_alumno.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.apellido_alumno.label }}
+                            </label>
+
+                            {{ form.apellido_alumno }}
+
+                            {% for error in form.apellido_alumno.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.dni_alumno.label }}
+                            </label>
+
+                            {{ form.dni_alumno }}
+
+                            {% for error in form.dni_alumno.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.fecha_nacimiento.label }}
+                            </label>
+
+                            {{ form.fecha_nacimiento }}
+
+                            {% for error in form.fecha_nacimiento.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo web-campo-ancho">
+
+                            <label>
+                                {{ form.nivel_solicitado.label }}
+                            </label>
+
+                            {{ form.nivel_solicitado }}
+
+                            {% for error in form.nivel_solicitado.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- ============================= -->
+                <!-- RESPONSABLE                   -->
+                <!-- ============================= -->
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            02
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Adulto responsable
+                            </h3>
+
+                            <p>
+                                Persona con quien podremos
+                                comunicarnos.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-form-grid">
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.nombre_responsable.label }}
+                            </label>
+
+                            {{ form.nombre_responsable }}
+
+                            {% for error in form.nombre_responsable.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.apellido_responsable.label }}
+                            </label>
+
+                            {{ form.apellido_responsable }}
+
+                            {% for error in form.apellido_responsable.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.telefono.label }}
+                            </label>
+
+                            {{ form.telefono }}
+
+                            {% for error in form.telefono.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.correo.label }}
+                            </label>
+
+                            {{ form.correo }}
+
+                            {% for error in form.correo.errors %}
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- ============================= -->
+                <!-- INFORMACIÓN ADICIONAL         -->
+                <!-- ============================= -->
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            03
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Información adicional
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-campo">
+
+                        <label>
+                            {{ form.observaciones.label }}
+                        </label>
+
+                        {{ form.observaciones }}
+
+                        {% for error in form.observaciones.errors %}
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                {% if form.non_field_errors %}
+
+                    <div class="web-error-general">
+
+                        {{ form.non_field_errors }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <button
+                    type="submit"
+                    class="web-boton web-formulario-submit"
+                >
+                    Enviar solicitud
+                </button>
+
+
+                <p class="web-formulario-legal">
+                    El envío de la solicitud no implica
+                    la confirmación automática de una vacante.
+                </p>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Consulta Web | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Consulta Web
+        </div>
+
+        <h1>
+            {{ consulta.asunto }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Recibida el
+            {{ consulta.fecha_consulta|date:"d/m/Y H:i" }}
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'consulta_contacto_lista' %}"
+        class="boton-secundario"
+    >
+        Volver
+    </a>
+
+</div>
+
+
+<div class="solicitud-detalle-grid">
+
+
+    <section class="panel">
+
+        <div class="panel-cabecera">
+
+            <h2>
+                Datos de contacto
+            </h2>
+
+        </div>
+
+
+        <div class="detalle-lista">
+
+            <div>
+
+                <span>
+                    Nombre
+                </span>
+
+                <strong>
+                    {{ consulta.nombre }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Correo
+                </span>
+
+                <strong>
+                    {{ consulta.correo }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Teléfono
+                </span>
+
+                <strong>
+                    {% if consulta.telefono %}
+                        {{ consulta.telefono }}
+                    {% else %}
+                        No informado
+                    {% endif %}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <div class="panel-cabecera">
+
+            <h2>
+                Estado
+            </h2>
+
+        </div>
+
+
+        {% if consulta.estado == "PENDIENTE" %}
+
+            <span class="badge badge-advertencia">
+                Pendiente
+            </span>
+
+        {% else %}
+
+            <span class="badge badge-exito">
+                Respondida
+            </span>
+
+        {% endif %}
+
+
+        {% if consulta.fecha_respuesta %}
+
+            <p class="pagina-subtitulo">
+                Marcada como respondida el
+                {{ consulta.fecha_respuesta|date:"d/m/Y H:i" }}
+            </p>
+
+        {% endif %}
+
+    </section>
+
+
+</div>
+
+
+<section class="panel solicitud-observaciones">
+
+    <div class="panel-cabecera">
+
+        <h2>
+            Mensaje
+        </h2>
+
+    </div>
+
+    <p>
+        {{ consulta.mensaje|linebreaksbr }}
+    </p>
+
+</section>
+
+
+{% if consulta.estado == "PENDIENTE" %}
+
+    <section class="panel solicitud-decision">
+
+        <div>
+
+            <span class="pagina-etiqueta">
+                Gestión
+            </span>
+
+            <h2>
+                ¿La consulta ya fue atendida?
+            </h2>
+
+        </div>
+
+
+        <form
+            method="post"
+            action="{% url 'consulta_contacto_responder' consulta.id_consulta %}"
+        >
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="boton"
+            >
+                Marcar como respondida
+            </button>
+
+        </form>
+
+    </section>
+
+{% endif %}
+
+
+{% endblock %}

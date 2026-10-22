@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Solicitudes de inscripción | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Página Web
+        </div>
+
+        <h1>
+            Solicitudes de inscripción
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Revisá las solicitudes enviadas
+            desde el sitio institucional.
+        </p>
+
+    </div>
+
+</section>
+
+
+<div class="solicitudes-resumen">
+
+    <div>
+
+        <span>
+            Pendientes
+        </span>
+
+        <strong>
+            {{ pendientes }}
+        </strong>
+
+    </div>
+
+</div>
+
+
+<section class="panel">
+
+
+    <div class="panel-cabecera">
+
+        <div>
+
+            <h2>
+                Solicitudes recibidas
+            </h2>
+
+        </div>
+
+
+        <form
+            method="get"
+            class="filtros-inline"
+        >
+
+            <select name="estado">
+
+                <option value="">
+                    Todos los estados
+                </option>
+
+                <option
+                    value="PENDIENTE"
+                    {% if estado_seleccionado == "PENDIENTE" %}
+                        selected
+                    {% endif %}
+                >
+                    Pendientes
+                </option>
+
+                <option
+                    value="APROBADA"
+                    {% if estado_seleccionado == "APROBADA" %}
+                        selected
+                    {% endif %}
+                >
+                    Aprobadas
+                </option>
+
+                <option
+                    value="RECHAZADA"
+                    {% if estado_seleccionado == "RECHAZADA" %}
+                        selected
+                    {% endif %}
+                >
+                    Rechazadas
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="boton-secundario"
+            >
+                Filtrar
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Alumno
+                    </th>
+
+                    <th>
+                        DNI
+                    </th>
+
+                    <th>
+                        Nivel
+                    </th>
+
+                    <th>
+                        Responsable
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for solicitud in solicitudes %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                {{ solicitud.apellido_alumno }},
+                                {{ solicitud.nombre_alumno }}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            {{ solicitud.dni_alumno }}
+                        </td>
+
+
+                        <td>
+                            {{ solicitud.nivel_solicitado.nombre }}
+                        </td>
+
+
+                        <td>
+
+                            {{ solicitud.apellido_responsable }},
+                            {{ solicitud.nombre_responsable }}
+
+                        </td>
+
+
+                        <td>
+                            {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if solicitud.estado == "PENDIENTE" %}
+
+                                <span class="badge badge-advertencia">
+                                    Pendiente
+                                </span>
+
+                            {% elif solicitud.estado == "APROBADA" %}
+
+                                <span class="badge badge-exito">
+                                    Aprobada
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-peligro">
+                                    Rechazada
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'solicitud_inscripcion_detalle' solicitud.id_solicitud %}"
+                                class="boton-secundario boton-tabla"
+                            >
+                                Ver
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="7">
+
+                            No hay solicitudes
+                            para mostrar.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</section>
+
+
+{% endblock %}

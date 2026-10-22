@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'services',
     'sports',
     'billing',
+    'website',
 ]
 
 MIDDLEWARE = [

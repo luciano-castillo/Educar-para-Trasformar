@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Gestión de Galería | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Página Web
+        </div>
+
+        <h1>
+            Galería
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Administrá las imágenes
+            visibles en el sitio público.
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'galeria_admin_crear' %}"
+        class="boton"
+    >
+        + Nueva imagen
+    </a>
+
+</div>
+
+
+<section class="web-admin-galeria">
+
+    {% for item in imagenes %}
+
+        <article class="web-admin-imagen-card">
+
+
+            {% if item.imagen %}
+
+                <img
+                    src="{{ item.imagen.url }}"
+                    alt="{{ item.titulo }}"
+                >
+
+            {% endif %}
+
+
+            <div>
+
+                <strong>
+                    {{ item.titulo }}
+                </strong>
+
+                <small>
+                    Orden: {{ item.orden }}
+                </small>
+
+
+                {% if item.publicada %}
+
+                    <span class="badge badge-exito">
+                        Publicada
+                    </span>
+
+                {% else %}
+
+                    <span class="badge badge-advertencia">
+                        Oculta
+                    </span>
+
+                {% endif %}
+
+
+                <div class="tabla-acciones">
+
+                    <a
+                        href="{% url 'galeria_admin_editar' item.id_imagen %}"
+                        class="boton-secundario boton-tabla"
+                    >
+                        Editar
+                    </a>
+
+
+                    <form
+                        method="post"
+                        action="{% url 'galeria_admin_publicacion' item.id_imagen %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="boton-secundario boton-tabla"
+                        >
+                            {% if item.publicada %}
+                                Ocultar
+                            {% else %}
+                                Publicar
+                            {% endif %}
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </article>
+
+
+    {% empty %}
+
+        <div class="panel">
+            Todavía no hay imágenes cargadas.
+        </div>
+
+    {% endfor %}
+
+</section>
+
+
+{% endblock %}

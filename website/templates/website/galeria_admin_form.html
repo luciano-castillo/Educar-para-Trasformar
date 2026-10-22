@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    {{ titulo }} | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Página Web · Galería
+        </div>
+
+        <h1>
+            {{ titulo }}
+        </h1>
+
+    </div>
+
+
+    <a
+        href="{% url 'galeria_admin_lista' %}"
+        class="boton-secundario"
+    >
+        Volver
+    </a>
+
+</div>
+
+
+<section class="panel web-admin-editor">
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+
+        {% for field in form %}
+
+            <div class="web-admin-campo">
+
+                {% if field.field.widget.input_type == "checkbox" %}
+
+                    <label class="web-admin-check">
+
+                        {{ field }}
+                        {{ field.label }}
+
+                    </label>
+
+                {% else %}
+
+                    <label>
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                {% endif %}
+
+
+                {% for error in field.errors %}
+
+                    <small class="web-error">
+                        {{ error }}
+                    </small>
+
+                {% endfor %}
+
+            </div>
+
+        {% endfor %}
+
+
+        <button
+            type="submit"
+            class="boton"
+        >
+            Guardar
+        </button>
+
+    </form>
+
+</section>
+
+
+{% endblock %}

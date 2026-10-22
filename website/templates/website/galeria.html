@@ -1,0 +1,97 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    Galería | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="web-pagina-hero">
+
+    <div class="web-contenedor">
+
+        <span class="web-etiqueta">
+            Nuestra institución
+        </span>
+
+        <h1>
+            Galería
+        </h1>
+
+        <p>
+            Conocé nuestros espacios,
+            actividades y propuestas.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="web-seccion">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-galeria-grid">
+
+            {% for item in imagenes %}
+
+                <figure class="web-galeria-item">
+
+                    <img
+                        src="{{ item.imagen.url }}"
+                        alt="{{ item.titulo }}"
+                        loading="lazy"
+                    >
+
+
+                    <figcaption>
+
+                        <strong>
+                            {{ item.titulo }}
+                        </strong>
+
+
+                        {% if item.descripcion %}
+
+                            <p>
+                                {{ item.descripcion }}
+                            </p>
+
+                        {% endif %}
+
+                    </figcaption>
+
+                </figure>
+
+
+            {% empty %}
+
+                <div class="web-contenido-vacio">
+
+                    <strong>
+                        Todavía no hay imágenes publicadas.
+                    </strong>
+
+                    <p>
+                        Próximamente podrás conocer
+                        nuestros espacios.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+{% endblock %}

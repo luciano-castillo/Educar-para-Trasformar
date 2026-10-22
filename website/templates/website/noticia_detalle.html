@@ -1,0 +1,73 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    {{ noticia.titulo }} | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<article class="web-noticia-detalle">
+
+
+    <div class="web-contenedor">
+
+
+        <a
+            href="{% url 'noticias' %}"
+            class="web-volver"
+        >
+            ← Volver a Noticias
+        </a>
+
+
+        <header class="web-noticia-detalle-header">
+
+            <span class="web-etiqueta">
+                Noticias
+            </span>
+
+            <h1>
+                {{ noticia.titulo }}
+            </h1>
+
+            <p class="web-noticia-detalle-fecha">
+                {{ noticia.fecha_publicacion|date:"d/m/Y" }}
+            </p>
+
+            <p class="web-noticia-detalle-resumen">
+                {{ noticia.resumen }}
+            </p>
+
+        </header>
+
+
+        {% if noticia.imagen %}
+
+            <div class="web-noticia-detalle-imagen">
+
+                <img
+                    src="{{ noticia.imagen.url }}"
+                    alt="{{ noticia.titulo }}"
+                >
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="web-noticia-texto">
+
+            {{ noticia.contenido|linebreaks }}
+
+        </div>
+
+
+    </div>
+
+</article>
+
+
+{% endblock %}

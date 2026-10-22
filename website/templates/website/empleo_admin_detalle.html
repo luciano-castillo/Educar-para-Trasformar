@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Postulación de empleo | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Postulación de empleo
+        </div>
+
+        <h1>
+            {{ postulacion.apellido }},
+            {{ postulacion.nombre }}
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Recibida el
+            {{ postulacion.fecha_postulacion|date:"d/m/Y H:i" }}
+        </p>
+
+    </div>
+
+
+    <a
+        href="{% url 'empleo_admin_lista' %}"
+        class="boton-secundario"
+    >
+        Volver
+    </a>
+
+</div>
+
+
+<div class="solicitud-detalle-grid">
+
+
+    <section class="panel">
+
+        <div class="panel-cabecera">
+
+            <h2>
+                Datos personales
+            </h2>
+
+        </div>
+
+
+        <div class="detalle-lista">
+
+
+            <div>
+
+                <span>
+                    Nombre
+                </span>
+
+                <strong>
+                    {{ postulacion.nombre }}
+                    {{ postulacion.apellido }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Correo
+                </span>
+
+                <strong>
+                    {{ postulacion.correo }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Teléfono
+                </span>
+
+                <strong>
+                    {{ postulacion.telefono }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Área de interés
+                </span>
+
+                <strong>
+                    {{ postulacion.get_area_interes_display }}
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <div class="panel-cabecera">
+
+            <h2>
+                Currículum Vitae
+            </h2>
+
+        </div>
+
+
+        <p class="pagina-subtitulo">
+            El CV solamente puede descargarse
+            desde una cuenta administrativa.
+        </p>
+
+
+        <a
+            href="{% url 'empleo_admin_descargar_cv' postulacion.id_postulacion %}"
+            class="boton"
+        >
+            Descargar CV
+        </a>
+
+    </section>
+
+
+</div>
+
+
+<section class="panel solicitud-observaciones">
+
+    <div class="panel-cabecera">
+
+        <h2>
+            Presentación
+        </h2>
+
+    </div>
+
+
+    {% if postulacion.mensaje %}
+
+        <p>
+            {{ postulacion.mensaje|linebreaksbr }}
+        </p>
+
+    {% else %}
+
+        <p class="texto-secundario">
+            No agregó una presentación.
+        </p>
+
+    {% endif %}
+
+</section>
+
+
+<section class="panel solicitud-decision">
+
+
+    <div>
+
+        <span class="pagina-etiqueta">
+            Estado
+        </span>
+
+
+        {% if postulacion.estado == "PENDIENTE" %}
+
+            <h2>
+                Pendiente de revisión
+            </h2>
+
+        {% elif postulacion.estado == "REVISADA" %}
+
+            <h2>
+                Postulación revisada
+            </h2>
+
+        {% else %}
+
+            <h2>
+                Postulación descartada
+            </h2>
+
+        {% endif %}
+
+
+        {% if postulacion.fecha_revision %}
+
+            <p class="pagina-subtitulo">
+                Revisada el
+                {{ postulacion.fecha_revision|date:"d/m/Y H:i" }}
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    {% if postulacion.estado == "PENDIENTE" %}
+
+        <div class="tabla-acciones">
+
+
+            <form
+                method="post"
+                action="{% url 'empleo_admin_revisar' postulacion.id_postulacion %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="boton"
+                >
+                    Marcar revisada
+                </button>
+
+            </form>
+
+
+            <form
+                method="post"
+                action="{% url 'empleo_admin_descartar' postulacion.id_postulacion %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="boton-peligro"
+                >
+                    Descartar
+                </button>
+
+            </form>
+
+
+        </div>
+
+    {% endif %}
+
+
+</section>
+
+
+{% endblock %}

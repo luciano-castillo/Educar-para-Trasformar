@@ -1,0 +1,303 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    Contacto | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="web-pagina-hero">
+
+    <div class="web-contenedor">
+
+        <span class="web-etiqueta">
+            Contacto
+        </span>
+
+        <h1>
+            Estamos para ayudarte
+        </h1>
+
+        <p>
+            Enviá tu consulta y nuestro equipo
+            podrá comunicarse con vos
+            utilizando los datos informados.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="web-seccion">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-formulario-layout">
+
+
+            <div class="web-formulario-info">
+
+                <span class="web-etiqueta">
+                    Comunicate con nosotros
+                </span>
+
+                <h2>
+                    ¿Tenés alguna consulta?
+                </h2>
+
+                <p>
+                    Podés escribirnos por medio
+                    del formulario. Tu mensaje
+                    será recibido por el equipo
+                    administrativo de la institución.
+                </p>
+
+
+                <div class="web-contacto-opciones">
+
+                    <div>
+
+                        <span>
+                            💬
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                WhatsApp
+                            </strong>
+
+                            <p>
+                                Próximamente disponible.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            📱
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Redes sociales
+                            </strong>
+
+                            <p>
+                                Próximamente disponibles.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            ✉️
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Consulta web
+                            </strong>
+
+                            <p>
+                                Completá el formulario
+                                para enviarnos un mensaje.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="post"
+                class="web-formulario"
+            >
+
+                {% csrf_token %}
+
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            01
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Tus datos
+                            </h3>
+
+                            <p>
+                                Información para poder
+                                comunicarnos con vos.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-form-grid">
+
+
+                        <div class="web-campo web-campo-ancho">
+
+                            <label>
+                                {{ form.nombre.label }}
+                            </label>
+
+                            {{ form.nombre }}
+
+                            {% for error in form.nombre.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.correo.label }}
+                            </label>
+
+                            {{ form.correo }}
+
+                            {% for error in form.correo.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.telefono.label }}
+                            </label>
+
+                            {{ form.telefono }}
+
+                            {% for error in form.telefono.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            02
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Tu consulta
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-campo">
+
+                        <label>
+                            {{ form.asunto.label }}
+                        </label>
+
+                        {{ form.asunto }}
+
+                        {% for error in form.asunto.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="web-campo web-campo-mensaje">
+
+                        <label>
+                            {{ form.mensaje.label }}
+                        </label>
+
+                        {{ form.mensaje }}
+
+                        {% for error in form.mensaje.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="web-boton web-formulario-submit"
+                >
+                    Enviar consulta
+                </button>
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

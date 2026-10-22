@@ -1,0 +1,121 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    Noticias | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="web-pagina-hero">
+
+    <div class="web-contenedor">
+
+        <span class="web-etiqueta">
+            Actualidad
+        </span>
+
+        <h1>
+            Noticias
+        </h1>
+
+        <p>
+            Novedades, actividades y acontecimientos
+            de nuestra comunidad educativa.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="web-seccion">
+
+    <div class="web-contenedor">
+
+        <div class="web-noticias-grid">
+
+            {% for noticia in noticias %}
+
+                <article class="web-noticia-card">
+
+
+                    {% if noticia.imagen %}
+
+                        <div class="web-noticia-imagen">
+
+                            <img
+                                src="{{ noticia.imagen.url }}"
+                                alt="{{ noticia.titulo }}"
+                            >
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="
+                            web-noticia-imagen
+                            web-noticia-sin-imagen
+                        ">
+                            📰
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="web-noticia-contenido">
+
+                        <span class="web-noticia-fecha">
+                            {{ noticia.fecha_publicacion|date:"d/m/Y" }}
+                        </span>
+
+
+                        <h2>
+                            {{ noticia.titulo }}
+                        </h2>
+
+
+                        <p>
+                            {{ noticia.resumen }}
+                        </p>
+
+
+                        <a
+                            href="{% url 'noticia_detalle' noticia.id_noticia %}"
+                            class="web-noticia-enlace"
+                        >
+                            Leer noticia →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+            {% empty %}
+
+                <div class="web-contenido-vacio">
+
+                    <strong>
+                        Todavía no hay noticias publicadas.
+                    </strong>
+
+                    <p>
+                        Próximamente encontrarás
+                        novedades de la institución.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

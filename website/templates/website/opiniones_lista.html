@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Opiniones Web | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="pagina-cabecera">
+
+    <div>
+
+        <div class="pagina-etiqueta">
+            Página Web
+        </div>
+
+        <h1>
+            Opiniones recibidas
+        </h1>
+
+        <p class="pagina-subtitulo">
+            Revisá los comentarios enviados
+            desde el sitio institucional.
+        </p>
+
+    </div>
+
+</section>
+
+
+<div class="solicitudes-resumen">
+
+    <div>
+
+        <span>
+            Pendientes
+        </span>
+
+        <strong>
+            {{ pendientes }}
+        </strong>
+
+    </div>
+
+</div>
+
+
+<section class="panel">
+
+
+    <div class="panel-cabecera">
+
+        <h2>
+            Opiniones
+        </h2>
+
+
+        <form
+            method="get"
+            class="filtros-inline"
+        >
+
+            <select name="estado">
+
+                <option value="">
+                    Todos los estados
+                </option>
+
+                <option
+                    value="PENDIENTE"
+                    {% if estado_seleccionado == "PENDIENTE" %}
+                        selected
+                    {% endif %}
+                >
+                    Pendientes
+                </option>
+
+                <option
+                    value="APROBADA"
+                    {% if estado_seleccionado == "APROBADA" %}
+                        selected
+                    {% endif %}
+                >
+                    Aprobadas
+                </option>
+
+                <option
+                    value="RECHAZADA"
+                    {% if estado_seleccionado == "RECHAZADA" %}
+                        selected
+                    {% endif %}
+                >
+                    Rechazadas
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="boton-secundario"
+            >
+                Filtrar
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Persona
+                    </th>
+
+                    <th>
+                        Opinión
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for opinion in opiniones %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                {{ opinion.nombre }}
+                            </strong>
+
+                            {% if opinion.correo %}
+
+                                <div class="tabla-contacto">
+                                    <small>
+                                        {{ opinion.correo }}
+                                    </small>
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+                            {{ opinion.comentario|truncatechars:80 }}
+                        </td>
+
+
+                        <td>
+                            {{ opinion.fecha_opinion|date:"d/m/Y H:i" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if opinion.estado == "PENDIENTE" %}
+
+                                <span class="badge badge-advertencia">
+                                    Pendiente
+                                </span>
+
+                            {% elif opinion.estado == "APROBADA" %}
+
+                                <span class="badge badge-exito">
+                                    Aprobada
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-peligro">
+                                    Rechazada
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'opinion_detalle' opinion.id_opinion %}"
+                                class="boton-secundario boton-tabla"
+                            >
+                                Ver
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="5">
+                            No hay opiniones para mostrar.
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

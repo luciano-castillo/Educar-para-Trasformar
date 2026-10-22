@@ -1,0 +1,258 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            Educar Para Transformar
+        {% endblock %}
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/website.css' %}"
+    >
+
+</head>
+
+
+<body class="{% block body_class %}{% endblock %}">
+
+
+    <!-- ====================================== -->
+    <!-- HEADER PÚBLICO                         -->
+    <!-- ====================================== -->
+
+    <header class="web-header">
+
+        <div class="web-header-contenedor">
+
+
+            <a
+                href="{% url 'home' %}"
+                class="web-marca"
+            >
+
+                <div class="web-logo">
+                    E
+                </div>
+
+                <div>
+
+                    <strong>
+                        Educar Para Transformar
+                    </strong>
+
+                    <span>
+                        Centro Educativo
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <nav 
+                class="web-nav"
+                id="web-nav-publico"
+                data-menu
+            >
+
+                <a href="{% url 'home' %}">
+                    Inicio
+                </a>
+            
+                <a href="{% url 'quienes_somos' %}">
+                    Institución
+                </a>
+            
+                <a href="{% url 'niveles' %}">
+                    Niveles
+                </a>
+            
+                <a href="{% url 'bienestar' %}">
+                    Bienestar
+                </a>
+            
+                <a href="{% url 'noticias' %}">
+                    Noticias
+                </a>
+            
+                <a href="{% url 'galeria' %}">
+                    Galería
+                </a>
+
+                <a href="{% url 'opiniones' %}">
+                    Opiniones
+                </a>
+            
+                <a href="{% url 'contacto' %}">
+                    Contacto
+                </a>
+
+                <a
+                    href="{% url 'inscripcion' %}"
+                    class="web-nav-accion-movil"
+                >
+                    Solicitar inscripción
+                </a>
+
+                <a
+                    href="{% url 'login' %}"
+                    class="web-nav-accion-movil"
+                >
+                    Acceder al Campus
+                </a>
+                
+            
+            </nav>
+
+            <button
+                type="button"
+                class="web-menu-toggle"
+                data-menu-toggle
+                aria-controls="web-nav-publico"
+                aria-expanded="false"
+                aria-label="Abrir menú de navegación"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+
+            <div class="web-header-acciones">
+
+                <a
+                    href="{% url 'inscripcion' %}"
+                    class="web-boton-secundario"
+                >
+                    Solicitar inscripción
+                </a>
+
+
+                <a
+                    href="{% url 'login' %}"
+                    class="web-boton"
+                >
+                    Acceder al Campus
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    {% if messages %}
+
+        <div class="web-mensajes">
+
+            {% for message in messages %}
+
+                <div class="
+                    web-mensaje
+                    {% if message.tags %}
+                        web-mensaje-{{ message.tags }}
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ====================================== -->
+    <!-- CONTENIDO                              -->
+    <!-- ====================================== -->
+
+    <main>
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+    <!-- ====================================== -->
+    <!-- FOOTER                                 -->
+    <!-- ====================================== -->
+
+    <footer class="web-footer">
+
+        <div class="web-footer-contenedor">
+
+            <div>
+
+                <strong>
+                    Educar Para Transformar
+                </strong>
+
+                <p>
+                    Centro educativo de gestión privada
+                    en Resistencia, Chaco.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    © 2026 Educar Para Transformar
+                </span>
+
+            </div>
+
+            <div class="web-footer-enlaces">
+
+                <a href="{% url 'opiniones' %}">
+                    Opiniones
+                </a>
+
+                <a href="{% url 'contacto' %}">
+                    Contacto
+                </a>
+            
+                <a href="{% url 'inscripcion' %}">
+                    Inscripción
+                </a>
+            
+                <a href="{% url 'empleo' %}">
+                    Empleo
+                </a>
+            
+                <a href="{% url 'login' %}">
+                    Campus
+                </a>
+            
+            </div>
+
+        </div>
+
+    </footer>
+
+    <script
+        src="{% static 'js/website.js' %}"
+        defer
+    ></script>
+
+</body>
+
+</html>

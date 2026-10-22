@@ -1,0 +1,363 @@
+{% extends "website/base_publico.html" %}
+
+
+{% block title %}
+    Empleo | Educar Para Transformar
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="web-pagina-hero">
+
+    <div class="web-contenedor">
+
+        <span class="web-etiqueta">
+            Trabajá con nosotros
+        </span>
+
+        <h1>
+            Formá parte de nuestro equipo
+        </h1>
+
+        <p>
+            Si compartís nuestra visión de una
+            educación integral y querés formar
+            parte de Educar Para Transformar,
+            podés enviarnos tu postulación.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="web-seccion">
+
+    <div class="web-contenedor">
+
+
+        <div class="web-formulario-layout">
+
+
+            <!-- ================================= -->
+            <!-- INFORMACIÓN                       -->
+            <!-- ================================= -->
+
+            <div class="web-formulario-info">
+
+                <span class="web-etiqueta">
+                    Oportunidades
+                </span>
+
+                <h2>
+                    Crecemos junto
+                    a nuestro equipo
+                </h2>
+
+                <p>
+                    Buscamos personas comprometidas,
+                    responsables y con interés
+                    en participar de una comunidad
+                    educativa orientada al aprendizaje
+                    y al desarrollo integral.
+                </p>
+
+
+                <div class="web-empleo-areas">
+
+                    <div>
+                        🎓 Docencia
+                    </div>
+
+                    <div>
+                        📋 Administración
+                    </div>
+
+                    <div>
+                        🤝 Apoyo estudiantil
+                    </div>
+
+                    <div>
+                        ⚽ Deportes
+                    </div>
+
+                    <div>
+                        🏫 Servicios
+                    </div>
+
+                </div>
+
+
+                <div class="web-info-box">
+
+                    <strong>
+                        Sobre tu CV
+                    </strong>
+
+                    <p>
+                        Podés adjuntar archivos
+                        PDF, DOC o DOCX de hasta
+                        5 MB.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- FORMULARIO                        -->
+            <!-- ================================= -->
+
+            <form
+                method="post"
+                enctype="multipart/form-data"
+                class="web-formulario"
+            >
+
+                {% csrf_token %}
+
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            01
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Datos personales
+                            </h3>
+
+                            <p>
+                                Información para
+                                poder contactarte.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-form-grid">
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.nombre.label }}
+                            </label>
+
+                            {{ form.nombre }}
+
+                            {% for error in form.nombre.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.apellido.label }}
+                            </label>
+
+                            {{ form.apellido }}
+
+                            {% for error in form.apellido.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.correo.label }}
+                            </label>
+
+                            {{ form.correo }}
+
+                            {% for error in form.correo.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="web-campo">
+
+                            <label>
+                                {{ form.telefono.label }}
+                            </label>
+
+                            {{ form.telefono }}
+
+                            {% for error in form.telefono.errors %}
+
+                                <small class="web-error">
+                                    {{ error }}
+                                </small>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            02
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Tu perfil
+                            </h3>
+
+                            <p>
+                                Contanos dónde
+                                te gustaría participar.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-campo">
+
+                        <label>
+                            {{ form.area_interes.label }}
+                        </label>
+
+                        {{ form.area_interes }}
+
+                        {% for error in form.area_interes.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="web-campo web-empleo-mensaje">
+
+                        <label>
+                            {{ form.mensaje.label }}
+                        </label>
+
+                        {{ form.mensaje }}
+
+                        {% for error in form.mensaje.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="web-formulario-seccion">
+
+                    <div class="web-formulario-titulo">
+
+                        <span>
+                            03
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Currículum Vitae
+                            </h3>
+
+                            <p>
+                                Adjuntá tu CV actualizado.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="web-campo">
+
+                        <label>
+                            {{ form.cv.label }}
+                        </label>
+
+                        {{ form.cv }}
+
+                        {% for error in form.cv.errors %}
+
+                            <small class="web-error">
+                                {{ error }}
+                            </small>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="web-boton web-formulario-submit"
+                >
+                    Enviar postulación
+                </button>
+
+
+                <p class="web-formulario-legal">
+                    El envío de una postulación
+                    no implica una contratación
+                    ni una vacante disponible.
+                </p>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}
