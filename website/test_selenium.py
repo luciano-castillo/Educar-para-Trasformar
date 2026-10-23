@@ -23,7 +23,7 @@ class SolicitudInscripcionSeleniumTest(
         options.add_argument(
             "--headless=new"
         )
-        
+
         options.add_argument(
             "--window-size=1440,1200"
         )
@@ -61,11 +61,14 @@ class SolicitudInscripcionSeleniumTest(
         )
 
 
-    def test_visitante_envia_solicitud_pendiente_sin_crear_alumno(
-        self
+    def completar_formulario(
+        self,
+        dni,
+        apellido,
+        telefono,
+        correo,
+        observaciones=""
     ):
-
-        dni = "50123456"
 
         self.selenium.get(
             
@@ -74,30 +77,25 @@ class SolicitudInscripcionSeleniumTest(
             
         )
 
+        datos = {
+            "nombre_alumno": "Luciano",
+            "apellido_alumno": apellido,
+            "dni_alumno": dni,
+            "nombre_responsable": "Carlos",
+            "apellido_responsable": apellido,
+            "telefono": telefono,
+            "correo": correo,
+            "observaciones": observaciones,
+        }
 
-        self.selenium.find_element(
-            By.NAME,
-            "nombre_alumno"
-        ).send_keys(
-            "Luciano"
-        )
+        for campo, valor in datos.items():
 
-
-        self.selenium.find_element(
-            By.NAME,
-            "apellido_alumno"
-        ).send_keys(
-            "Prueba"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "dni_alumno"
-        ).send_keys(
-            dni
-        )
-
+            self.selenium.find_element(
+                By.NAME,
+                campo
+            ).send_keys(
+                valor
+            )
 
         campo_fecha = (
             self.selenium.find_element(
@@ -114,7 +112,6 @@ class SolicitudInscripcionSeleniumTest(
             campo_fecha
         )
 
-
         Select(
             self.selenium.find_element(
                 By.NAME,
@@ -127,45 +124,8 @@ class SolicitudInscripcionSeleniumTest(
         )
 
 
-        self.selenium.find_element(
-            By.NAME,
-            "nombre_responsable"
-        ).send_keys(
-            "Carlos"
-        )
+    def enviar_formulario(self):
 
-
-        self.selenium.find_element(
-            By.NAME,
-            "apellido_responsable"
-        ).send_keys(
-            "Prueba"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "telefono"
-        ).send_keys(
-            "3624123456"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "correo"
-        ).send_keys(
-            "prueba@example.com"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "observaciones"
-        ).send_keys(
-            "Solicitud generada por Selenium."
-        )
-        
         boton_enviar = WebDriverWait(
             self.selenium,
             10
@@ -178,15 +138,29 @@ class SolicitudInscripcionSeleniumTest(
             )
         )
 
-
         self.selenium.execute_script(
             "arguments[0].click();",
             boton_enviar
         )
 
 
+    def test_visitante_envia_solicitud_pendiente_sin_crear_alumno(
+        self
+    ):
 
+        dni = "50123456"
 
+        self.completar_formulario(
+            dni=dni,
+            apellido="Prueba",
+            telefono="3624123456",
+            correo="prueba@example.com",
+            observaciones=(
+                "Solicitud generada por Selenium."
+            )
+        )
+
+        self.enviar_formulario()
 
         WebDriverWait(
             self.selenium,
@@ -204,13 +178,11 @@ class SolicitudInscripcionSeleniumTest(
             )
         )
 
-
         solicitud = (
             SolicitudInscripcion.objects.get(
                 dni_alumno=dni
             )
         )
-
 
         self.assertEqual(
             solicitud.estado,
@@ -219,12 +191,13 @@ class SolicitudInscripcionSeleniumTest(
             .PENDIENTE
         )
 
-
         self.assertFalse(
             Alumno.objects.filter(
                 dni=dni
             ).exists()
         )
+
+
     def test_no_permite_solicitud_pendiente_duplicada(
         self
     ):
@@ -248,117 +221,14 @@ class SolicitudInscripcionSeleniumTest(
             ),
         )
 
-
-        self.selenium.get(
-            
-                f"{self.live_server_url}"
-                "/inscripcion/"
-            
+        self.completar_formulario(
+            dni=dni,
+            apellido="Duplicado",
+            telefono="3624987654",
+            correo="duplicado@example.com"
         )
 
-
-        self.selenium.find_element(
-            By.NAME,
-            "nombre_alumno"
-        ).send_keys(
-            "Luciano"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "apellido_alumno"
-        ).send_keys(
-            "Duplicado"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "dni_alumno"
-        ).send_keys(
-            dni
-        )
-
-
-        campo_fecha = (
-            self.selenium.find_element(
-                By.NAME,
-                "fecha_nacimiento"
-            )
-        )
-
-        self.selenium.execute_script(
-            (
-                "arguments[0].value = "
-                "'2015-05-10';"
-            ),
-            campo_fecha
-        )
-
-
-        Select(
-            self.selenium.find_element(
-                By.NAME,
-                "nivel_solicitado"
-            )
-        ).select_by_value(
-            str(
-                self.nivel.pk
-            )
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "nombre_responsable"
-        ).send_keys(
-            "Carlos"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "apellido_responsable"
-        ).send_keys(
-            "Duplicado"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "telefono"
-        ).send_keys(
-            "3624987654"
-        )
-
-
-        self.selenium.find_element(
-            By.NAME,
-            "correo"
-        ).send_keys(
-            "duplicado@example.com"
-        )
-
-
-        boton_enviar = WebDriverWait(
-            self.selenium,
-            10
-        ).until(
-            EC.presence_of_element_located(
-                (
-                    By.CSS_SELECTOR,
-                    "button[type='submit']"
-                )
-            )
-        )
-
-
-        self.selenium.execute_script(
-            "arguments[0].click();",
-            boton_enviar
-        )
-
+        self.enviar_formulario()
 
         WebDriverWait(
             self.selenium,
@@ -376,7 +246,6 @@ class SolicitudInscripcionSeleniumTest(
             )
         )
 
-
         self.assertEqual(
             SolicitudInscripcion.objects.filter(
                 dni_alumno=dni,
@@ -389,10 +258,8 @@ class SolicitudInscripcionSeleniumTest(
             1
         )
 
-
         self.assertFalse(
             Alumno.objects.filter(
                 dni=dni
             ).exists()
         )
-        
