@@ -3,23 +3,22 @@ from datetime import date
 from django.test import TestCase
 
 from academic.models import (
-    NivelEducativo,
-    Curso,
     Alumno,
-)
-
-from .models import (
-    RutaTransporte,
-    ContratacionTransporte,
-    ServicioComedor,
-    ContratacionComedor,
+    Curso,
+    NivelEducativo,
 )
 
 from .forms import (
-    RutaTransporteForm,
-    ContratacionTransporteForm,
-    ServicioComedorForm,
     ContratacionComedorForm,
+    ContratacionTransporteForm,
+    RutaTransporteForm,
+    ServicioComedorForm,
+)
+from .models import (
+    ContratacionComedor,
+    ContratacionTransporte,
+    RutaTransporte,
+    ServicioComedor,
 )
 
 

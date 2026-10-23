@@ -1,11 +1,13 @@
 from django import forms
-from .models import Deporte, GrupoDeportivo, InscripcionDeporte
+
 from academic.models import (
+    Alumno,
+    Horario,
     NivelEducativo,
     Profesor,
-    Horario,
-    Alumno,
 )
+
+from .models import Deporte, GrupoDeportivo, InscripcionDeporte
 
 
 class DeporteForm(forms.ModelForm):

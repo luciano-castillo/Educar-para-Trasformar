@@ -1,57 +1,51 @@
+import tempfile
 from datetime import date, time
 from decimal import Decimal
-import tempfile
 
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
-from django.utils.datastructures import MultiValueDict
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
-from django.contrib.auth.models import User
 from django.urls import reverse
-
-from accounts.models import PerfilUsuario
+from django.utils.datastructures import MultiValueDict
 
 from academic.models import (
-    NivelEducativo,
-    Curso,
     Alumno,
-    Profesor,
+    Curso,
     Horario,
+    NivelEducativo,
+    Profesor,
 )
-
+from accounts.models import PerfilUsuario
+from services.models import (
+    ContratacionComedor,
+    ContratacionTransporte,
+    RutaTransporte,
+    ServicioComedor,
+)
 from sports.models import (
     Deporte,
     GrupoDeportivo,
     InscripcionDeporte,
 )
 
-from services.models import (
-    RutaTransporte,
-    ContratacionTransporte,
-    ServicioComedor,
-    ContratacionComedor,
-)
-
-from .models import (
-    CuotaMensual,
-    Factura,
-    Pago,
-    ComprobantePago,
-)
-
 from .forms import (
     CuotaMensualForm,
     RegistrarPagoForm,
 )
-
+from .models import (
+    ComprobantePago,
+    CuotaMensual,
+    Factura,
+    Pago,
+)
 from .services import (
+    actualizar_facturas_vencidas,
     generar_factura_alumno,
+    rechazar_pago,
     registrar_pago,
     validar_pago,
-    rechazar_pago,
-    actualizar_facturas_vencidas,
 )
 
 
@@ -151,21 +145,19 @@ class CuotaMensualTestCase(TestCase):
 
         with self.assertRaises(
             IntegrityError
-        ):
+        ), transaction.atomic():
 
-            with transaction.atomic():
-
-                CuotaMensual.objects.create(
-                    mes=10,
-                    anio=2026,
-                    valor=70000,
-                    fecha_vencimiento=date(
-                        2026,
-                        10,
-                        20
-                    ),
-                    estado=True
-                )
+            CuotaMensual.objects.create(
+                mes=10,
+                anio=2026,
+                valor=70000,
+                fecha_vencimiento=date(
+                    2026,
+                    10,
+                    20
+                ),
+                estado=True
+            )
 
 class GeneracionFacturaTestCase(TestCase):
 
@@ -985,53 +977,51 @@ class GeneracionFacturaTestCase(TestCase):
             content_type="image/jpeg"
         )
 
-        with tempfile.TemporaryDirectory() as media_root:
+        with tempfile.TemporaryDirectory() as media_root, override_settings(
+            MEDIA_ROOT=media_root
+        ):
 
-            with override_settings(
-                MEDIA_ROOT=media_root
+            pago = registrar_pago(
+                factura=factura,
+                fecha_transferencia=date(
+                    2026,
+                    10,
+                    15
+                ),
+                aplicaciones=[
+                    (
+                        cuota,
+                        cuota.importe
+                    )
+                ],
+                numero_operacion="COMP-001",
+                comprobantes=[
+                    comprobante_pdf,
+                    comprobante_jpg,
+                ]
+            )
+
+            self.assertEqual(
+                pago.comprobantes.count(),
+                2
+            )
+
+            self.assertEqual(
+                ComprobantePago.objects.filter(
+                    pago__factura=factura
+                ).count(),
+                2
+            )
+
+            for comprobante in (
+                pago.comprobantes.all()
             ):
 
-                pago = registrar_pago(
-                    factura=factura,
-                    fecha_transferencia=date(
-                        2026,
-                        10,
-                        15
-                    ),
-                    aplicaciones=[
-                        (
-                            cuota,
-                            cuota.importe
-                        )
-                    ],
-                    numero_operacion="COMP-001",
-                    comprobantes=[
-                        comprobante_pdf,
-                        comprobante_jpg,
-                    ]
-                )
-
-                self.assertEqual(
-                    pago.comprobantes.count(),
-                    2
-                )
-
-                self.assertEqual(
-                    ComprobantePago.objects.filter(
-                        pago__factura=factura
-                    ).count(),
-                    2
-                )
-
-                for comprobante in (
-                    pago.comprobantes.all()
-                ):
-
-                    self.assertTrue(
-                        comprobante.archivo.storage.exists(
-                            comprobante.archivo.name
-                        )
+                self.assertTrue(
+                    comprobante.archivo.storage.exists(
+                        comprobante.archivo.name
                     )
+                )
     
     def test_formulario_rechaza_comprobante_invalido(self):
 
@@ -1100,61 +1090,59 @@ class GeneracionFacturaTestCase(TestCase):
             content_type="image/png"
         )
 
-        with tempfile.TemporaryDirectory() as media_root:
+        with tempfile.TemporaryDirectory() as media_root, override_settings(
+            MEDIA_ROOT=media_root
+        ):
 
-            with override_settings(
-                MEDIA_ROOT=media_root
-            ):
-
-                pago = registrar_pago(
-                    factura=factura,
-                    fecha_transferencia=date(
-                        2026,
-                        10,
-                        15
-                    ),
-                    aplicaciones=[
-                        (
-                            cuota,
-                            cuota.importe
-                        )
-                    ],
-                    numero_operacion="COMP-003",
-                    comprobantes=[
-                        archivo
-                    ]
-                )
-
-                self.assertEqual(
-                    pago.comprobantes.count(),
-                    1
-                )
-
-                validar_pago(
-                    pago
-                )
-
-                pago.refresh_from_db()
-
-                self.assertEqual(
-                    pago.estado,
-                    "VALIDADO"
-                )
-
-                self.assertEqual(
-                    pago.comprobantes.count(),
-                    1
-                )
-
-                comprobante = (
-                    pago.comprobantes.first()
-                )
-
-                self.assertTrue(
-                    comprobante.archivo.storage.exists(
-                        comprobante.archivo.name
+            pago = registrar_pago(
+                factura=factura,
+                fecha_transferencia=date(
+                    2026,
+                    10,
+                    15
+                ),
+                aplicaciones=[
+                    (
+                        cuota,
+                        cuota.importe
                     )
+                ],
+                numero_operacion="COMP-003",
+                comprobantes=[
+                    archivo
+                ]
+            )
+
+            self.assertEqual(
+                pago.comprobantes.count(),
+                1
+            )
+
+            validar_pago(
+                pago
+            )
+
+            pago.refresh_from_db()
+
+            self.assertEqual(
+                pago.estado,
+                "VALIDADO"
+            )
+
+            self.assertEqual(
+                pago.comprobantes.count(),
+                1
+            )
+
+            comprobante = (
+                pago.comprobantes.first()
+            )
+
+            self.assertTrue(
+                comprobante.archivo.storage.exists(
+                    comprobante.archivo.name
                 )
+            )
     
     def test_factura_vencida_con_deuda(self):
 

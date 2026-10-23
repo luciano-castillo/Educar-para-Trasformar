@@ -1,31 +1,30 @@
 from django.contrib import messages
+from django.http import FileResponse
 from django.shortcuts import (
-    render,
-    redirect,
     get_object_or_404,
+    redirect,
+    render,
 )
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.decorators import admin_required
-from django.http import FileResponse
 
 from .forms import (
-    SolicitudInscripcionForm,
     ConsultaContactoForm,
-    OpinionForm,
-    NoticiaForm,
     ImagenGaleriaForm,
+    NoticiaForm,
+    OpinionForm,
     PostulacionEmpleoForm,
+    SolicitudInscripcionForm,
 )
-
 from .models import (
-    SolicitudInscripcion,
     ConsultaContacto,
-    Opinion,
-    Noticia,
     ImagenGaleria,
+    Noticia,
+    Opinion,
     PostulacionEmpleo,
+    SolicitudInscripcion,
 )
 
 

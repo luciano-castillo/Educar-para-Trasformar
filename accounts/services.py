@@ -145,20 +145,20 @@ def crear_cuenta_acceso(
     if not persona.estado:
 
         raise ValidationError(
-            (
+            
                 "No se puede crear una cuenta "
                 "para una persona inactiva."
-            )
+            
         )
 
 
     if persona.usuario_id:
 
         raise ValidationError(
-            (
+            
                 "Esta persona ya posee "
                 "una cuenta de acceso."
-            )
+            
         )
 
 
@@ -171,10 +171,10 @@ def crear_cuenta_acceso(
     if not correo:
 
         raise ValidationError(
-            (
+            
                 "La persona debe tener "
                 "un correo electrónico registrado."
-            )
+            
         )
 
 
@@ -183,10 +183,10 @@ def crear_cuenta_acceso(
     ).exists():
 
         raise ValidationError(
-            (
+            
                 "El correo electrónico ya está "
                 "asociado a otra cuenta de acceso."
-            )
+            
         )
 
 
@@ -244,20 +244,20 @@ def restablecer_password_acceso(
     if not persona.estado:
 
         raise ValidationError(
-            (
+            
                 "No se puede restablecer la contraseña "
                 "de una persona inactiva."
-            )
+            
         )
 
 
     if not persona.usuario_id:
 
         raise ValidationError(
-            (
+            
                 "Esta persona todavía no posee "
                 "una cuenta de acceso."
-            )
+            
         )
 
 
@@ -271,10 +271,10 @@ def restablecer_password_acceso(
     except PerfilUsuario.DoesNotExist:
 
         raise ValidationError(
-            (
+            
                 "La cuenta no posee "
                 "un perfil de usuario asociado."
-            )
+            
         )
 
 

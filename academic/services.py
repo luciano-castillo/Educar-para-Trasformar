@@ -1,17 +1,18 @@
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.utils import timezone
 from decimal import (
     Decimal,
     InvalidOperation,
 )
 
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
+
 from .models import (
-    Asistencia,
     Alumno,
+    Asistencia,
     DictadoMateria,
-    Profesor,
     Nota,
+    Profesor,
 )
 
 
@@ -140,13 +141,13 @@ def registrar_asistencias(
         ):
 
             raise ValidationError(
-                (
+                
                     f"El alumno "
                     f"{alumno.apellido}, "
                     f"{alumno.nombre} "
                     "no pertenece al curso "
                     "del dictado."
-                )
+                
             )
 
         # -------------------------------------
@@ -156,12 +157,12 @@ def registrar_asistencias(
         if not alumno.estado:
 
             raise ValidationError(
-                (
+                
                     f"El alumno "
                     f"{alumno.apellido}, "
                     f"{alumno.nombre} "
                     "se encuentra inactivo."
-                )
+                
             )
 
         # -------------------------------------
@@ -401,13 +402,13 @@ def registrar_notas(
         ):
 
             raise ValidationError(
-                (
+                
                     f"El alumno "
                     f"{alumno.apellido}, "
                     f"{alumno.nombre} "
                     "no pertenece al curso "
                     "del dictado."
-                )
+                
             )
 
         # -------------------------------------
@@ -417,12 +418,12 @@ def registrar_notas(
         if not alumno.estado:
 
             raise ValidationError(
-                (
+                
                     f"El alumno "
                     f"{alumno.apellido}, "
                     f"{alumno.nombre} "
                     "se encuentra inactivo."
-                )
+                
             )
 
         # -------------------------------------
@@ -443,12 +444,12 @@ def registrar_notas(
         ):
 
             raise ValidationError(
-                (
+                
                     f"La calificación de "
                     f"{alumno.apellido}, "
                     f"{alumno.nombre} "
                     "no es válida."
-                )
+                
             )
 
         # -------------------------------------
@@ -462,12 +463,12 @@ def registrar_notas(
         ):
 
             raise ValidationError(
-                (
+                
                     f"La calificación de "
                     f"{alumno.apellido}, "
                     f"{alumno.nombre} "
                     "debe estar entre 1 y 10."
-                )
+                
             )
 
         registros_validados.append(

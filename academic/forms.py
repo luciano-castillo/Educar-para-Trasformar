@@ -1,5 +1,16 @@
 from django import forms
-from .models import Alumno, Profesor, NivelEducativo, Materia, Horario, Curso, DictadoMateria, Tutor, TutorAlumno
+
+from .models import (
+    Alumno,
+    Curso,
+    DictadoMateria,
+    Horario,
+    Materia,
+    NivelEducativo,
+    Profesor,
+    Tutor,
+    TutorAlumno,
+)
 
 
 class AlumnoForm(forms.ModelForm):

@@ -14,19 +14,18 @@ from django.utils import timezone
 from accounts.models import PerfilUsuario
 
 from .models import (
-    NivelEducativo,
-    Curso,
     Alumno,
-    Profesor,
-    Materia,
-    Horario,
-    DictadoMateria,
     Asistencia,
+    Curso,
+    DictadoMateria,
+    Horario,
+    Materia,
+    NivelEducativo,
     Nota,
+    Profesor,
     Tutor,
     TutorAlumno,
 )
-
 from .services import registrar_asistencias, registrar_notas
 
 
@@ -381,16 +380,14 @@ class AsistenciaTestCase(TestCase):
 
         with self.assertRaises(
             IntegrityError
-        ):
+        ), transaction.atomic():
 
-            with transaction.atomic():
-
-                Asistencia.objects.create(
-                    alumno=self.alumno1,
-                    dictado=self.dictado,
-                    fecha=self.fecha,
-                    estado="AUSENTE"
-                )
+            Asistencia.objects.create(
+                alumno=self.alumno1,
+                dictado=self.dictado,
+                fecha=self.fecha,
+                estado="AUSENTE"
+            )
 
 
     def test_docente_registra_desde_interfaz(self):
@@ -962,18 +959,16 @@ class NotaTestCase(TestCase):
 
         with self.assertRaises(
             IntegrityError
-        ):
+        ), transaction.atomic():
 
-            with transaction.atomic():
-
-                Nota.objects.create(
-                    alumno=self.alumno1,
-                    dictado=self.dictado,
-                    periodo=self.periodo,
-                    evaluacion=self.evaluacion,
-                    calificacion=Decimal("9"),
-                    fecha=self.fecha
-                )
+            Nota.objects.create(
+                alumno=self.alumno1,
+                dictado=self.dictado,
+                periodo=self.periodo,
+                evaluacion=self.evaluacion,
+                calificacion=Decimal("9"),
+                fecha=self.fecha
+            )
 
 
     def test_docente_registra_notas_desde_interfaz(self):

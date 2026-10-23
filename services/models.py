@@ -1,7 +1,7 @@
 from django.db import models
 
-from django.db import models
 from academic.models import Alumno
+
 
 class RutaTransporte(models.Model):
 
