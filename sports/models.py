@@ -1,10 +1,12 @@
 from django.db import models
+
 from academic.models import (
+    Alumno,
+    Horario,
     NivelEducativo,
     Profesor,
-    Horario,
-    Alumno,
 )
+
 
 class Deporte(models.Model):
 

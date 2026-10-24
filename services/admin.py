@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import RutaTransporte, ContratacionTransporte, ServicioComedor, ContratacionComedor
+
+from .models import (
+    ContratacionComedor,
+    ContratacionTransporte,
+    RutaTransporte,
+    ServicioComedor,
+)
 
 
 @admin.register(RutaTransporte)

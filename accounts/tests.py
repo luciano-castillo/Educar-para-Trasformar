@@ -2,14 +2,16 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import PerfilUsuario
 from academic.models import (
-    NivelEducativo,
-    Curso,
     Alumno,
+    Curso,
+    NivelEducativo,
     Profesor,
     Tutor,
 )
+
+from .models import PerfilUsuario
+
 
 class PrimerAccesoTestCase(TestCase):
 

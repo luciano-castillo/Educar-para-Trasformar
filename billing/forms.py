@@ -1,16 +1,18 @@
-from django import forms
 from decimal import Decimal
+
+from django import forms
 from django.core.validators import FileExtensionValidator
 
-from .models import CuotaMensual, DetalleFactura, Factura
 from academic.models import (
     Alumno,
     NivelEducativo,
     Profesor,
 )
-
-from sports.models import Deporte
 from services.models import RutaTransporte
+from sports.models import Deporte
+
+from .models import CuotaMensual, DetalleFactura, Factura
+
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True

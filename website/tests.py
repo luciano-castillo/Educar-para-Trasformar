@@ -1,22 +1,22 @@
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-
-from academic.models import NivelEducativo
-from accounts.models import PerfilUsuario
 import tempfile
 
+from django.contrib.auth.models import User
 from django.core.files.uploadedfile import (
     SimpleUploadedFile,
 )
+from django.test import TestCase
+from django.urls import reverse
+
+from academic.models import NivelEducativo
+from accounts.models import PerfilUsuario
 
 from .models import (
-    SolicitudInscripcion,
     ConsultaContacto,
-    Opinion,
-    Noticia,
     ImagenGaleria,
+    Noticia,
+    Opinion,
     PostulacionEmpleo,
+    SolicitudInscripcion,
 )
 
 

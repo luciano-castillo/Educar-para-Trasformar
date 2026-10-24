@@ -3,20 +3,19 @@ from datetime import date, time
 from django.test import TestCase
 
 from academic.models import (
-    NivelEducativo,
-    Curso,
     Alumno,
-    Profesor,
+    Curso,
     Horario,
+    NivelEducativo,
+    Profesor,
 )
 
+from .forms import InscripcionDeporteForm
 from .models import (
     Deporte,
     GrupoDeportivo,
     InscripcionDeporte,
 )
-
-from .forms import InscripcionDeporteForm
 
 
 class InscripcionDeporteTestCase(TestCase):

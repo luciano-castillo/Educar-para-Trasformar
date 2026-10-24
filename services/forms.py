@@ -1,6 +1,14 @@
 from django import forms
-from .models import RutaTransporte, ContratacionTransporte, ServicioComedor, ContratacionComedor
+
 from academic.models import Alumno
+
+from .models import (
+    ContratacionComedor,
+    ContratacionTransporte,
+    RutaTransporte,
+    ServicioComedor,
+)
+
 
 class RutaTransporteForm(forms.ModelForm):
 

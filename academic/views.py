@@ -1,35 +1,52 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.db.models.deletion import ProtectedError
 from datetime import date
 
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db.models import (
-    Count,
-    Q,
-    Max,
     Avg,
+    Count,
+    Max,
+    Q,
 )
+from django.db.models.deletion import ProtectedError
+from django.shortcuts import get_object_or_404, redirect, render
 
-from accounts.decorators import admin_required, alumno_required, docente_required, tutor_required
-
+from accounts.decorators import (
+    admin_required,
+    alumno_required,
+    docente_required,
+    tutor_required,
+)
 from sports.models import InscripcionDeporte
-from .services import registrar_asistencias, registrar_notas
-from .models import (Alumno, Profesor, Materia, Horario, DictadoMateria, NivelEducativo, Curso, Tutor, TutorAlumno, Asistencia, Nota)
+
 from .forms import (
-    AlumnoForm, 
-    AlumnoDatosPersonalesForm, 
-    ProfesorForm, 
-    ProfesorDatosPersonalesForm, 
-    MateriaForm, 
-    HorarioForm,
-    DictadoMateriaForm,
+    AlumnoDatosPersonalesForm,
+    AlumnoForm,
     CursoForm,
+    DictadoMateriaForm,
+    HorarioForm,
+    MateriaForm,
     NivelEducativoForm,
-    TutorForm,
+    ProfesorDatosPersonalesForm,
+    ProfesorForm,
     TutorAlumnoForm,
-    
-    )
+    TutorForm,
+)
+from .models import (
+    Alumno,
+    Asistencia,
+    Curso,
+    DictadoMateria,
+    Horario,
+    Materia,
+    NivelEducativo,
+    Nota,
+    Profesor,
+    Tutor,
+    TutorAlumno,
+)
+from .services import registrar_asistencias, registrar_notas
+
 
 #Alumnos
 @admin_required
@@ -1296,10 +1313,10 @@ def asistencia_tomar(
             )
 
             return redirect(
-                (
+                
                     f"{request.path}"
                     f"?fecha={fecha_seleccionada.isoformat()}"
-                )
+                
             )
 
         except ValidationError as error:
@@ -1604,11 +1621,11 @@ def nota_registrar(
             )
 
             return redirect(
-                (
+                
                     f"{request.path}"
                     f"?periodo={periodo}"
                     f"&evaluacion={evaluacion}"
-                )
+                
             )
 
         except ValidationError as error:

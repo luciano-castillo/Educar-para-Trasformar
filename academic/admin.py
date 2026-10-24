@@ -1,5 +1,16 @@
 from django.contrib import admin
-from .models import NivelEducativo, Curso, Alumno, Profesor, Tutor, Materia, Horario, DictadoMateria,TutorAlumno
+
+from .models import (
+    Alumno,
+    Curso,
+    DictadoMateria,
+    Horario,
+    Materia,
+    NivelEducativo,
+    Profesor,
+    Tutor,
+    TutorAlumno,
+)
 
 
 @admin.register(NivelEducativo)

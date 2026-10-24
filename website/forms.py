@@ -7,12 +7,12 @@ from academic.models import (
 )
 
 from .models import (
-    SolicitudInscripcion,
     ConsultaContacto,
-    Opinion,
-    Noticia,
     ImagenGaleria,
+    Noticia,
+    Opinion,
     PostulacionEmpleo,
+    SolicitudInscripcion,
 )
 
 
@@ -211,10 +211,10 @@ class SolicitudInscripcionForm(
         ).exists():
 
             raise ValidationError(
-                (
+                
                     "Ya existe un alumno "
                     "registrado con este DNI."
-                )
+                
             )
 
 
@@ -230,10 +230,10 @@ class SolicitudInscripcionForm(
         ).exists():
 
             raise ValidationError(
-                (
+                
                     "Ya existe una solicitud "
                     "pendiente para este DNI."
-                )
+                
             )
 
 
@@ -587,10 +587,10 @@ class PostulacionEmpleoForm(
         if cv.size > limite:
 
             raise forms.ValidationError(
-                (
+                
                     "El archivo no puede "
                     "superar los 5 MB."
-                )
+                
             )
 
 
