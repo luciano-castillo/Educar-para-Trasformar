@@ -11,9 +11,7 @@ from .models import Deporte, GrupoDeportivo, InscripcionDeporte
 
 
 class DeporteForm(forms.ModelForm):
-
     class Meta:
-
         model = Deporte
 
         fields = [
@@ -24,45 +22,28 @@ class DeporteForm(forms.ModelForm):
         ]
 
         widgets = {
-
-            "nombre": forms.TextInput(
-                attrs={
-                    "placeholder": "Ej.: Fútbol"
-                }
-            ),
-
+            "nombre": forms.TextInput(attrs={"placeholder": "Ej.: Fútbol"}),
             "descripcion": forms.Textarea(
-                attrs={
-                    "rows": 3,
-                    "placeholder": "Descripción del deporte"
-                }
+                attrs={"rows": 3, "placeholder": "Descripción del deporte"}
             ),
-            
             "valor_mensual": forms.NumberInput(
-                attrs={
-                    "step": "0.01",
-                    "min": "0",
-                    "placeholder": "Ej.: 20000"
-                }
+                attrs={"step": "0.01", "min": "0", "placeholder": "Ej.: 20000"}
             ),
         }
-        
+
     def clean_valor_mensual(self):
 
-        valor = self.cleaned_data.get(
-            "valor_mensual"
-        )
+        valor = self.cleaned_data.get("valor_mensual")
 
         if valor is not None and valor <= 0:
-
             raise forms.ValidationError(
                 "El valor mensual del deporte debe ser mayor a cero."
             )
 
         return valor
 
-class GrupoDeportivoForm(forms.ModelForm):
 
+class GrupoDeportivoForm(forms.ModelForm):
     class Meta:
         model = GrupoDeportivo
 
@@ -78,28 +59,20 @@ class GrupoDeportivoForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields["deporte"].queryset = (
-            Deporte.objects
-            .filter(estado=True)
-            .order_by("nombre")
+        self.fields["deporte"].queryset = Deporte.objects.filter(estado=True).order_by(
+            "nombre"
         )
 
-        self.fields["nivel"].queryset = (
-            NivelEducativo.objects
-            .filter(estado=True)
-            .order_by("nombre")
-        )
+        self.fields["nivel"].queryset = NivelEducativo.objects.filter(
+            estado=True
+        ).order_by("nombre")
 
-        self.fields["profesor"].queryset = (
-            Profesor.objects
-            .filter(estado=True)
-            .order_by("apellido", "nombre")
-        )
+        self.fields["profesor"].queryset = Profesor.objects.filter(
+            estado=True
+        ).order_by("apellido", "nombre")
 
-        self.fields["horario"].queryset = (
-            Horario.objects
-            .all()
-            .order_by("dia_semana", "hora_inicio")
+        self.fields["horario"].queryset = Horario.objects.all().order_by(
+            "dia_semana", "hora_inicio"
         )
 
     def clean(self):
@@ -112,18 +85,12 @@ class GrupoDeportivoForm(forms.ModelForm):
         horario = cleaned_data.get("horario")
 
         if deporte and nivel and profesor and horario:
-
             grupos = GrupoDeportivo.objects.filter(
-                deporte=deporte,
-                nivel=nivel,
-                profesor=profesor,
-                horario=horario
+                deporte=deporte, nivel=nivel, profesor=profesor, horario=horario
             )
 
             if self.instance.pk:
-                grupos = grupos.exclude(
-                    pk=self.instance.pk
-                )
+                grupos = grupos.exclude(pk=self.instance.pk)
 
             if grupos.exists():
                 raise forms.ValidationError(
@@ -133,10 +100,9 @@ class GrupoDeportivoForm(forms.ModelForm):
 
         return cleaned_data
 
+
 class InscripcionDeporteForm(forms.ModelForm):
-
     class Meta:
-
         model = InscripcionDeporte
 
         fields = [
@@ -148,29 +114,18 @@ class InscripcionDeporteForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields["alumno"].queryset = (
-            Alumno.objects
-            .filter(estado=True)
-            .order_by("apellido", "nombre")
+        self.fields["alumno"].queryset = Alumno.objects.filter(estado=True).order_by(
+            "apellido", "nombre"
         )
 
         self.fields["grupo"].queryset = (
-            GrupoDeportivo.objects
-            .filter(
+            GrupoDeportivo.objects.filter(
                 estado=True,
                 deporte__estado=True,
                 nivel__estado=True,
             )
-            .select_related(
-                "deporte",
-                "nivel",
-                "profesor",
-                "horario"
-            )
-            .order_by(
-                "deporte__nombre",
-                "nivel__nombre"
-            )
+            .select_related("deporte", "nivel", "profesor", "horario")
+            .order_by("deporte__nombre", "nivel__nombre")
         )
 
     def clean(self):
@@ -183,46 +138,28 @@ class InscripcionDeporteForm(forms.ModelForm):
         if not alumno or not grupo:
             return cleaned_data
 
-        inscripciones_activas = (
-            InscripcionDeporte.objects
-            .filter(
-                alumno=alumno,
-                estado=True
-            )
-            .select_related(
-                "grupo",
-                "grupo__deporte",
-                "grupo__horario"
-            )
-        )
+        inscripciones_activas = InscripcionDeporte.objects.filter(
+            alumno=alumno, estado=True
+        ).select_related("grupo", "grupo__deporte", "grupo__horario")
 
         # Si alguna vez reutilizamos este formulario
         # para editar una inscripción:
         if self.instance.pk:
-
-            inscripciones_activas = (
-                inscripciones_activas
-                .exclude(pk=self.instance.pk)
-            )
+            inscripciones_activas = inscripciones_activas.exclude(pk=self.instance.pk)
 
         # RF33:
         # No permitir dos inscripciones activas
         # en el mismo grupo.
 
-        if inscripciones_activas.filter(
-            grupo=grupo
-        ).exists():
-
+        if inscripciones_activas.filter(grupo=grupo).exists():
             raise forms.ValidationError(
-                "El alumno ya se encuentra inscripto "
-                "en este grupo deportivo."
+                "El alumno ya se encuentra inscripto en este grupo deportivo."
             )
 
         # RF31:
         # Máximo dos deportes simultáneos.
 
         if inscripciones_activas.count() >= 2:
-
             raise forms.ValidationError(
                 "El alumno ya participa en dos deportes. "
                 "No puede realizar una tercera inscripción."
@@ -234,26 +171,16 @@ class InscripcionDeporteForm(forms.ModelForm):
         nuevo_horario = grupo.horario
 
         for inscripcion in inscripciones_activas:
+            horario_actual = inscripcion.grupo.horario
 
-            horario_actual = (
-                inscripcion.grupo.horario
-            )
-
-            mismo_dia = (
-                horario_actual.dia_semana
-                == nuevo_horario.dia_semana
-            )
+            mismo_dia = horario_actual.dia_semana == nuevo_horario.dia_semana
 
             hay_superposicion = (
-                nuevo_horario.hora_inicio
-                < horario_actual.hora_fin
-                and
-                nuevo_horario.hora_fin
-                > horario_actual.hora_inicio
+                nuevo_horario.hora_inicio < horario_actual.hora_fin
+                and nuevo_horario.hora_fin > horario_actual.hora_inicio
             )
 
             if mismo_dia and hay_superposicion:
-
                 raise forms.ValidationError(
                     "El horario del grupo se superpone "
                     f"con {inscripcion.grupo.deporte.nombre} "

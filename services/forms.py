@@ -11,9 +11,7 @@ from .models import (
 
 
 class RutaTransporteForm(forms.ModelForm):
-
     class Meta:
-
         model = RutaTransporte
 
         fields = [
@@ -24,46 +22,25 @@ class RutaTransporteForm(forms.ModelForm):
         ]
 
         widgets = {
-
-            "nombre": forms.TextInput(
-                attrs={
-                    "placeholder": "Ej.: Zona Centro"
-                }
-            ),
-
+            "nombre": forms.TextInput(attrs={"placeholder": "Ej.: Zona Centro"}),
             "descripcion": forms.Textarea(
-                attrs={
-                    "rows": 3,
-                    "placeholder": "Descripción del recorrido"
-                }
+                attrs={"rows": 3, "placeholder": "Descripción del recorrido"}
             ),
-
-            "valor_mensual": forms.NumberInput(
-                attrs={
-                    "step": "0.01",
-                    "min": "0"
-                }
-            ),
+            "valor_mensual": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
         }
 
     def clean_valor_mensual(self):
 
-        valor = self.cleaned_data.get(
-            "valor_mensual"
-        )
+        valor = self.cleaned_data.get("valor_mensual")
 
         if valor is not None and valor <= 0:
-
-            raise forms.ValidationError(
-                "El valor mensual debe ser mayor a cero."
-            )
+            raise forms.ValidationError("El valor mensual debe ser mayor a cero.")
 
         return valor
 
+
 class ContratacionTransporteForm(forms.ModelForm):
-
     class Meta:
-
         model = ContratacionTransporte
 
         fields = [
@@ -76,10 +53,7 @@ class ContratacionTransporteForm(forms.ModelForm):
 
         widgets = {
             "anio": forms.NumberInput(
-                attrs={
-                    "min": "2026",
-                    "placeholder": "Ej.: 2027"
-                }
+                attrs={"min": "2026", "placeholder": "Ej.: 2027"}
             ),
         }
 
@@ -87,20 +61,13 @@ class ContratacionTransporteForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields["alumno"].queryset = (
-            Alumno.objects
-            .filter(estado=True)
-            .order_by(
-                "apellido",
-                "nombre"
-            )
+        self.fields["alumno"].queryset = Alumno.objects.filter(estado=True).order_by(
+            "apellido", "nombre"
         )
 
-        self.fields["ruta"].queryset = (
-            RutaTransporte.objects
-            .filter(estado=True)
-            .order_by("nombre")
-        )
+        self.fields["ruta"].queryset = RutaTransporte.objects.filter(
+            estado=True
+        ).order_by("nombre")
 
     def clean(self):
 
@@ -111,26 +78,16 @@ class ContratacionTransporteForm(forms.ModelForm):
         anio = cleaned_data.get("anio")
 
         if alumno and mes and anio:
-
-            contrataciones = (
-                ContratacionTransporte.objects
-                .filter(
-                    alumno=alumno,
-                    mes=mes,
-                    anio=anio,
-                )
+            contrataciones = ContratacionTransporte.objects.filter(
+                alumno=alumno,
+                mes=mes,
+                anio=anio,
             )
 
             if self.instance.pk:
-
-                contrataciones = (
-                    contrataciones.exclude(
-                        pk=self.instance.pk
-                    )
-                )
+                contrataciones = contrataciones.exclude(pk=self.instance.pk)
 
             if contrataciones.exists():
-
                 raise forms.ValidationError(
                     "El alumno ya posee una contratación "
                     "de transporte para ese mes y año."
@@ -138,10 +95,9 @@ class ContratacionTransporteForm(forms.ModelForm):
 
         return cleaned_data
 
+
 class ServicioComedorForm(forms.ModelForm):
-
     class Meta:
-
         model = ServicioComedor
 
         fields = [
@@ -152,46 +108,25 @@ class ServicioComedorForm(forms.ModelForm):
         ]
 
         widgets = {
-
-            "nombre": forms.TextInput(
-                attrs={
-                    "placeholder": "Ej.: Comedor Escolar"
-                }
-            ),
-
+            "nombre": forms.TextInput(attrs={"placeholder": "Ej.: Comedor Escolar"}),
             "descripcion": forms.Textarea(
-                attrs={
-                    "rows": 3,
-                    "placeholder": "Descripción del servicio"
-                }
+                attrs={"rows": 3, "placeholder": "Descripción del servicio"}
             ),
-
-            "valor_mensual": forms.NumberInput(
-                attrs={
-                    "step": "0.01",
-                    "min": "0"
-                }
-            ),
+            "valor_mensual": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
         }
 
     def clean_valor_mensual(self):
 
-        valor = self.cleaned_data.get(
-            "valor_mensual"
-        )
+        valor = self.cleaned_data.get("valor_mensual")
 
         if valor is not None and valor <= 0:
-
-            raise forms.ValidationError(
-                "El valor mensual debe ser mayor a cero."
-            )
+            raise forms.ValidationError("El valor mensual debe ser mayor a cero.")
 
         return valor
 
+
 class ContratacionComedorForm(forms.ModelForm):
-
     class Meta:
-
         model = ContratacionComedor
 
         fields = [
@@ -203,12 +138,8 @@ class ContratacionComedorForm(forms.ModelForm):
         ]
 
         widgets = {
-
             "anio": forms.NumberInput(
-                attrs={
-                    "min": "2026",
-                    "placeholder": "Ej.: 2027"
-                }
+                attrs={"min": "2026", "placeholder": "Ej.: 2027"}
             ),
         }
 
@@ -216,20 +147,13 @@ class ContratacionComedorForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields["alumno"].queryset = (
-            Alumno.objects
-            .filter(estado=True)
-            .order_by(
-                "apellido",
-                "nombre"
-            )
+        self.fields["alumno"].queryset = Alumno.objects.filter(estado=True).order_by(
+            "apellido", "nombre"
         )
 
-        self.fields["servicio"].queryset = (
-            ServicioComedor.objects
-            .filter(estado=True)
-            .order_by("nombre")
-        )
+        self.fields["servicio"].queryset = ServicioComedor.objects.filter(
+            estado=True
+        ).order_by("nombre")
 
     def clean(self):
 
@@ -240,29 +164,18 @@ class ContratacionComedorForm(forms.ModelForm):
         anio = cleaned_data.get("anio")
 
         if alumno and mes and anio:
-
-            contrataciones = (
-                ContratacionComedor.objects
-                .filter(
-                    alumno=alumno,
-                    mes=mes,
-                    anio=anio,
-                )
+            contrataciones = ContratacionComedor.objects.filter(
+                alumno=alumno,
+                mes=mes,
+                anio=anio,
             )
 
             if self.instance.pk:
-
-                contrataciones = (
-                    contrataciones.exclude(
-                        pk=self.instance.pk
-                    )
-                )
+                contrataciones = contrataciones.exclude(pk=self.instance.pk)
 
             if contrataciones.exists():
-
                 raise forms.ValidationError(
-                    "El alumno ya posee una contratación "
-                    "de comedor para ese mes y año."
+                    "El alumno ya posee una contratación de comedor para ese mes y año."
                 )
 
         return cleaned_data

@@ -24,63 +24,35 @@ from .models import (
 
 
 @transaction.atomic
-def generar_factura_alumno(
-    alumno,
-    mes,
-    anio
-):
+def generar_factura_alumno(alumno, mes, anio):
 
     # -------------------------------------------------
     # 1. Evitar dos facturas del mismo alumno/período
     # -------------------------------------------------
 
-    if Factura.objects.filter(
-        alumno=alumno,
-        mes=mes,
-        anio=anio
-    ).exists():
-
+    if Factura.objects.filter(alumno=alumno, mes=mes, anio=anio).exists():
         raise ValidationError(
-            "El alumno ya posee una factura "
-            "para el período seleccionado."
+            "El alumno ya posee una factura para el período seleccionado."
         )
 
     # -------------------------------------------------
     # 2. Buscar cuota mensual
     # -------------------------------------------------
 
-    cuota = (
-        CuotaMensual.objects
-        .filter(
-            mes=mes,
-            anio=anio,
-            estado=True
-        )
-        .first()
-    )
+    cuota = CuotaMensual.objects.filter(mes=mes, anio=anio, estado=True).first()
 
     if not cuota:
-
         raise ValidationError(
-            "No existe una cuota activa "
-            "para el período seleccionado."
+            "No existe una cuota activa para el período seleccionado."
         )
 
     # -------------------------------------------------
     # 3. Fechas correspondientes al período
     # -------------------------------------------------
 
-    primer_dia = date(
-        anio,
-        mes,
-        1
-    )
+    primer_dia = date(anio, mes, 1)
 
-    ultimo_dia = date(
-        anio,
-        mes,
-        monthrange(anio, mes)[1]
-    )
+    ultimo_dia = date(anio, mes, monthrange(anio, mes)[1])
 
     # -------------------------------------------------
     # 4. Crear factura
@@ -91,7 +63,7 @@ def generar_factura_alumno(
         mes=mes,
         anio=anio,
         fecha_vencimiento=cuota.fecha_vencimiento,
-        estado="PENDIENTE"
+        estado="PENDIENTE",
     )
 
     # -------------------------------------------------
@@ -101,13 +73,9 @@ def generar_factura_alumno(
     DetalleFactura.objects.create(
         factura=factura,
         tipo_concepto="CUOTA",
-        descripcion=(
-            f"Cuota mensual "
-            f"{cuota.get_mes_display()} "
-            f"{cuota.anio}"
-        ),
+        descripcion=(f"Cuota mensual {cuota.get_mes_display()} {cuota.anio}"),
         importe=cuota.valor,
-        cuota_mensual=cuota
+        cuota_mensual=cuota,
     )
 
     # -------------------------------------------------
@@ -115,26 +83,16 @@ def generar_factura_alumno(
     # -------------------------------------------------
 
     inscripciones = (
-        InscripcionDeporte.objects
-        .filter(
-            alumno=alumno,
-            fecha_inscripcion__lte=ultimo_dia
+        InscripcionDeporte.objects.filter(
+            alumno=alumno, fecha_inscripcion__lte=ultimo_dia
         )
-        .filter(
-            Q(fecha_baja__isnull=True)
-            |
-            Q(fecha_baja__gte=primer_dia)
-        )
-        .select_related(
-            "grupo",
-            "grupo__deporte"
-        )
+        .filter(Q(fecha_baja__isnull=True) | Q(fecha_baja__gte=primer_dia))
+        .select_related("grupo", "grupo__deporte")
     )
 
     deportes_agregados = set()
 
     for inscripcion in inscripciones:
-
         deporte = inscripcion.grupo.deporte
 
         # Evitamos cobrar dos veces el mismo deporte
@@ -142,62 +100,44 @@ def generar_factura_alumno(
             continue
 
         if deporte.valor_mensual <= 0:
-
             raise ValidationError(
-                f"El deporte {deporte.nombre} "
-                "no posee un valor mensual válido."
+                f"El deporte {deporte.nombre} no posee un valor mensual válido."
             )
 
         DetalleFactura.objects.create(
             factura=factura,
             tipo_concepto="DEPORTE",
-            descripcion=(
-                f"Deporte: {deporte.nombre}"
-            ),
+            descripcion=(f"Deporte: {deporte.nombre}"),
             importe=deporte.valor_mensual,
-            grupo_deportivo=inscripcion.grupo
+            grupo_deportivo=inscripcion.grupo,
         )
 
-        deportes_agregados.add(
-            deporte.pk
-        )
+        deportes_agregados.add(deporte.pk)
 
     # -------------------------------------------------
     # 7. Transporte contratado para ese mes
     # -------------------------------------------------
 
     transporte = (
-        ContratacionTransporte.objects
-        .filter(
-            alumno=alumno,
-            mes=mes,
-            anio=anio,
-            estado=True
+        ContratacionTransporte.objects.filter(
+            alumno=alumno, mes=mes, anio=anio, estado=True
         )
-        .select_related(
-            "ruta"
-        )
+        .select_related("ruta")
         .first()
     )
 
     if transporte:
-
         if transporte.ruta.valor_mensual <= 0:
-
             raise ValidationError(
-                "La ruta de transporte "
-                "no posee un valor mensual válido."
+                "La ruta de transporte no posee un valor mensual válido."
             )
 
         DetalleFactura.objects.create(
             factura=factura,
             tipo_concepto="TRANSPORTE",
-            descripcion=(
-                f"Transporte: "
-                f"{transporte.ruta.nombre}"
-            ),
+            descripcion=(f"Transporte: {transporte.ruta.nombre}"),
             importe=transporte.ruta.valor_mensual,
-            ruta_transporte=transporte.ruta
+            ruta_transporte=transporte.ruta,
         )
 
     # -------------------------------------------------
@@ -205,40 +145,29 @@ def generar_factura_alumno(
     # -------------------------------------------------
 
     comedor = (
-        ContratacionComedor.objects
-        .filter(
-            alumno=alumno,
-            mes=mes,
-            anio=anio,
-            estado=True
+        ContratacionComedor.objects.filter(
+            alumno=alumno, mes=mes, anio=anio, estado=True
         )
-        .select_related(
-            "servicio"
-        )
+        .select_related("servicio")
         .first()
     )
 
     if comedor:
-
         if comedor.servicio.valor_mensual <= 0:
-
             raise ValidationError(
-                "El servicio de comedor "
-                "no posee un valor mensual válido."
+                "El servicio de comedor no posee un valor mensual válido."
             )
 
         DetalleFactura.objects.create(
             factura=factura,
             tipo_concepto="COMEDOR",
-            descripcion=(
-                f"Comedor: "
-                f"{comedor.servicio.nombre}"
-            ),
+            descripcion=(f"Comedor: {comedor.servicio.nombre}"),
             importe=comedor.servicio.valor_mensual,
-            servicio_comedor=comedor.servicio
+            servicio_comedor=comedor.servicio,
         )
 
     return factura
+
 
 @transaction.atomic
 def registrar_pago(
@@ -254,27 +183,13 @@ def registrar_pago(
     # Bloqueamos la factura mientras
     # registramos el pago.
 
-    factura = (
-        Factura.objects
-        .select_for_update()
-        .get(
-            pk=factura.pk
-        )
-    )
+    factura = Factura.objects.select_for_update().get(pk=factura.pk)
 
     if factura.estado == "ANULADA":
-
-        raise ValidationError(
-            "No se pueden registrar pagos "
-            "sobre una factura anulada."
-        )
+        raise ValidationError("No se pueden registrar pagos sobre una factura anulada.")
 
     if not aplicaciones:
-
-        raise ValidationError(
-            "Debe seleccionar al menos "
-            "un concepto para pagar."
-        )
+        raise ValidationError("Debe seleccionar al menos un concepto para pagar.")
 
     total_pago = Decimal("0.00")
 
@@ -283,20 +198,15 @@ def registrar_pago(
     detalles_usados = set()
 
     for detalle, importe in aplicaciones:
-
-        importe = Decimal(
-            str(importe)
-        )
+        importe = Decimal(str(importe))
 
         # -----------------------------------------
         # El detalle debe pertenecer a la factura
         # -----------------------------------------
 
         if detalle.factura_id != factura.id_factura:
-
             raise ValidationError(
-                "Uno de los conceptos seleccionados "
-                "no pertenece a esta factura."
+                "Uno de los conceptos seleccionados no pertenece a esta factura."
             )
 
         # -----------------------------------------
@@ -304,26 +214,18 @@ def registrar_pago(
         # -----------------------------------------
 
         if detalle.pk in detalles_usados:
-
             raise ValidationError(
-                "Un mismo concepto no puede "
-                "repetirse dentro del pago."
+                "Un mismo concepto no puede repetirse dentro del pago."
             )
 
-        detalles_usados.add(
-            detalle.pk
-        )
+        detalles_usados.add(detalle.pk)
 
         # -----------------------------------------
         # Importe positivo
         # -----------------------------------------
 
         if importe <= 0:
-
-            raise ValidationError(
-                "El importe aplicado debe "
-                "ser mayor a cero."
-            )
+            raise ValidationError("El importe aplicado debe ser mayor a cero.")
 
         # -----------------------------------------
         # Cuánto del concepto ya fue utilizado
@@ -332,26 +234,13 @@ def registrar_pago(
         # RECHAZADOS no cuentan.
         # -----------------------------------------
 
-        utilizado = (
-            detalle.aplicaciones_pago
-            .exclude(
-                pago__estado="RECHAZADO"
-            )
-            .aggregate(
-                total=Sum(
-                    "importe_aplicado"
-                )
-            )["total"]
-            or Decimal("0.00")
-        )
+        utilizado = detalle.aplicaciones_pago.exclude(
+            pago__estado="RECHAZADO"
+        ).aggregate(total=Sum("importe_aplicado"))["total"] or Decimal("0.00")
 
-        disponible = (
-            detalle.importe
-            - utilizado
-        )
+        disponible = detalle.importe - utilizado
 
         if importe > disponible:
-
             raise ValidationError(
                 f"El importe ingresado para "
                 f"'{detalle.descripcion}' "
@@ -369,11 +258,7 @@ def registrar_pago(
         total_pago += importe
 
     if total_pago <= 0:
-
-        raise ValidationError(
-            "El monto del pago debe "
-            "ser mayor a cero."
-        )
+        raise ValidationError("El monto del pago debe ser mayor a cero.")
 
     # ---------------------------------------------
     # Crear pago
@@ -386,7 +271,7 @@ def registrar_pago(
         numero_operacion=numero_operacion,
         observaciones=observaciones,
         registrado_por=registrado_por,
-        estado="PENDIENTE"
+        estado="PENDIENTE",
     )
 
     # ---------------------------------------------
@@ -394,26 +279,16 @@ def registrar_pago(
     # ---------------------------------------------
 
     for detalle, importe in aplicaciones_validadas:
-
         PagoDetalle.objects.create(
-            pago=pago,
-            detalle_factura=detalle,
-            importe_aplicado=importe
+            pago=pago, detalle_factura=detalle, importe_aplicado=importe
         )
 
     # ---------------------------------------------
     # Guardar comprobantes
     # ---------------------------------------------
 
-    for archivo in (
-        comprobantes
-        or []
-    ):
-
-        comprobante = ComprobantePago(
-            pago=pago,
-            archivo=archivo
-        )
+    for archivo in comprobantes or []:
+        comprobante = ComprobantePago(pago=pago, archivo=archivo)
 
         # Ejecuta también los validadores
         # definidos en el modelo.
@@ -422,107 +297,49 @@ def registrar_pago(
         comprobante.save()
 
     return pago
-    
+
 
 @transaction.atomic
 def validar_pago(pago):
 
-    pago = (
-        Pago.objects
-        .select_for_update()
-        .select_related(
-            "factura"
-        )
-        .get(
-            pk=pago.pk
-        )
-    )
+    pago = Pago.objects.select_for_update().select_related("factura").get(pk=pago.pk)
 
-    factura = (
-        Factura.objects
-        .select_for_update()
-        .get(
-            pk=pago.factura_id
-        )
-    )
+    factura = Factura.objects.select_for_update().get(pk=pago.factura_id)
 
     if pago.estado != "PENDIENTE":
-
-        raise ValidationError(
-            "Solamente se pueden validar "
-            "pagos pendientes."
-        )
+        raise ValidationError("Solamente se pueden validar pagos pendientes.")
 
     if factura.estado == "ANULADA":
+        raise ValidationError("No se puede validar un pago de una factura anulada.")
 
-        raise ValidationError(
-            "No se puede validar un pago "
-            "de una factura anulada."
-        )
-
-    detalles_pago = (
-        pago.detalles_pago
-        .select_related(
-            "detalle_factura"
-        )
-        .all()
-    )
+    detalles_pago = pago.detalles_pago.select_related("detalle_factura").all()
 
     if not detalles_pago.exists():
-
-        raise ValidationError(
-            "El pago no posee conceptos asociados."
-        )
+        raise ValidationError("El pago no posee conceptos asociados.")
 
     total_aplicado = Decimal("0.00")
 
     for pago_detalle in detalles_pago:
-
-        detalle = (
-            pago_detalle.detalle_factura
-        )
+        detalle = pago_detalle.detalle_factura
 
         # El detalle debe pertenecer
         # a la misma factura.
 
         if detalle.factura_id != factura.id_factura:
-
             raise ValidationError(
-                "El pago contiene un concepto "
-                "que pertenece a otra factura."
+                "El pago contiene un concepto que pertenece a otra factura."
             )
 
-        ya_pagado = (
-            detalle.aplicaciones_pago
-            .filter(
-                pago__estado="VALIDADO"
-            )
-            .exclude(
-                pago=pago
-            )
-            .aggregate(
-                total=Sum(
-                    "importe_aplicado"
-                )
-            )["total"]
-            or Decimal("0.00")
-        )
+        ya_pagado = detalle.aplicaciones_pago.filter(pago__estado="VALIDADO").exclude(
+            pago=pago
+        ).aggregate(total=Sum("importe_aplicado"))["total"] or Decimal("0.00")
 
-        if (
-            ya_pagado
-            + pago_detalle.importe_aplicado
-            > detalle.importe
-        ):
-
+        if ya_pagado + pago_detalle.importe_aplicado > detalle.importe:
             raise ValidationError(
-                f"El pago supera el saldo "
-                f"del concepto "
-                f"'{detalle.descripcion}'."
+                f"El pago supera el saldo del concepto '{detalle.descripcion}'."
             )
 
-        total_aplicado += (
-            pago_detalle.importe_aplicado
-        )
+        total_aplicado += pago_detalle.importe_aplicado
 
     # ---------------------------------------------
     # El monto del pago tiene que coincidir
@@ -530,100 +347,56 @@ def validar_pago(pago):
     # ---------------------------------------------
 
     if total_aplicado != pago.monto:
-
         raise ValidationError(
-            "El monto del pago no coincide "
-            "con la suma de sus conceptos."
+            "El monto del pago no coincide con la suma de sus conceptos."
         )
 
     pago.estado = "VALIDADO"
 
-    pago.save(
-        update_fields=[
-            "estado"
-        ]
-    )
+    pago.save(update_fields=["estado"])
 
     factura.actualizar_estado_pago()
 
     return pago
 
+
 @transaction.atomic
 def rechazar_pago(pago):
 
-    pago = (
-        Pago.objects
-        .select_for_update()
-        .select_related(
-            "factura"
-        )
-        .get(
-            pk=pago.pk
-        )
-    )
+    pago = Pago.objects.select_for_update().select_related("factura").get(pk=pago.pk)
 
     if pago.estado != "PENDIENTE":
-
-        raise ValidationError(
-            "Solamente se pueden rechazar "
-            "pagos pendientes."
-        )
+        raise ValidationError("Solamente se pueden rechazar pagos pendientes.")
 
     pago.estado = "RECHAZADO"
 
-    pago.save(
-        update_fields=[
-            "estado"
-        ]
-    )
+    pago.save(update_fields=["estado"])
 
     pago.factura.actualizar_estado_pago()
 
     return pago
 
+
 @transaction.atomic
-def actualizar_facturas_vencidas(
-    fecha_referencia=None
-):
+def actualizar_facturas_vencidas(fecha_referencia=None):
 
     if fecha_referencia is None:
+        fecha_referencia = timezone.localdate()
 
-        fecha_referencia = (
-            timezone.localdate()
-        )
-
-    facturas = (
-        Factura.objects
-        .filter(
-            fecha_vencimiento__lt=(
-                fecha_referencia
-            )
-        )
-        .exclude(
-            estado__in=[
-                "PAGADA",
-                "ANULADA",
-            ]
-        )
+    facturas = Factura.objects.filter(fecha_vencimiento__lt=(fecha_referencia)).exclude(
+        estado__in=[
+            "PAGADA",
+            "ANULADA",
+        ]
     )
 
     cantidad_actualizada = 0
 
     for factura in facturas:
-
-        if (
-            factura.saldo > 0
-            and
-            factura.estado != "VENCIDA"
-        ):
-
+        if factura.saldo > 0 and factura.estado != "VENCIDA":
             factura.estado = "VENCIDA"
 
-            factura.save(
-                update_fields=[
-                    "estado"
-                ]
-            )
+            factura.save(update_fields=["estado"])
 
             cantidad_actualizada += 1
 

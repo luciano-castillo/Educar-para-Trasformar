@@ -3,314 +3,141 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    #Alumnos
-    path(
-        "alumnos/",
-        views.alumno_lista,
-        name="alumno_lista"
-    ),
-
-    path(
-        "alumnos/nuevo/",
-        views.alumno_crear,
-        name="alumno_crear"
-    ),
-
-    path(
-        "alumnos/<int:id_alumno>/editar/",
-        views.alumno_editar,
-        name="alumno_editar"
-    ),
-
+    # Alumnos
+    path("alumnos/", views.alumno_lista, name="alumno_lista"),
+    path("alumnos/nuevo/", views.alumno_crear, name="alumno_crear"),
+    path("alumnos/<int:id_alumno>/editar/", views.alumno_editar, name="alumno_editar"),
     path(
         "alumnos/<int:id_alumno>/desactivar/",
         views.alumno_desactivar,
-        name="alumno_desactivar"
+        name="alumno_desactivar",
     ),
-    
-    path(
-        "alumno/mis-datos/",
-        views.alumno_mis_datos,
-        name="alumno_mis_datos"
-    ),
-    
-    path(
-        "alumno/materias/",
-        views.alumno_materias,
-        name="alumno_materias"
-    ),
-    
-    path(
-        "alumno/horarios/",
-        views.alumno_horarios,
-        name="alumno_horarios"
-    ),
-
-    path(
-        "alumno/deportes/",
-        views.alumno_deportes,
-        name="alumno_deportes"
-    ),
-
+    path("alumno/mis-datos/", views.alumno_mis_datos, name="alumno_mis_datos"),
+    path("alumno/materias/", views.alumno_materias, name="alumno_materias"),
+    path("alumno/horarios/", views.alumno_horarios, name="alumno_horarios"),
+    path("alumno/deportes/", views.alumno_deportes, name="alumno_deportes"),
     path(
         "alumno/mis-datos/editar/",
         views.alumno_editar_mis_datos,
-        name="alumno_editar_mis_datos"
+        name="alumno_editar_mis_datos",
     ),
-    path(
-        "alumno/academico/",
-        views.alumno_academico,
-        name="alumno_academico"
-    ),
-    
-    #profesores
-    
-    path(
-        "profesores/",
-        views.profesor_lista,
-        name="profesor_lista"
-    ),
-
-    path(
-        "profesores/nuevo/",
-        views.profesor_crear,
-        name="profesor_crear"
-    ),
-
+    path("alumno/academico/", views.alumno_academico, name="alumno_academico"),
+    # profesores
+    path("profesores/", views.profesor_lista, name="profesor_lista"),
+    path("profesores/nuevo/", views.profesor_crear, name="profesor_crear"),
     path(
         "profesores/<int:id_profesor>/editar/",
         views.profesor_editar,
-        name="profesor_editar"
+        name="profesor_editar",
     ),
-
     path(
         "profesores/<int:id_profesor>/desactivar/",
         views.profesor_desactivar,
-        name="profesor_desactivar"
+        name="profesor_desactivar",
     ),
-    
+    path("profesor/mis-datos/", views.profesor_mis_datos, name="profesor_mis_datos"),
+    path("profesor/cursos/", views.profesor_cursos, name="profesor_cursos"),
     path(
-        "profesor/mis-datos/",
-        views.profesor_mis_datos,
-        name="profesor_mis_datos"
+        "profesor/asistencias/", views.profesor_asistencias, name="profesor_asistencias"
     ),
-    
-    path(
-        "profesor/cursos/",
-        views.profesor_cursos,
-        name="profesor_cursos"
-    ),
-
-    path(
-        "profesor/asistencias/",
-        views.profesor_asistencias,
-        name="profesor_asistencias"
-    ),
-
     path(
         "profesor/calificaciones/",
         views.profesor_calificaciones,
-        name="profesor_calificaciones"
+        name="profesor_calificaciones",
     ),
-
     path(
         "profesor/mis-datos/editar/",
         views.profesor_editar_mis_datos,
-        name="profesor_editar_mis_datos"
+        name="profesor_editar_mis_datos",
     ),
-    
     path(
         "profesor/asistencias/<int:id_dictado>/",
         views.asistencia_tomar,
-        name="asistencia_tomar"
+        name="asistencia_tomar",
     ),
-    
     path(
         "profesor/asistencias/<int:id_dictado>/historial/",
         views.asistencia_historial,
-        name="asistencia_historial"
+        name="asistencia_historial",
     ),
     path(
-        "profesor/notas/<int:id_dictado>/",
-        views.nota_registrar,
-        name="nota_registrar"
+        "profesor/notas/<int:id_dictado>/", views.nota_registrar, name="nota_registrar"
     ),
     path(
         "profesor/notas/<int:id_dictado>/historial/",
         views.nota_historial,
-        name="nota_historial"
+        name="nota_historial",
     ),
-    #Materias
+    # Materias
+    path("materias/", views.materia_lista, name="materia_lista"),
+    path("materias/nueva/", views.materia_crear, name="materia_crear"),
     path(
-        "materias/",
-        views.materia_lista,
-        name="materia_lista"
+        "materias/<int:id_materia>/editar/", views.materia_editar, name="materia_editar"
     ),
-
-    path(
-        "materias/nueva/",
-        views.materia_crear,
-        name="materia_crear"
-    ),
-
-    path(
-        "materias/<int:id_materia>/editar/",
-        views.materia_editar,
-        name="materia_editar"
-    ),
-
     path(
         "materias/<int:id_materia>/desactivar/",
         views.materia_desactivar,
-        name="materia_desactivar"
+        name="materia_desactivar",
     ),
-    #Horarios
+    # Horarios
+    path("horarios/", views.horario_lista, name="horario_lista"),
+    path("horarios/nuevo/", views.horario_crear, name="horario_crear"),
     path(
-        "horarios/",
-        views.horario_lista,
-        name="horario_lista"
+        "horarios/<int:id_horario>/editar/", views.horario_editar, name="horario_editar"
     ),
-
-    path(
-        "horarios/nuevo/",
-        views.horario_crear,
-        name="horario_crear"
-    ),
-
-    path(
-        "horarios/<int:id_horario>/editar/",
-        views.horario_editar,
-        name="horario_editar"
-    ),
-
     path(
         "horarios/<int:id_horario>/eliminar/",
         views.horario_eliminar,
-        name="horario_eliminar"
+        name="horario_eliminar",
     ),
+    path("dictados/", views.dictado_lista, name="dictado_lista"),
+    path("dictados/nuevo/", views.dictado_crear, name="dictado_crear"),
     path(
-        "dictados/",
-        views.dictado_lista,
-        name="dictado_lista"
+        "dictados/<int:id_dictado>/editar/", views.dictado_editar, name="dictado_editar"
     ),
-
-    path(
-        "dictados/nuevo/",
-        views.dictado_crear,
-        name="dictado_crear"
-    ),
-
-    path(
-        "dictados/<int:id_dictado>/editar/",
-        views.dictado_editar,
-        name="dictado_editar"
-    ), 
-    
     # Niveles educativos
-
-    path(
-        "niveles/",
-        views.nivel_lista,
-        name="nivel_lista"
-    ),
-
-    path(
-        "niveles/nuevo/",
-        views.nivel_crear,
-        name="nivel_crear"
-    ),
-
-    path(
-        "niveles/<int:id_nivel>/editar/",
-        views.nivel_editar,
-        name="nivel_editar"
-    ),
-
+    path("niveles/", views.nivel_lista, name="nivel_lista"),
+    path("niveles/nuevo/", views.nivel_crear, name="nivel_crear"),
+    path("niveles/<int:id_nivel>/editar/", views.nivel_editar, name="nivel_editar"),
     path(
         "niveles/<int:id_nivel>/desactivar/",
         views.nivel_desactivar,
-        name="nivel_desactivar"
+        name="nivel_desactivar",
     ),
-
-
     # Cursos
-
-    path(
-        "cursos/",
-        views.curso_lista,
-        name="curso_lista"
-    ),
-
-    path(
-        "cursos/nuevo/",
-        views.curso_crear,
-        name="curso_crear"
-    ),
-
-    path(
-        "cursos/<int:id_curso>/editar/",
-        views.curso_editar,
-        name="curso_editar"
-    ),
-
+    path("cursos/", views.curso_lista, name="curso_lista"),
+    path("cursos/nuevo/", views.curso_crear, name="curso_crear"),
+    path("cursos/<int:id_curso>/editar/", views.curso_editar, name="curso_editar"),
     path(
         "cursos/<int:id_curso>/desactivar/",
         views.curso_desactivar,
-        name="curso_desactivar"
+        name="curso_desactivar",
     ),
-    #Tutores
-    
-    path(
-        "tutores/",
-        views.tutor_lista,
-        name="tutor_lista"
-    ),
-
-    path(
-        "tutores/nuevo/",
-        views.tutor_crear,
-        name="tutor_crear"
-    ),
-
-    path(
-        "tutores/<int:id_tutor>/editar/",
-        views.tutor_editar,
-        name="tutor_editar"
-    ),
-
+    # Tutores
+    path("tutores/", views.tutor_lista, name="tutor_lista"),
+    path("tutores/nuevo/", views.tutor_crear, name="tutor_crear"),
+    path("tutores/<int:id_tutor>/editar/", views.tutor_editar, name="tutor_editar"),
     path(
         "tutores/<int:id_tutor>/desactivar/",
         views.tutor_desactivar,
-        name="tutor_desactivar"
+        name="tutor_desactivar",
     ),
-    
-    path(
-        "tutor/mis-hijos/",
-        views.tutor_mis_hijos,
-        name="tutor_mis_hijos"
-    ),
-    
-    #Tutores y alumnos
-    path(
-        "tutores/asociaciones/",
-        views.tutor_alumno_lista,
-        name="tutor_alumno_lista"
-    ),
-
+    path("tutor/mis-hijos/", views.tutor_mis_hijos, name="tutor_mis_hijos"),
+    # Tutores y alumnos
+    path("tutores/asociaciones/", views.tutor_alumno_lista, name="tutor_alumno_lista"),
     path(
         "tutores/asociaciones/nueva/",
         views.tutor_alumno_crear,
-        name="tutor_alumno_crear"
+        name="tutor_alumno_crear",
     ),
-
     path(
         "tutores/asociaciones/<int:id_relacion>/eliminar/",
         views.tutor_alumno_eliminar,
-        name="tutor_alumno_eliminar"
+        name="tutor_alumno_eliminar",
     ),
     path(
         "tutor/alumno/<int:id_alumno>/",
         views.tutor_detalle_alumno,
-        name="tutor_detalle_alumno"
+        name="tutor_detalle_alumno",
     ),
 ]

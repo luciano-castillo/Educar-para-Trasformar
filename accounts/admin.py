@@ -5,7 +5,6 @@ from .models import PerfilUsuario
 
 @admin.register(PerfilUsuario)
 class PerfilUsuarioAdmin(admin.ModelAdmin):
-
     list_display = (
         "id_perfil",
         "usuario",
@@ -17,6 +16,4 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
         "usuario__email",
     )
 
-    list_filter = (
-        "rol",
-    )
+    list_filter = ("rol",)

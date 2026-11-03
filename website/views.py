@@ -30,147 +30,89 @@ from .models import (
 
 def home(request):
 
-    imagenes_carrusel = (
-        ImagenGaleria.objects
-        .filter(
-            publicada=True
-        )
-        .order_by(
-            "orden",
-            "-fecha_carga"
-        )[:3]
-    )
+    imagenes_carrusel = ImagenGaleria.objects.filter(publicada=True).order_by(
+        "orden", "-fecha_carga"
+    )[:3]
 
+    ultimas_noticias = Noticia.objects.filter(publicada=True).order_by(
+        "-fecha_publicacion"
+    )[:3]
 
-    ultimas_noticias = (
-        Noticia.objects
-        .filter(
-            publicada=True
-        )
-        .order_by(
-            "-fecha_publicacion"
-        )[:3]
-    )
-
-
-    ultimas_opiniones = (
-        Opinion.objects
-        .filter(
-            estado=Opinion.Estado.APROBADA
-        )
-        .order_by(
-            "-fecha_opinion"
-        )[:3]
-    )
-
+    ultimas_opiniones = Opinion.objects.filter(estado=Opinion.Estado.APROBADA).order_by(
+        "-fecha_opinion"
+    )[:3]
 
     return render(
         request,
         "website/home.html",
         {
-            "imagenes_carrusel": (
-                imagenes_carrusel
-            ),
-            "ultimas_noticias": (
-                ultimas_noticias
-            ),
-            "ultimas_opiniones": (
-                ultimas_opiniones
-            ),
-        }
+            "imagenes_carrusel": (imagenes_carrusel),
+            "ultimas_noticias": (ultimas_noticias),
+            "ultimas_opiniones": (ultimas_opiniones),
+        },
     )
+
 
 def quienes_somos(request):
 
-    return render(
-        request,
-        "website/quienes_somos.html"
-    )
+    return render(request, "website/quienes_somos.html")
 
 
 def niveles(request):
 
-    return render(
-        request,
-        "website/niveles.html"
-    )
+    return render(request, "website/niveles.html")
 
 
 def bienestar(request):
 
-    return render(
-        request,
-        "website/bienestar.html"
-    )
+    return render(request, "website/bienestar.html")
 
 
 def galeria(request):
 
-    imagenes = (
-        ImagenGaleria.objects.filter(
-            publicada=True
-        )
-    )
-
+    imagenes = ImagenGaleria.objects.filter(publicada=True)
 
     return render(
         request,
         "website/galeria.html",
         {
             "imagenes": imagenes,
-        }
+        },
     )
 
 
 def noticias(request):
 
-    noticias_publicadas = (
-        Noticia.objects.filter(
-            publicada=True
-        )
-    )
-
+    noticias_publicadas = Noticia.objects.filter(publicada=True)
 
     return render(
         request,
         "website/noticias.html",
         {
-            "noticias": (
-                noticias_publicadas
-            ),
-        }
+            "noticias": (noticias_publicadas),
+        },
     )
 
-def noticia_detalle(
-    request,
-    id_noticia
-):
 
-    noticia = get_object_or_404(
-        Noticia,
-        id_noticia=id_noticia,
-        publicada=True
-    )
+def noticia_detalle(request, id_noticia):
 
+    noticia = get_object_or_404(Noticia, id_noticia=id_noticia, publicada=True)
 
     return render(
         request,
         "website/noticia_detalle.html",
         {
             "noticia": noticia,
-        }
+        },
     )
+
 
 def contacto(request):
 
     if request.method == "POST":
-
-        form = ConsultaContactoForm(
-            request.POST
-        )
+        form = ConsultaContactoForm(request.POST)
 
         if form.is_valid():
-
             form.save()
 
             messages.success(
@@ -180,37 +122,29 @@ def contacto(request):
                     "correctamente. "
                     "Nos pondremos en contacto "
                     "a la brevedad."
-                )
+                ),
             )
 
-            return redirect(
-                "contacto"
-            )
+            return redirect("contacto")
 
     else:
-
         form = ConsultaContactoForm()
-
 
     return render(
         request,
         "website/contacto.html",
         {
             "form": form,
-        }
+        },
     )
 
 
 def inscripcion(request):
 
     if request.method == "POST":
-
-        form = SolicitudInscripcionForm(
-            request.POST
-        )
+        form = SolicitudInscripcionForm(request.POST)
 
         if form.is_valid():
-
             form.save()
 
             messages.success(
@@ -220,41 +154,30 @@ def inscripcion(request):
                     "correctamente. "
                     "La institución la revisará "
                     "y se comunicará con vos."
-                )
+                ),
             )
 
-            return redirect(
-                "inscripcion"
-            )
+            return redirect("inscripcion")
 
     else:
-
         form = SolicitudInscripcionForm()
-
 
     return render(
         request,
         "website/inscripcion.html",
         {
             "form": form,
-        }
+        },
     )
 
 
 def empleo(request):
 
     if request.method == "POST":
-
-        form = PostulacionEmpleoForm(
-            request.POST,
-            request.FILES
-        )
-
+        form = PostulacionEmpleoForm(request.POST, request.FILES)
 
         if form.is_valid():
-
             form.save()
-
 
             messages.success(
                 request,
@@ -264,39 +187,29 @@ def empleo(request):
                     "Gracias por tu interés "
                     "en formar parte de "
                     "Educar Para Transformar."
-                )
+                ),
             )
 
-
-            return redirect(
-                "empleo"
-            )
+            return redirect("empleo")
 
     else:
-
-        form = (
-            PostulacionEmpleoForm()
-        )
-
+        form = PostulacionEmpleoForm()
 
     return render(
         request,
         "website/empleo.html",
         {
             "form": form,
-        }
+        },
     )
-    
+
+
 def opiniones(request):
 
     if request.method == "POST":
-
-        form = OpinionForm(
-            request.POST
-        )
+        form = OpinionForm(request.POST)
 
         if form.is_valid():
-
             form.save()
 
             messages.success(
@@ -306,183 +219,88 @@ def opiniones(request):
                     "tu opinión. "
                     "Será publicada una vez "
                     "que sea revisada."
-                )
+                ),
             )
 
-            return redirect(
-                "opiniones"
-            )
+            return redirect("opiniones")
 
     else:
-
         form = OpinionForm()
 
-
-    opiniones_publicadas = (
-        Opinion.objects.filter(
-            estado=(
-                Opinion
-                .Estado
-                .APROBADA
-            )
-        )
-    )
-
+    opiniones_publicadas = Opinion.objects.filter(estado=(Opinion.Estado.APROBADA))
 
     return render(
         request,
         "website/opiniones.html",
         {
             "form": form,
-            "opiniones": (
-                opiniones_publicadas
-            ),
-        }
+            "opiniones": (opiniones_publicadas),
+        },
     )
-    
-#Solicitudes    
+
+
+# Solicitudes
 @admin_required
-def solicitud_inscripcion_lista(
-    request
-):
+def solicitud_inscripcion_lista(request):
 
-    estado = (
-        request.GET.get(
-            "estado",
-            ""
-        )
-        .strip()
-        .upper()
-    )
+    estado = request.GET.get("estado", "").strip().upper()
 
+    solicitudes = SolicitudInscripcion.objects.select_related("nivel_solicitado")
 
-    solicitudes = (
-        SolicitudInscripcion.objects
-        .select_related(
-            "nivel_solicitado"
-        )
-    )
-
-
-    estados_validos = {
-        valor
-        for valor, etiqueta
-        in SolicitudInscripcion
-        .Estado
-        .choices
-    }
-
+    estados_validos = {valor for valor, etiqueta in SolicitudInscripcion.Estado.choices}
 
     if estado in estados_validos:
-
-        solicitudes = (
-            solicitudes.filter(
-                estado=estado
-            )
-        )
+        solicitudes = solicitudes.filter(estado=estado)
 
     else:
-
         estado = ""
 
-
-    pendientes = (
-        SolicitudInscripcion.objects
-        .filter(
-            estado=(
-                SolicitudInscripcion
-                .Estado
-                .PENDIENTE
-            )
-        )
-        .count()
-    )
-
+    pendientes = SolicitudInscripcion.objects.filter(
+        estado=(SolicitudInscripcion.Estado.PENDIENTE)
+    ).count()
 
     return render(
         request,
-        (
-            "website/"
-            "solicitudes_lista.html"
-        ),
+        ("website/solicitudes_lista.html"),
         {
             "solicitudes": solicitudes,
             "estado_seleccionado": estado,
             "pendientes": pendientes,
-        }
+        },
     )
 
 
 @admin_required
-def solicitud_inscripcion_detalle(
-    request,
-    id_solicitud
-):
+def solicitud_inscripcion_detalle(request, id_solicitud):
 
     solicitud = get_object_or_404(
-        SolicitudInscripcion.objects
-        .select_related(
-            "nivel_solicitado"
-        ),
-        id_solicitud=id_solicitud
+        SolicitudInscripcion.objects.select_related("nivel_solicitado"),
+        id_solicitud=id_solicitud,
     )
-
 
     return render(
         request,
-        (
-            "website/"
-            "solicitud_detalle.html"
-        ),
+        ("website/solicitud_detalle.html"),
         {
             "solicitud": solicitud,
-        }
+        },
     )
 
 
 @admin_required
 @require_POST
-def solicitud_inscripcion_aprobar(
-    request,
-    id_solicitud
-):
+def solicitud_inscripcion_aprobar(request, id_solicitud):
 
-    solicitud = get_object_or_404(
-        SolicitudInscripcion,
-        id_solicitud=id_solicitud
-    )
+    solicitud = get_object_or_404(SolicitudInscripcion, id_solicitud=id_solicitud)
 
+    if solicitud.estado != SolicitudInscripcion.Estado.PENDIENTE:
+        messages.info(request, ("La solicitud ya fue revisada anteriormente."))
 
-    if (
-        solicitud.estado
-        != SolicitudInscripcion
-        .Estado
-        .PENDIENTE
-    ):
+        return redirect("solicitud_inscripcion_detalle", id_solicitud=id_solicitud)
 
-        messages.info(
-            request,
-            (
-                "La solicitud ya fue "
-                "revisada anteriormente."
-            )
-        )
+    solicitud.estado = SolicitudInscripcion.Estado.APROBADA
 
-        return redirect(
-            "solicitud_inscripcion_detalle",
-            id_solicitud=id_solicitud
-        )
-
-
-    solicitud.estado = (
-        SolicitudInscripcion
-        .Estado
-        .APROBADA
-    )
-
-    solicitud.fecha_revision = (
-        timezone.now()
-    )
+    solicitud.fecha_revision = timezone.now()
 
     solicitud.save(
         update_fields=[
@@ -491,65 +309,25 @@ def solicitud_inscripcion_aprobar(
         ]
     )
 
+    messages.success(request, ("La solicitud fue aprobada correctamente."))
 
-    messages.success(
-        request,
-        (
-            "La solicitud fue aprobada "
-            "correctamente."
-        )
-    )
-
-
-    return redirect(
-        "solicitud_inscripcion_detalle",
-        id_solicitud=id_solicitud
-    )
+    return redirect("solicitud_inscripcion_detalle", id_solicitud=id_solicitud)
 
 
 @admin_required
 @require_POST
-def solicitud_inscripcion_rechazar(
-    request,
-    id_solicitud
-):
+def solicitud_inscripcion_rechazar(request, id_solicitud):
 
-    solicitud = get_object_or_404(
-        SolicitudInscripcion,
-        id_solicitud=id_solicitud
-    )
+    solicitud = get_object_or_404(SolicitudInscripcion, id_solicitud=id_solicitud)
 
+    if solicitud.estado != SolicitudInscripcion.Estado.PENDIENTE:
+        messages.info(request, ("La solicitud ya fue revisada anteriormente."))
 
-    if (
-        solicitud.estado
-        != SolicitudInscripcion
-        .Estado
-        .PENDIENTE
-    ):
+        return redirect("solicitud_inscripcion_detalle", id_solicitud=id_solicitud)
 
-        messages.info(
-            request,
-            (
-                "La solicitud ya fue "
-                "revisada anteriormente."
-            )
-        )
+    solicitud.estado = SolicitudInscripcion.Estado.RECHAZADA
 
-        return redirect(
-            "solicitud_inscripcion_detalle",
-            id_solicitud=id_solicitud
-        )
-
-
-    solicitud.estado = (
-        SolicitudInscripcion
-        .Estado
-        .RECHAZADA
-    )
-
-    solicitud.fecha_revision = (
-        timezone.now()
-    )
+    solicitud.fecha_revision = timezone.now()
 
     solicitud.save(
         update_fields=[
@@ -558,76 +336,32 @@ def solicitud_inscripcion_rechazar(
         ]
     )
 
+    messages.success(request, ("La solicitud fue rechazada."))
 
-    messages.success(
-        request,
-        (
-            "La solicitud fue rechazada."
-        )
-    )
+    return redirect("solicitud_inscripcion_detalle", id_solicitud=id_solicitud)
 
 
-    return redirect(
-        "solicitud_inscripcion_detalle",
-        id_solicitud=id_solicitud
-    )
+# CONSULTAS
 
-#CONSULTAS
 
 @admin_required
-def consulta_contacto_lista(
-    request
-):
+def consulta_contacto_lista(request):
 
-    estado = (
-        request.GET.get(
-            "estado",
-            ""
-        )
-        .strip()
-        .upper()
-    )
+    estado = request.GET.get("estado", "").strip().upper()
 
+    consultas = ConsultaContacto.objects.all()
 
-    consultas = (
-        ConsultaContacto.objects.all()
-    )
-
-
-    estados_validos = {
-        valor
-        for valor, etiqueta
-        in ConsultaContacto
-        .Estado
-        .choices
-    }
-
+    estados_validos = {valor for valor, etiqueta in ConsultaContacto.Estado.choices}
 
     if estado in estados_validos:
-
-        consultas = (
-            consultas.filter(
-                estado=estado
-            )
-        )
+        consultas = consultas.filter(estado=estado)
 
     else:
-
         estado = ""
 
-
-    pendientes = (
-        ConsultaContacto.objects
-        .filter(
-            estado=(
-                ConsultaContacto
-                .Estado
-                .PENDIENTE
-            )
-        )
-        .count()
-    )
-
+    pendientes = ConsultaContacto.objects.filter(
+        estado=(ConsultaContacto.Estado.PENDIENTE)
+    ).count()
 
     return render(
         request,
@@ -636,74 +370,38 @@ def consulta_contacto_lista(
             "consultas": consultas,
             "estado_seleccionado": estado,
             "pendientes": pendientes,
-        }
+        },
     )
 
 
 @admin_required
-def consulta_contacto_detalle(
-    request,
-    id_consulta
-):
+def consulta_contacto_detalle(request, id_consulta):
 
-    consulta = get_object_or_404(
-        ConsultaContacto,
-        id_consulta=id_consulta
-    )
-
+    consulta = get_object_or_404(ConsultaContacto, id_consulta=id_consulta)
 
     return render(
         request,
         "website/consulta_detalle.html",
         {
             "consulta": consulta,
-        }
+        },
     )
 
 
 @admin_required
 @require_POST
-def consulta_contacto_responder(
-    request,
-    id_consulta
-):
+def consulta_contacto_responder(request, id_consulta):
 
-    consulta = get_object_or_404(
-        ConsultaContacto,
-        id_consulta=id_consulta
-    )
+    consulta = get_object_or_404(ConsultaContacto, id_consulta=id_consulta)
 
+    if consulta.estado == ConsultaContacto.Estado.RESPONDIDA:
+        messages.info(request, ("La consulta ya estaba marcada como respondida."))
 
-    if (
-        consulta.estado
-        == ConsultaContacto
-        .Estado
-        .RESPONDIDA
-    ):
+        return redirect("consulta_contacto_detalle", id_consulta=id_consulta)
 
-        messages.info(
-            request,
-            (
-                "La consulta ya estaba "
-                "marcada como respondida."
-            )
-        )
+    consulta.estado = ConsultaContacto.Estado.RESPONDIDA
 
-        return redirect(
-            "consulta_contacto_detalle",
-            id_consulta=id_consulta
-        )
-
-
-    consulta.estado = (
-        ConsultaContacto
-        .Estado
-        .RESPONDIDA
-    )
-
-    consulta.fecha_respuesta = (
-        timezone.now()
-    )
+    consulta.fecha_respuesta = timezone.now()
 
     consulta.save(
         update_fields=[
@@ -712,76 +410,30 @@ def consulta_contacto_responder(
         ]
     )
 
+    messages.success(request, ("La consulta fue marcada como respondida."))
 
-    messages.success(
-        request,
-        (
-            "La consulta fue marcada "
-            "como respondida."
-        )
-    )
+    return redirect("consulta_contacto_detalle", id_consulta=id_consulta)
 
 
-    return redirect(
-        "consulta_contacto_detalle",
-        id_consulta=id_consulta
-    )
-    
-#OPINIONES
+# OPINIONES
+
 
 @admin_required
-def opinion_lista(
-    request
-):
+def opinion_lista(request):
 
-    estado = (
-        request.GET.get(
-            "estado",
-            ""
-        )
-        .strip()
-        .upper()
-    )
+    estado = request.GET.get("estado", "").strip().upper()
 
+    opiniones = Opinion.objects.all()
 
-    opiniones = (
-        Opinion.objects.all()
-    )
-
-
-    estados_validos = {
-        valor
-        for valor, etiqueta
-        in Opinion
-        .Estado
-        .choices
-    }
-
+    estados_validos = {valor for valor, etiqueta in Opinion.Estado.choices}
 
     if estado in estados_validos:
-
-        opiniones = (
-            opiniones.filter(
-                estado=estado
-            )
-        )
+        opiniones = opiniones.filter(estado=estado)
 
     else:
-
         estado = ""
 
-
-    pendientes = (
-        Opinion.objects.filter(
-            estado=(
-                Opinion
-                .Estado
-                .PENDIENTE
-            )
-        )
-        .count()
-    )
-
+    pendientes = Opinion.objects.filter(estado=(Opinion.Estado.PENDIENTE)).count()
 
     return render(
         request,
@@ -790,70 +442,38 @@ def opinion_lista(
             "opiniones": opiniones,
             "estado_seleccionado": estado,
             "pendientes": pendientes,
-        }
+        },
     )
 
 
 @admin_required
-def opinion_detalle(
-    request,
-    id_opinion
-):
+def opinion_detalle(request, id_opinion):
 
-    opinion = get_object_or_404(
-        Opinion,
-        id_opinion=id_opinion
-    )
-
+    opinion = get_object_or_404(Opinion, id_opinion=id_opinion)
 
     return render(
         request,
         "website/opinion_detalle.html",
         {
             "opinion": opinion,
-        }
+        },
     )
 
 
 @admin_required
 @require_POST
-def opinion_aprobar(
-    request,
-    id_opinion
-):
+def opinion_aprobar(request, id_opinion):
 
-    opinion = get_object_or_404(
-        Opinion,
-        id_opinion=id_opinion
-    )
+    opinion = get_object_or_404(Opinion, id_opinion=id_opinion)
 
+    if opinion.estado != Opinion.Estado.PENDIENTE:
+        messages.info(request, ("La opinión ya fue revisada anteriormente."))
 
-    if (
-        opinion.estado
-        != Opinion.Estado.PENDIENTE
-    ):
+        return redirect("opinion_detalle", id_opinion=id_opinion)
 
-        messages.info(
-            request,
-            (
-                "La opinión ya fue "
-                "revisada anteriormente."
-            )
-        )
+    opinion.estado = Opinion.Estado.APROBADA
 
-        return redirect(
-            "opinion_detalle",
-            id_opinion=id_opinion
-        )
-
-
-    opinion.estado = (
-        Opinion.Estado.APROBADA
-    )
-
-    opinion.fecha_revision = (
-        timezone.now()
-    )
+    opinion.fecha_revision = timezone.now()
 
     opinion.save(
         update_fields=[
@@ -862,62 +482,27 @@ def opinion_aprobar(
         ]
     )
 
-
     messages.success(
-        request,
-        (
-            "La opinión fue aprobada "
-            "y ya puede verse "
-            "en la página pública."
-        )
+        request, ("La opinión fue aprobada y ya puede verse en la página pública.")
     )
 
-
-    return redirect(
-        "opinion_detalle",
-        id_opinion=id_opinion
-    )
+    return redirect("opinion_detalle", id_opinion=id_opinion)
 
 
 @admin_required
 @require_POST
-def opinion_rechazar(
-    request,
-    id_opinion
-):
+def opinion_rechazar(request, id_opinion):
 
-    opinion = get_object_or_404(
-        Opinion,
-        id_opinion=id_opinion
-    )
+    opinion = get_object_or_404(Opinion, id_opinion=id_opinion)
 
+    if opinion.estado != Opinion.Estado.PENDIENTE:
+        messages.info(request, ("La opinión ya fue revisada anteriormente."))
 
-    if (
-        opinion.estado
-        != Opinion.Estado.PENDIENTE
-    ):
+        return redirect("opinion_detalle", id_opinion=id_opinion)
 
-        messages.info(
-            request,
-            (
-                "La opinión ya fue "
-                "revisada anteriormente."
-            )
-        )
+    opinion.estado = Opinion.Estado.RECHAZADA
 
-        return redirect(
-            "opinion_detalle",
-            id_opinion=id_opinion
-        )
-
-
-    opinion.estado = (
-        Opinion.Estado.RECHAZADA
-    )
-
-    opinion.fecha_revision = (
-        timezone.now()
-    )
+    opinion.fecha_revision = timezone.now()
 
     opinion.save(
         update_fields=[
@@ -926,66 +511,40 @@ def opinion_rechazar(
         ]
     )
 
+    messages.success(request, "La opinión fue rechazada.")
 
-    messages.success(
-        request,
-        "La opinión fue rechazada."
-    )
+    return redirect("opinion_detalle", id_opinion=id_opinion)
 
-
-    return redirect(
-        "opinion_detalle",
-        id_opinion=id_opinion
-    )
 
 @admin_required
-def noticia_admin_lista(
-    request
-):
+def noticia_admin_lista(request):
 
-    noticias = (
-        Noticia.objects.all()
-    )
-
+    noticias = Noticia.objects.all()
 
     return render(
         request,
         "website/noticias_admin_lista.html",
         {
             "noticias": noticias,
-        }
+        },
     )
 
 
 @admin_required
-def noticia_admin_crear(
-    request
-):
+def noticia_admin_crear(request):
 
     if request.method == "POST":
-
-        form = NoticiaForm(
-            request.POST,
-            request.FILES
-        )
+        form = NoticiaForm(request.POST, request.FILES)
 
         if form.is_valid():
-
             form.save()
 
-            messages.success(
-                request,
-                "La noticia fue creada correctamente."
-            )
+            messages.success(request, "La noticia fue creada correctamente.")
 
-            return redirect(
-                "noticia_admin_lista"
-            )
+            return redirect("noticia_admin_lista")
 
     else:
-
         form = NoticiaForm()
-
 
     return render(
         request,
@@ -993,49 +552,27 @@ def noticia_admin_crear(
         {
             "form": form,
             "titulo": "Nueva noticia",
-        }
+        },
     )
 
 
 @admin_required
-def noticia_admin_editar(
-    request,
-    id_noticia
-):
+def noticia_admin_editar(request, id_noticia):
 
-    noticia = get_object_or_404(
-        Noticia,
-        id_noticia=id_noticia
-    )
-
+    noticia = get_object_or_404(Noticia, id_noticia=id_noticia)
 
     if request.method == "POST":
-
-        form = NoticiaForm(
-            request.POST,
-            request.FILES,
-            instance=noticia
-        )
+        form = NoticiaForm(request.POST, request.FILES, instance=noticia)
 
         if form.is_valid():
-
             form.save()
 
-            messages.success(
-                request,
-                "La noticia fue actualizada."
-            )
+            messages.success(request, "La noticia fue actualizada.")
 
-            return redirect(
-                "noticia_admin_lista"
-            )
+            return redirect("noticia_admin_lista")
 
     else:
-
-        form = NoticiaForm(
-            instance=noticia
-        )
-
+        form = NoticiaForm(instance=noticia)
 
     return render(
         request,
@@ -1044,108 +581,60 @@ def noticia_admin_editar(
             "form": form,
             "titulo": "Editar noticia",
             "noticia": noticia,
-        }
+        },
     )
 
 
 @admin_required
 @require_POST
-def noticia_admin_publicacion(
-    request,
-    id_noticia
-):
+def noticia_admin_publicacion(request, id_noticia):
 
-    noticia = get_object_or_404(
-        Noticia,
-        id_noticia=id_noticia
-    )
+    noticia = get_object_or_404(Noticia, id_noticia=id_noticia)
 
+    noticia.publicada = not noticia.publicada
 
-    noticia.publicada = (
-        not noticia.publicada
-    )
-
-    noticia.save(
-        update_fields=[
-            "publicada"
-        ]
-    )
-
+    noticia.save(update_fields=["publicada"])
 
     if noticia.publicada:
-
-        mensaje = (
-            "La noticia fue publicada."
-        )
+        mensaje = "La noticia fue publicada."
 
     else:
+        mensaje = "La noticia fue ocultada."
 
-        mensaje = (
-            "La noticia fue ocultada."
-        )
+    messages.success(request, mensaje)
 
+    return redirect("noticia_admin_lista")
 
-    messages.success(
-        request,
-        mensaje
-    )
-
-
-    return redirect(
-        "noticia_admin_lista"
-    )
 
 @admin_required
-def galeria_admin_lista(
-    request
-):
+def galeria_admin_lista(request):
 
-    imagenes = (
-        ImagenGaleria.objects.all()
-    )
-
+    imagenes = ImagenGaleria.objects.all()
 
     return render(
         request,
         "website/galeria_admin_lista.html",
         {
             "imagenes": imagenes,
-        }
+        },
     )
 
 
 @admin_required
-def galeria_admin_crear(
-    request
-):
+def galeria_admin_crear(request):
 
     if request.method == "POST":
-
-        form = ImagenGaleriaForm(
-            request.POST,
-            request.FILES
-        )
+        form = ImagenGaleriaForm(request.POST, request.FILES)
 
         if form.is_valid():
-
             form.save()
 
-            messages.success(
-                request,
-                (
-                    "La imagen fue agregada "
-                    "a la galería."
-                )
-            )
+            messages.success(request, ("La imagen fue agregada a la galería."))
 
-            return redirect(
-                "galeria_admin_lista"
-            )
+            return redirect("galeria_admin_lista")
 
     else:
-
         form = ImagenGaleriaForm()
-
 
     return render(
         request,
@@ -1153,49 +642,27 @@ def galeria_admin_crear(
         {
             "form": form,
             "titulo": "Nueva imagen",
-        }
+        },
     )
 
 
 @admin_required
-def galeria_admin_editar(
-    request,
-    id_imagen
-):
+def galeria_admin_editar(request, id_imagen):
 
-    imagen = get_object_or_404(
-        ImagenGaleria,
-        id_imagen=id_imagen
-    )
-
+    imagen = get_object_or_404(ImagenGaleria, id_imagen=id_imagen)
 
     if request.method == "POST":
-
-        form = ImagenGaleriaForm(
-            request.POST,
-            request.FILES,
-            instance=imagen
-        )
+        form = ImagenGaleriaForm(request.POST, request.FILES, instance=imagen)
 
         if form.is_valid():
-
             form.save()
 
-            messages.success(
-                request,
-                "La imagen fue actualizada."
-            )
+            messages.success(request, "La imagen fue actualizada.")
 
-            return redirect(
-                "galeria_admin_lista"
-            )
+            return redirect("galeria_admin_lista")
 
     else:
-
-        form = ImagenGaleriaForm(
-            instance=imagen
-        )
-
+        form = ImagenGaleriaForm(instance=imagen)
 
     return render(
         request,
@@ -1204,163 +671,79 @@ def galeria_admin_editar(
             "form": form,
             "titulo": "Editar imagen",
             "imagen": imagen,
-        }
+        },
     )
 
 
 @admin_required
 @require_POST
-def galeria_admin_publicacion(
-    request,
-    id_imagen
-):
+def galeria_admin_publicacion(request, id_imagen):
 
-    imagen = get_object_or_404(
-        ImagenGaleria,
-        id_imagen=id_imagen
-    )
+    imagen = get_object_or_404(ImagenGaleria, id_imagen=id_imagen)
 
+    imagen.publicada = not imagen.publicada
 
-    imagen.publicada = (
-        not imagen.publicada
-    )
+    imagen.save(update_fields=["publicada"])
 
-    imagen.save(
-        update_fields=[
-            "publicada"
-        ]
-    )
+    messages.success(request, ("El estado de la imagen fue actualizado."))
+
+    return redirect("galeria_admin_lista")
 
 
-    messages.success(
-        request,
-        (
-            "El estado de la imagen "
-            "fue actualizado."
-        )
-    )
-
-
-    return redirect(
-        "galeria_admin_lista"
-    )
-
-#EMPLEO
+# EMPLEO
 @admin_required
-def empleo_admin_lista(
-    request
-):
+def empleo_admin_lista(request):
 
-    estado = (
-        request.GET.get(
-            "estado",
-            ""
-        )
-        .strip()
-        .upper()
-    )
+    estado = request.GET.get("estado", "").strip().upper()
 
+    postulaciones = PostulacionEmpleo.objects.all()
 
-    postulaciones = (
-        PostulacionEmpleo.objects.all()
-    )
-
-
-    estados_validos = {
-        valor
-        for valor, etiqueta
-        in PostulacionEmpleo
-        .Estado
-        .choices
-    }
-
+    estados_validos = {valor for valor, etiqueta in PostulacionEmpleo.Estado.choices}
 
     if estado in estados_validos:
-
-        postulaciones = (
-            postulaciones.filter(
-                estado=estado
-            )
-        )
+        postulaciones = postulaciones.filter(estado=estado)
 
     else:
-
         estado = ""
 
-
-    pendientes = (
-        PostulacionEmpleo.objects
-        .filter(
-            estado=(
-                PostulacionEmpleo
-                .Estado
-                .PENDIENTE
-            )
-        )
-        .count()
-    )
-
+    pendientes = PostulacionEmpleo.objects.filter(
+        estado=(PostulacionEmpleo.Estado.PENDIENTE)
+    ).count()
 
     return render(
         request,
-        (
-            "website/"
-            "empleo_admin_lista.html"
-        ),
+        ("website/empleo_admin_lista.html"),
         {
             "postulaciones": postulaciones,
             "estado_seleccionado": estado,
             "pendientes": pendientes,
-        }
+        },
     )
 
 
 @admin_required
-def empleo_admin_detalle(
-    request,
-    id_postulacion
-):
+def empleo_admin_detalle(request, id_postulacion):
 
-    postulacion = get_object_or_404(
-        PostulacionEmpleo,
-        id_postulacion=id_postulacion
-    )
-
+    postulacion = get_object_or_404(PostulacionEmpleo, id_postulacion=id_postulacion)
 
     return render(
         request,
-        (
-            "website/"
-            "empleo_admin_detalle.html"
-        ),
+        ("website/empleo_admin_detalle.html"),
         {
             "postulacion": postulacion,
-        }
+        },
     )
 
 
 @admin_required
 @require_POST
-def empleo_admin_revisar(
-    request,
-    id_postulacion
-):
+def empleo_admin_revisar(request, id_postulacion):
 
-    postulacion = get_object_or_404(
-        PostulacionEmpleo,
-        id_postulacion=id_postulacion
-    )
+    postulacion = get_object_or_404(PostulacionEmpleo, id_postulacion=id_postulacion)
 
+    postulacion.estado = PostulacionEmpleo.Estado.REVISADA
 
-    postulacion.estado = (
-        PostulacionEmpleo
-        .Estado
-        .REVISADA
-    )
-
-    postulacion.fecha_revision = (
-        timezone.now()
-    )
+    postulacion.fecha_revision = timezone.now()
 
     postulacion.save(
         update_fields=[
@@ -1369,44 +752,20 @@ def empleo_admin_revisar(
         ]
     )
 
+    messages.success(request, ("La postulación fue marcada como revisada."))
 
-    messages.success(
-        request,
-        (
-            "La postulación fue marcada "
-            "como revisada."
-        )
-    )
-
-
-    return redirect(
-        "empleo_admin_detalle",
-        id_postulacion=id_postulacion
-    )
+    return redirect("empleo_admin_detalle", id_postulacion=id_postulacion)
 
 
 @admin_required
 @require_POST
-def empleo_admin_descartar(
-    request,
-    id_postulacion
-):
+def empleo_admin_descartar(request, id_postulacion):
 
-    postulacion = get_object_or_404(
-        PostulacionEmpleo,
-        id_postulacion=id_postulacion
-    )
+    postulacion = get_object_or_404(PostulacionEmpleo, id_postulacion=id_postulacion)
 
+    postulacion.estado = PostulacionEmpleo.Estado.DESCARTADA
 
-    postulacion.estado = (
-        PostulacionEmpleo
-        .Estado
-        .DESCARTADA
-    )
-
-    postulacion.fecha_revision = (
-        timezone.now()
-    )
+    postulacion.fecha_revision = timezone.now()
 
     postulacion.save(
         update_fields=[
@@ -1415,47 +774,18 @@ def empleo_admin_descartar(
         ]
     )
 
+    messages.success(request, ("La postulación fue descartada."))
 
-    messages.success(
-        request,
-        (
-            "La postulación fue descartada."
-        )
-    )
+    return redirect("empleo_admin_detalle", id_postulacion=id_postulacion)
 
-
-    return redirect(
-        "empleo_admin_detalle",
-        id_postulacion=id_postulacion
-    )
 
 @admin_required
-def empleo_admin_descargar_cv(
-    request,
-    id_postulacion
-):
+def empleo_admin_descargar_cv(request, id_postulacion):
 
-    postulacion = get_object_or_404(
-        PostulacionEmpleo,
-        id_postulacion=id_postulacion
-    )
+    postulacion = get_object_or_404(PostulacionEmpleo, id_postulacion=id_postulacion)
 
+    archivo = postulacion.cv.open("rb")
 
-    archivo = (
-        postulacion.cv.open(
-            "rb"
-        )
-    )
+    nombre_archivo = postulacion.cv.name.split("/")[-1]
 
-
-    nombre_archivo = (
-        postulacion.cv.name
-        .split("/")[-1]
-    )
-
-
-    return FileResponse(
-        archivo,
-        as_attachment=True,
-        filename=nombre_archivo
-    )
+    return FileResponse(archivo, as_attachment=True, filename=nombre_archivo)

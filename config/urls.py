@@ -4,62 +4,28 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-
-    path(
-        "admin/",
-        admin.site.urls
-    ),
-
+    path("admin/", admin.site.urls),
     # ==========================================
     # PÁGINA WEB PÚBLICA
     # ==========================================
-
-    path(
-        "",
-        include("website.urls")
-    ),
-
+    path("", include("website.urls")),
     # ==========================================
     # SISTEMA DE GESTIÓN
     # ==========================================
-
-    path(
-        "academico/",
-        include("academic.urls")
-    ),
-
-    path(
-        "cuentas/",
-        include("accounts.urls")
-    ),
-
+    path("academico/", include("academic.urls")),
+    path("cuentas/", include("accounts.urls")),
     # Deportes
-
-    path(
-        "",
-        include("sports.urls")
-    ),
-
+    path("", include("sports.urls")),
     # Servicios
-
-    path(
-        "",
-        include("services.urls")
-    ),
-
+    path("", include("services.urls")),
     # Cuotas / Facturación
-
-    path(
-        "",
-        include("billing.urls")
-    ),
-
+    path("", include("billing.urls")),
+    # ==========================================
+    # API MÓVIL
+    # ==========================================
+    path("api/", include("api.urls")),
 ]
 
 
 if settings.DEBUG:
-
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
-    )
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

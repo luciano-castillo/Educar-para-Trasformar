@@ -7,7 +7,6 @@ from django.db.models import Sum
 
 
 class CuotaMensual(models.Model):
-
     MESES = [
         (1, "Enero"),
         (2, "Febrero"),
@@ -23,36 +22,26 @@ class CuotaMensual(models.Model):
         (12, "Diciembre"),
     ]
 
-    id_cuota = models.BigAutoField(
-        primary_key=True
-    )
+    id_cuota = models.BigAutoField(primary_key=True)
 
-    mes = models.PositiveSmallIntegerField(
-        choices=MESES
-    )
+    mes = models.PositiveSmallIntegerField(choices=MESES)
 
     anio = models.PositiveSmallIntegerField()
 
-    valor = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
 
     fecha_vencimiento = models.DateField()
 
-    estado = models.BooleanField(
-        default=True
-    )
+    estado = models.BooleanField(default=True)
 
     class Meta:
-
         constraints = [
             models.UniqueConstraint(
                 fields=[
                     "mes",
                     "anio",
                 ],
-                name="cuota_periodo_unico"
+                name="cuota_periodo_unico",
             )
         ]
 
@@ -63,14 +52,10 @@ class CuotaMensual(models.Model):
 
     def __str__(self):
 
-        return (
-            f"{self.get_mes_display()} "
-            f"{self.anio} - "
-            f"${self.valor}"
-        )
-    
-class Factura(models.Model):
+        return f"{self.get_mes_display()} {self.anio} - ${self.valor}"
 
+
+class Factura(models.Model):
     ESTADOS = [
         ("PENDIENTE", "Pendiente"),
         ("PARCIAL", "Pago parcial"),
@@ -79,36 +64,23 @@ class Factura(models.Model):
         ("ANULADA", "Anulada"),
     ]
 
-    id_factura = models.BigAutoField(
-        primary_key=True
-    )
+    id_factura = models.BigAutoField(primary_key=True)
 
     alumno = models.ForeignKey(
-        "academic.Alumno",
-        on_delete=models.PROTECT,
-        related_name="facturas"
+        "academic.Alumno", on_delete=models.PROTECT, related_name="facturas"
     )
 
-    mes = models.PositiveSmallIntegerField(
-        choices=CuotaMensual.MESES
-    )
+    mes = models.PositiveSmallIntegerField(choices=CuotaMensual.MESES)
 
     anio = models.PositiveSmallIntegerField()
 
-    fecha_emision = models.DateField(
-        auto_now_add=True
-    )
+    fecha_emision = models.DateField(auto_now_add=True)
 
     fecha_vencimiento = models.DateField()
 
-    estado = models.CharField(
-        max_length=10,
-        choices=ESTADOS,
-        default="PENDIENTE"
-    )
+    estado = models.CharField(max_length=10, choices=ESTADOS, default="PENDIENTE")
 
     class Meta:
-
         constraints = [
             models.UniqueConstraint(
                 fields=[
@@ -116,7 +88,7 @@ class Factura(models.Model):
                     "mes",
                     "anio",
                 ],
-                name="factura_alumno_periodo_unico"
+                name="factura_alumno_periodo_unico",
             )
         ]
 
@@ -130,47 +102,27 @@ class Factura(models.Model):
     def total(self):
 
         return sum(
-            (
-                detalle.importe
-                for detalle in self.detalles.all()
-            ),
-            Decimal("0.00")
+            (detalle.importe for detalle in self.detalles.all()), Decimal("0.00")
         )
-    
+
     @property
     def total_pagado(self):
 
-        resultado = (
-            self.pagos
-            .filter(
-                estado="VALIDADO"
-            )
-            .aggregate(
-                total=Sum(
-                    "detalles_pago__importe_aplicado"
-                )
-            )
+        resultado = self.pagos.filter(estado="VALIDADO").aggregate(
+            total=Sum("detalles_pago__importe_aplicado")
         )
 
-        return (
-            resultado["total"]
-            or Decimal("0.00")
-        )
-
+        return resultado["total"] or Decimal("0.00")
 
     @property
     def saldo(self):
 
-        saldo = (
-            self.total
-            - self.total_pagado
-        )
+        saldo = self.total - self.total_pagado
 
         if saldo < 0:
             return Decimal("0.00")
 
         return saldo
-
 
     def actualizar_estado_pago(self):
 
@@ -178,11 +130,9 @@ class Factura(models.Model):
             return
 
         if self.saldo <= 0:
-
             nuevo_estado = "PAGADA"
 
         elif self.estado == "VENCIDA":
-
             # Si la factura ya estaba vencida
             # y todavía conserva deuda,
             # debe continuar vencida aunque
@@ -190,22 +140,15 @@ class Factura(models.Model):
             nuevo_estado = "VENCIDA"
 
         elif self.total_pagado > 0:
-
             nuevo_estado = "PARCIAL"
 
         else:
-
             nuevo_estado = "PENDIENTE"
 
         if self.estado != nuevo_estado:
-
             self.estado = nuevo_estado
 
-            self.save(
-                update_fields=[
-                    "estado"
-                ]
-            )
+            self.save(update_fields=["estado"])
 
     def __str__(self):
 
@@ -217,8 +160,8 @@ class Factura(models.Model):
             f"{self.anio}"
         )
 
-class DetalleFactura(models.Model):
 
+class DetalleFactura(models.Model):
     TIPOS_CONCEPTO = [
         ("CUOTA", "Cuota mensual"),
         ("DEPORTE", "Deporte"),
@@ -226,36 +169,24 @@ class DetalleFactura(models.Model):
         ("COMEDOR", "Comedor"),
     ]
 
-    id_detalle = models.BigAutoField(
-        primary_key=True
-    )
+    id_detalle = models.BigAutoField(primary_key=True)
 
     factura = models.ForeignKey(
-        Factura,
-        on_delete=models.CASCADE,
-        related_name="detalles"
+        Factura, on_delete=models.CASCADE, related_name="detalles"
     )
 
-    tipo_concepto = models.CharField(
-        max_length=20,
-        choices=TIPOS_CONCEPTO
-    )
+    tipo_concepto = models.CharField(max_length=20, choices=TIPOS_CONCEPTO)
 
-    descripcion = models.CharField(
-        max_length=200
-    )
+    descripcion = models.CharField(max_length=200)
 
-    importe = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
+    importe = models.DecimalField(max_digits=10, decimal_places=2)
 
     cuota_mensual = models.ForeignKey(
         CuotaMensual,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="detalles_factura"
+        related_name="detalles_factura",
     )
 
     grupo_deportivo = models.ForeignKey(
@@ -263,7 +194,7 @@ class DetalleFactura(models.Model):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="detalles_factura"
+        related_name="detalles_factura",
     )
 
     ruta_transporte = models.ForeignKey(
@@ -271,7 +202,7 @@ class DetalleFactura(models.Model):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="detalles_factura"
+        related_name="detalles_factura",
     )
 
     servicio_comedor = models.ForeignKey(
@@ -279,76 +210,44 @@ class DetalleFactura(models.Model):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="detalles_factura"
+        related_name="detalles_factura",
     )
 
     class Meta:
-
         constraints = [
-
             models.CheckConstraint(
-                condition=models.Q(
-                    importe__gt=0
-                ),
-                name="detalle_factura_importe_positivo"
+                condition=models.Q(importe__gt=0),
+                name="detalle_factura_importe_positivo",
             ),
         ]
-    
+
     @property
     def total_pagado(self):
 
-        resultado = (
-            self.aplicaciones_pago
-            .filter(
-                pago__estado="VALIDADO"
-            )
-            .aggregate(
-                total=Sum(
-                    "importe_aplicado"
-                )
-            )
+        resultado = self.aplicaciones_pago.filter(pago__estado="VALIDADO").aggregate(
+            total=Sum("importe_aplicado")
         )
 
-        return (
-            resultado["total"]
-            or Decimal("0.00")
-        )
-
+        return resultado["total"] or Decimal("0.00")
 
     @property
     def saldo_pendiente(self):
 
-        saldo = (
-            self.importe
-            - self.total_pagado
-        )
+        saldo = self.importe - self.total_pagado
 
         if saldo < 0:
             return Decimal("0.00")
 
         return saldo
 
-
     @property
     def saldo_disponible_pago(self):
 
-        utilizado = (
-            self.aplicaciones_pago
-            .exclude(
-                pago__estado="RECHAZADO"
-            )
-            .aggregate(
-                total=Sum(
-                    "importe_aplicado"
-                )
-            )["total"]
-            or Decimal("0.00")
-        )
+        utilizado = self.aplicaciones_pago.exclude(pago__estado="RECHAZADO").aggregate(
+            total=Sum("importe_aplicado")
+        )["total"] or Decimal("0.00")
 
-        disponible = (
-            self.importe
-            - utilizado
-        )
+        disponible = self.importe - utilizado
 
         if disponible < 0:
             return Decimal("0.00")
@@ -357,128 +256,79 @@ class DetalleFactura(models.Model):
 
     def __str__(self):
 
-        return (
-            f"{self.descripcion} - "
-            f"${self.importe}"
-        )
+        return f"{self.descripcion} - ${self.importe}"
+
 
 class Pago(models.Model):
-
     ESTADOS = [
         ("PENDIENTE", "Pendiente"),
         ("VALIDADO", "Validado"),
         ("RECHAZADO", "Rechazado"),
     ]
 
-    id_pago = models.BigAutoField(
-        primary_key=True
-    )
+    id_pago = models.BigAutoField(primary_key=True)
 
-    factura = models.ForeignKey(
-        Factura,
-        on_delete=models.PROTECT,
-        related_name="pagos"
-    )
+    factura = models.ForeignKey(Factura, on_delete=models.PROTECT, related_name="pagos")
 
     fecha_transferencia = models.DateField()
 
-    monto = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
 
-    numero_operacion = models.CharField(
-        max_length=100,
-        blank=True
-    )
+    numero_operacion = models.CharField(max_length=100, blank=True)
 
-    estado = models.CharField(
-        max_length=10,
-        choices=ESTADOS,
-        default="PENDIENTE"
-    )
+    estado = models.CharField(max_length=10, choices=ESTADOS, default="PENDIENTE")
 
-    observaciones = models.CharField(
-        max_length=250,
-        blank=True
-    )
+    observaciones = models.CharField(max_length=250, blank=True)
 
     registrado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="pagos_registrados"
+        related_name="pagos_registrados",
     )
 
-    fecha_registro = models.DateTimeField(
-        auto_now_add=True
-    )
+    fecha_registro = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-
-        ordering = [
-            "-fecha_registro"
-        ]
+        ordering = ["-fecha_registro"]
 
         constraints = [
-
             models.CheckConstraint(
-                condition=models.Q(
-                    monto__gt=0
-                ),
-                name="pago_monto_positivo"
+                condition=models.Q(monto__gt=0), name="pago_monto_positivo"
             ),
         ]
 
     def __str__(self):
 
-        return (
-            f"Pago {self.id_pago} - "
-            f"Factura {self.factura_id} - "
-            f"${self.monto}"
-        )
+        return f"Pago {self.id_pago} - Factura {self.factura_id} - ${self.monto}"
+
 
 class PagoDetalle(models.Model):
-
-    id_pago_detalle = models.BigAutoField(
-        primary_key=True
-    )
+    id_pago_detalle = models.BigAutoField(primary_key=True)
 
     pago = models.ForeignKey(
-        Pago,
-        on_delete=models.CASCADE,
-        related_name="detalles_pago"
+        Pago, on_delete=models.CASCADE, related_name="detalles_pago"
     )
 
     detalle_factura = models.ForeignKey(
-        DetalleFactura,
-        on_delete=models.PROTECT,
-        related_name="aplicaciones_pago"
+        DetalleFactura, on_delete=models.PROTECT, related_name="aplicaciones_pago"
     )
 
-    importe_aplicado = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
+    importe_aplicado = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-
         constraints = [
-
             models.UniqueConstraint(
                 fields=[
                     "pago",
                     "detalle_factura",
                 ],
-                name="pago_detalle_unico"
+                name="pago_detalle_unico",
             ),
-
             models.CheckConstraint(
-                condition=models.Q(
-                    importe_aplicado__gt=0
-                ),
-                name="pago_detalle_importe_positivo"
+                condition=models.Q(importe_aplicado__gt=0),
+                name="pago_detalle_importe_positivo",
             ),
         ]
 
@@ -490,10 +340,8 @@ class PagoDetalle(models.Model):
             f"${self.importe_aplicado}"
         )
 
-def comprobante_upload_to(
-    instance,
-    filename
-):
+
+def comprobante_upload_to(instance, filename):
 
     return (
         f"comprobantes/"
@@ -504,15 +352,10 @@ def comprobante_upload_to(
 
 
 class ComprobantePago(models.Model):
-
-    id_comprobante = models.BigAutoField(
-        primary_key=True
-    )
+    id_comprobante = models.BigAutoField(primary_key=True)
 
     pago = models.ForeignKey(
-        Pago,
-        on_delete=models.CASCADE,
-        related_name="comprobantes"
+        Pago, on_delete=models.CASCADE, related_name="comprobantes"
     )
 
     archivo = models.FileField(
@@ -526,17 +369,11 @@ class ComprobantePago(models.Model):
                     "png",
                 ]
             )
-        ]
+        ],
     )
 
-    fecha_subida = models.DateTimeField(
-        auto_now_add=True
-    )
+    fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
 
-        return (
-            f"Comprobante "
-            f"{self.id_comprobante} - "
-            f"Pago {self.pago_id}"
-        )
+        return f"Comprobante {self.id_comprobante} - Pago {self.pago_id}"

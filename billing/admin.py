@@ -5,7 +5,6 @@ from .models import CuotaMensual
 
 @admin.register(CuotaMensual)
 class CuotaMensualAdmin(admin.ModelAdmin):
-
     list_display = (
         "mes",
         "anio",

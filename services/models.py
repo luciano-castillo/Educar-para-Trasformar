@@ -4,35 +4,21 @@ from academic.models import Alumno
 
 
 class RutaTransporte(models.Model):
+    id_ruta = models.BigAutoField(primary_key=True)
 
-    id_ruta = models.BigAutoField(
-        primary_key=True
-    )
+    nombre = models.CharField(max_length=100, unique=True)
 
-    nombre = models.CharField(
-        max_length=100,
-        unique=True
-    )
+    descripcion = models.CharField(max_length=250, blank=True)
 
-    descripcion = models.CharField(
-        max_length=250,
-        blank=True
-    )
+    valor_mensual = models.DecimalField(max_digits=10, decimal_places=2)
 
-    valor_mensual = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-
-    estado = models.BooleanField(
-        default=True
-    )
+    estado = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre
 
-class ContratacionTransporte(models.Model):
 
+class ContratacionTransporte(models.Model):
     MESES = [
         (1, "Enero"),
         (2, "Febrero"),
@@ -48,38 +34,25 @@ class ContratacionTransporte(models.Model):
         (12, "Diciembre"),
     ]
 
-    id_contratacion = models.BigAutoField(
-        primary_key=True
-    )
+    id_contratacion = models.BigAutoField(primary_key=True)
 
     alumno = models.ForeignKey(
-        Alumno,
-        on_delete=models.PROTECT,
-        related_name="contrataciones_transporte"
+        Alumno, on_delete=models.PROTECT, related_name="contrataciones_transporte"
     )
 
     ruta = models.ForeignKey(
-        RutaTransporte,
-        on_delete=models.PROTECT,
-        related_name="contrataciones"
+        RutaTransporte, on_delete=models.PROTECT, related_name="contrataciones"
     )
 
-    mes = models.PositiveSmallIntegerField(
-        choices=MESES
-    )
+    mes = models.PositiveSmallIntegerField(choices=MESES)
 
     anio = models.PositiveSmallIntegerField()
 
-    fecha_registro = models.DateField(
-        auto_now_add=True
-    )
+    fecha_registro = models.DateField(auto_now_add=True)
 
-    estado = models.BooleanField(
-        default=True
-    )
+    estado = models.BooleanField(default=True)
 
     class Meta:
-
         constraints = [
             models.UniqueConstraint(
                 fields=[
@@ -87,7 +60,7 @@ class ContratacionTransporte(models.Model):
                     "mes",
                     "anio",
                 ],
-                name="transporte_alumno_periodo_unico"
+                name="transporte_alumno_periodo_unico",
             )
         ]
 
@@ -100,37 +73,24 @@ class ContratacionTransporte(models.Model):
             f"{self.anio} - "
             f"{self.ruta.nombre}"
         )
-    
+
+
 class ServicioComedor(models.Model):
+    id_servicio_comedor = models.BigAutoField(primary_key=True)
 
-    id_servicio_comedor = models.BigAutoField(
-        primary_key=True
-    )
+    nombre = models.CharField(max_length=100, unique=True)
 
-    nombre = models.CharField(
-        max_length=100,
-        unique=True
-    )
+    descripcion = models.CharField(max_length=250, blank=True)
 
-    descripcion = models.CharField(
-        max_length=250,
-        blank=True
-    )
+    valor_mensual = models.DecimalField(max_digits=10, decimal_places=2)
 
-    valor_mensual = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-
-    estado = models.BooleanField(
-        default=True
-    )
+    estado = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre
 
-class ContratacionComedor(models.Model):
 
+class ContratacionComedor(models.Model):
     MESES = [
         (1, "Enero"),
         (2, "Febrero"),
@@ -146,38 +106,25 @@ class ContratacionComedor(models.Model):
         (12, "Diciembre"),
     ]
 
-    id_contratacion_comedor = models.BigAutoField(
-        primary_key=True
-    )
+    id_contratacion_comedor = models.BigAutoField(primary_key=True)
 
     alumno = models.ForeignKey(
-        Alumno,
-        on_delete=models.PROTECT,
-        related_name="contrataciones_comedor"
+        Alumno, on_delete=models.PROTECT, related_name="contrataciones_comedor"
     )
 
     servicio = models.ForeignKey(
-        ServicioComedor,
-        on_delete=models.PROTECT,
-        related_name="contrataciones"
+        ServicioComedor, on_delete=models.PROTECT, related_name="contrataciones"
     )
 
-    mes = models.PositiveSmallIntegerField(
-        choices=MESES
-    )
+    mes = models.PositiveSmallIntegerField(choices=MESES)
 
     anio = models.PositiveSmallIntegerField()
 
-    fecha_registro = models.DateField(
-        auto_now_add=True
-    )
+    fecha_registro = models.DateField(auto_now_add=True)
 
-    estado = models.BooleanField(
-        default=True
-    )
+    estado = models.BooleanField(default=True)
 
     class Meta:
-
         constraints = [
             models.UniqueConstraint(
                 fields=[
@@ -185,7 +132,7 @@ class ContratacionComedor(models.Model):
                     "mes",
                     "anio",
                 ],
-                name="comedor_alumno_periodo_unico"
+                name="comedor_alumno_periodo_unico",
             )
         ]
 

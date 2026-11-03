@@ -19,24 +19,16 @@ from .models import (
 
 
 class InscripcionDeporteTestCase(TestCase):
-
     def setUp(self):
 
         # Nivel
 
-        self.nivel = NivelEducativo.objects.create(
-            nombre="Primario",
-            estado=True
-        )
+        self.nivel = NivelEducativo.objects.create(nombre="Primario", estado=True)
 
         # Curso
 
         self.curso = Curso.objects.create(
-            nombre="1°",
-            division="A",
-            turno="MANANA",
-            nivel=self.nivel,
-            estado=True
+            nombre="1°", division="A", turno="MANANA", nivel=self.nivel, estado=True
         )
 
         # Alumno
@@ -51,7 +43,7 @@ class InscripcionDeporteTestCase(TestCase):
             telefono="3624000000",
             correo="lucia@test.com",
             curso=self.curso,
-            estado=True
+            estado=True,
         )
 
         # Profesor
@@ -64,53 +56,39 @@ class InscripcionDeporteTestCase(TestCase):
             especialidad="Educación Física",
             correo="carlos@test.com",
             telefono="3624111111",
-            estado=True
+            estado=True,
         )
 
         # Deportes
 
         self.futbol = Deporte.objects.create(
-            nombre="Fútbol",
-            descripcion="Fútbol",
-            estado=True
+            nombre="Fútbol", descripcion="Fútbol", estado=True
         )
 
         self.voley = Deporte.objects.create(
-            nombre="Vóley",
-            descripcion="Vóley",
-            estado=True
+            nombre="Vóley", descripcion="Vóley", estado=True
         )
 
         self.basquet = Deporte.objects.create(
-            nombre="Básquet",
-            descripcion="Básquet",
-            estado=True
+            nombre="Básquet", descripcion="Básquet", estado=True
         )
 
         self.handball = Deporte.objects.create(
-            nombre="Handball",
-            descripcion="Handball",
-            estado=True
+            nombre="Handball", descripcion="Handball", estado=True
         )
 
         # Horarios
 
         self.horario_futbol = Horario.objects.create(
-            dia_semana="LUNES",
-            hora_inicio=time(9, 0),
-            hora_fin=time(10, 0)
+            dia_semana="LUNES", hora_inicio=time(9, 0), hora_fin=time(10, 0)
         )
 
         self.horario_voley = Horario.objects.create(
-            dia_semana="MARTES",
-            hora_inicio=time(9, 0),
-            hora_fin=time(10, 0)
+            dia_semana="MARTES", hora_inicio=time(9, 0), hora_fin=time(10, 0)
         )
 
         self.horario_basquet = Horario.objects.create(
-            dia_semana="MIERCOLES",
-            hora_inicio=time(9, 0),
-            hora_fin=time(10, 0)
+            dia_semana="MIERCOLES", hora_inicio=time(9, 0), hora_fin=time(10, 0)
         )
 
         # Se superpone con fútbol:
@@ -118,9 +96,7 @@ class InscripcionDeporteTestCase(TestCase):
         # handball 09:30 - 10:30
 
         self.horario_handball = Horario.objects.create(
-            dia_semana="LUNES",
-            hora_inicio=time(9, 30),
-            hora_fin=time(10, 30)
+            dia_semana="LUNES", hora_inicio=time(9, 30), hora_fin=time(10, 30)
         )
 
         # Grupos
@@ -130,7 +106,7 @@ class InscripcionDeporteTestCase(TestCase):
             nivel=self.nivel,
             profesor=self.profesor,
             horario=self.horario_futbol,
-            estado=True
+            estado=True,
         )
 
         self.grupo_voley = GrupoDeportivo.objects.create(
@@ -138,7 +114,7 @@ class InscripcionDeporteTestCase(TestCase):
             nivel=self.nivel,
             profesor=self.profesor,
             horario=self.horario_voley,
-            estado=True
+            estado=True,
         )
 
         self.grupo_basquet = GrupoDeportivo.objects.create(
@@ -146,7 +122,7 @@ class InscripcionDeporteTestCase(TestCase):
             nivel=self.nivel,
             profesor=self.profesor,
             horario=self.horario_basquet,
-            estado=True
+            estado=True,
         )
 
         self.grupo_handball = GrupoDeportivo.objects.create(
@@ -154,16 +130,13 @@ class InscripcionDeporteTestCase(TestCase):
             nivel=self.nivel,
             profesor=self.profesor,
             horario=self.horario_handball,
-            estado=True
+            estado=True,
         )
-
 
     def test_no_permite_inscripcion_duplicada_mismo_grupo(self):
 
         InscripcionDeporte.objects.create(
-            alumno=self.alumno,
-            grupo=self.grupo_futbol,
-            estado=True
+            alumno=self.alumno, grupo=self.grupo_futbol, estado=True
         )
 
         form = InscripcionDeporteForm(
@@ -173,28 +146,20 @@ class InscripcionDeporteTestCase(TestCase):
             }
         )
 
-        self.assertFalse(
-            form.is_valid()
-        )
+        self.assertFalse(form.is_valid())
 
         self.assertIn(
-            "El alumno ya se encuentra inscripto",
-            str(form.non_field_errors())
+            "El alumno ya se encuentra inscripto", str(form.non_field_errors())
         )
-
 
     def test_no_permite_mas_de_dos_deportes(self):
 
         InscripcionDeporte.objects.create(
-            alumno=self.alumno,
-            grupo=self.grupo_futbol,
-            estado=True
+            alumno=self.alumno, grupo=self.grupo_futbol, estado=True
         )
 
         InscripcionDeporte.objects.create(
-            alumno=self.alumno,
-            grupo=self.grupo_voley,
-            estado=True
+            alumno=self.alumno, grupo=self.grupo_voley, estado=True
         )
 
         # Intentamos inscribirlo en un tercer deporte
@@ -206,22 +171,16 @@ class InscripcionDeporteTestCase(TestCase):
             }
         )
 
-        self.assertFalse(
-            form.is_valid()
-        )
+        self.assertFalse(form.is_valid())
 
         self.assertIn(
-            "El alumno ya participa en dos deportes",
-            str(form.non_field_errors())
+            "El alumno ya participa en dos deportes", str(form.non_field_errors())
         )
-
 
     def test_no_permite_superposicion_horaria(self):
 
         InscripcionDeporte.objects.create(
-            alumno=self.alumno,
-            grupo=self.grupo_futbol,
-            estado=True
+            alumno=self.alumno, grupo=self.grupo_futbol, estado=True
         )
 
         # Fútbol:
@@ -237,11 +196,6 @@ class InscripcionDeporteTestCase(TestCase):
             }
         )
 
-        self.assertFalse(
-            form.is_valid()
-        )
+        self.assertFalse(form.is_valid())
 
-        self.assertIn(
-            "se superpone",
-            str(form.non_field_errors())
-        )
+        self.assertIn("se superpone", str(form.non_field_errors()))
