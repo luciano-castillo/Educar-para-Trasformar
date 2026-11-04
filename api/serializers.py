@@ -2,8 +2,11 @@ from rest_framework import serializers
 
 from academic.models import Alumno, Curso
 from billing.models import (
+    ComprobantePago,
     DetalleFactura,
     Factura,
+    Pago,
+    PagoDetalle,
 )
 
 
@@ -49,6 +52,12 @@ class DetalleFacturaSerializer(serializers.ModelSerializer):
         decimal_places=2,
         read_only=True,
     )
+    
+    saldo_disponible_pago = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        read_only=True,
+    )
 
     class Meta:
         model = DetalleFactura
@@ -60,6 +69,7 @@ class DetalleFacturaSerializer(serializers.ModelSerializer):
             "importe",
             "total_pagado",
             "saldo_pendiente",
+            "saldo_disponible_pago",
         ]
 
 
@@ -113,4 +123,80 @@ class FacturaSerializer(serializers.ModelSerializer):
             "total_pagado",
             "saldo",
             "detalles",
+        ]
+
+
+class PagoDetalleSerializer(serializers.ModelSerializer):
+    concepto = serializers.CharField(
+        source="detalle_factura.descripcion",
+        read_only=True,
+    )
+
+    class Meta:
+        model = PagoDetalle
+
+        fields = [
+            "id_pago_detalle",
+            "concepto",
+            "importe_aplicado",
+        ]
+
+
+class ComprobantePagoSerializer(serializers.ModelSerializer):
+    archivo_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ComprobantePago
+
+        fields = [
+            "id_comprobante",
+            "archivo_url",
+            "fecha_subida",
+        ]
+
+    def get_archivo_url(
+        self,
+        obj,
+    ):
+        request = self.context.get("request")
+
+        if not obj.archivo:
+            return None
+
+        if request is None:
+            return obj.archivo.url
+
+        return request.build_absolute_uri(obj.archivo.url)
+
+
+class PagoSerializer(serializers.ModelSerializer):
+    estado_nombre = serializers.CharField(
+        source="get_estado_display",
+        read_only=True,
+    )
+
+    detalles_pago = PagoDetalleSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    comprobantes = ComprobantePagoSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = Pago
+
+        fields = [
+            "id_pago",
+            "fecha_transferencia",
+            "monto",
+            "numero_operacion",
+            "estado",
+            "estado_nombre",
+            "observaciones",
+            "fecha_registro",
+            "detalles_pago",
+            "comprobantes",
         ]
