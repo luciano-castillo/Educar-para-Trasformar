@@ -5,19 +5,24 @@ from .models import Deporte, GrupoDeportivo, InscripcionDeporte
 
 @admin.register(Deporte)
 class DeporteAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_deporte",
         "nombre",
         "estado",
     )
 
-    search_fields = ("nombre",)
+    search_fields = (
+        "nombre",
+    )
 
-    list_filter = ("estado",)
-
+    list_filter = (
+        "estado",
+    )
 
 @admin.register(GrupoDeportivo)
 class GrupoDeportivoAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_grupo",
         "deporte",
@@ -31,9 +36,9 @@ class GrupoDeportivoAdmin(admin.ModelAdmin):
         "nivel",
     )
 
-
 @admin.register(InscripcionDeporte)
 class InscripcionDeporteAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_inscripcion",
         "alumno",

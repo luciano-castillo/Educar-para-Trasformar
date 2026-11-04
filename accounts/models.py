@@ -3,21 +3,31 @@ from django.db import models
 
 
 class PerfilUsuario(models.Model):
+
     class Rol(models.TextChoices):
         ADMIN = "ADMIN", "Administrador"
         DOCENTE = "DOCENTE", "Docente"
         ALUMNO = "ALUMNO", "Alumno"
         TUTOR = "TUTOR", "Padre / Tutor"
 
-    id_perfil = models.BigAutoField(primary_key=True)
-
-    usuario = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="perfil"
+    id_perfil = models.BigAutoField(
+        primary_key=True
     )
 
-    rol = models.CharField(max_length=10, choices=Rol.choices)
+    usuario = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="perfil"
+    )
 
-    debe_cambiar_password = models.BooleanField(default=False)
+    rol = models.CharField(
+        max_length=10,
+        choices=Rol.choices
+    )
+    
+    debe_cambiar_password = models.BooleanField(
+        default=False
+    )
 
     def __str__(self):
         return f"{self.usuario.username} - {self.get_rol_display()}"

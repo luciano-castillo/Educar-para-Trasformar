@@ -14,6 +14,7 @@ from .models import (
 
 
 class AlumnoForm(forms.ModelForm):
+
     class Meta:
         model = Alumno
 
@@ -31,18 +32,34 @@ class AlumnoForm(forms.ModelForm):
         ]
 
         widgets = {
-            "dni": forms.TextInput(attrs={"placeholder": "Ingrese DNI"}),
-            "legajo": forms.TextInput(attrs={"placeholder": "Ingrese legajo"}),
-            "nombre": forms.TextInput(attrs={"placeholder": "Ingrese nombre"}),
-            "apellido": forms.TextInput(attrs={"placeholder": "Ingrese apellido"}),
-            "fecha_nacimiento": forms.DateInput(attrs={"type": "date"}),
-            "domicilio": forms.TextInput(attrs={"placeholder": "Ingrese domicilio"}),
-            "telefono": forms.TextInput(attrs={"placeholder": "Ingrese teléfono"}),
-            "correo": forms.EmailInput(attrs={"placeholder": "correo@ejemplo.com"}),
+            "dni": forms.TextInput(
+                attrs={"placeholder": "Ingrese DNI"}
+            ),
+            "legajo": forms.TextInput(
+                attrs={"placeholder": "Ingrese legajo"}
+            ),
+            "nombre": forms.TextInput(
+                attrs={"placeholder": "Ingrese nombre"}
+            ),
+            "apellido": forms.TextInput(
+                attrs={"placeholder": "Ingrese apellido"}
+            ),
+            "fecha_nacimiento": forms.DateInput(
+                attrs={"type": "date"}
+            ),
+            "domicilio": forms.TextInput(
+                attrs={"placeholder": "Ingrese domicilio"}
+            ),
+            "telefono": forms.TextInput(
+                attrs={"placeholder": "Ingrese teléfono"}
+            ),
+            "correo": forms.EmailInput(
+                attrs={"placeholder": "correo@ejemplo.com"}
+            ),
         }
 
-
 class AlumnoDatosPersonalesForm(forms.ModelForm):
+
     class Meta:
         model = Alumno
 
@@ -53,13 +70,27 @@ class AlumnoDatosPersonalesForm(forms.ModelForm):
         ]
 
         widgets = {
-            "correo": forms.EmailInput(attrs={"placeholder": "correo@ejemplo.com"}),
-            "telefono": forms.TextInput(attrs={"placeholder": "Ingrese teléfono"}),
-            "domicilio": forms.TextInput(attrs={"placeholder": "Ingrese domicilio"}),
+            "correo": forms.EmailInput(
+                attrs={
+                    "placeholder": "correo@ejemplo.com"
+                }
+            ),
+
+            "telefono": forms.TextInput(
+                attrs={
+                    "placeholder": "Ingrese teléfono"
+                }
+            ),
+
+            "domicilio": forms.TextInput(
+                attrs={
+                    "placeholder": "Ingrese domicilio"
+                }
+            ),
         }
 
-
 class ProfesorForm(forms.ModelForm):
+
     class Meta:
         model = Profesor
 
@@ -75,19 +106,31 @@ class ProfesorForm(forms.ModelForm):
         ]
 
         widgets = {
-            "dni": forms.TextInput(attrs={"placeholder": "Ingrese DNI"}),
-            "legajo": forms.TextInput(attrs={"placeholder": "Ingrese legajo"}),
-            "nombre": forms.TextInput(attrs={"placeholder": "Ingrese nombre"}),
-            "apellido": forms.TextInput(attrs={"placeholder": "Ingrese apellido"}),
+            "dni": forms.TextInput(
+                attrs={"placeholder": "Ingrese DNI"}
+            ),
+            "legajo": forms.TextInput(
+                attrs={"placeholder": "Ingrese legajo"}
+            ),
+            "nombre": forms.TextInput(
+                attrs={"placeholder": "Ingrese nombre"}
+            ),
+            "apellido": forms.TextInput(
+                attrs={"placeholder": "Ingrese apellido"}
+            ),
             "especialidad": forms.TextInput(
                 attrs={"placeholder": "Ingrese especialidad"}
             ),
-            "correo": forms.EmailInput(attrs={"placeholder": "correo@ejemplo.com"}),
-            "telefono": forms.TextInput(attrs={"placeholder": "Ingrese teléfono"}),
+            "correo": forms.EmailInput(
+                attrs={"placeholder": "correo@ejemplo.com"}
+            ),
+            "telefono": forms.TextInput(
+                attrs={"placeholder": "Ingrese teléfono"}
+            ),
         }
 
-
 class ProfesorDatosPersonalesForm(forms.ModelForm):
+
     class Meta:
         model = Profesor
 
@@ -97,12 +140,21 @@ class ProfesorDatosPersonalesForm(forms.ModelForm):
         ]
 
         widgets = {
-            "correo": forms.EmailInput(attrs={"placeholder": "correo@ejemplo.com"}),
-            "telefono": forms.TextInput(attrs={"placeholder": "Ingrese teléfono"}),
+            "correo": forms.EmailInput(
+                attrs={
+                    "placeholder": "correo@ejemplo.com"
+                }
+            ),
+
+            "telefono": forms.TextInput(
+                attrs={
+                    "placeholder": "Ingrese teléfono"
+                }
+            ),
         }
 
-
 class MateriaForm(forms.ModelForm):
+
     class Meta:
         model = Materia
 
@@ -113,12 +165,14 @@ class MateriaForm(forms.ModelForm):
 
         widgets = {
             "nombre": forms.TextInput(
-                attrs={"placeholder": "Ingrese el nombre de la materia"}
+                attrs={
+                    "placeholder": "Ingrese el nombre de la materia"
+                }
             ),
         }
 
-
 class HorarioForm(forms.ModelForm):
+
     class Meta:
         model = Horario
 
@@ -129,8 +183,12 @@ class HorarioForm(forms.ModelForm):
         ]
 
         widgets = {
-            "hora_inicio": forms.TimeInput(attrs={"type": "time"}),
-            "hora_fin": forms.TimeInput(attrs={"type": "time"}),
+            "hora_inicio": forms.TimeInput(
+                attrs={"type": "time"}
+            ),
+            "hora_fin": forms.TimeInput(
+                attrs={"type": "time"}
+            ),
         }
 
     def clean(self):
@@ -139,16 +197,20 @@ class HorarioForm(forms.ModelForm):
         hora_inicio = cleaned_data.get("hora_inicio")
         hora_fin = cleaned_data.get("hora_fin")
 
-        if hora_inicio and hora_fin and hora_fin <= hora_inicio:
+        if (
+            hora_inicio
+            and hora_fin
+            and hora_fin <= hora_inicio
+        ):
             self.add_error(
                 "hora_fin",
-                "La hora de finalización debe ser posterior a la hora de inicio.",
+                "La hora de finalización debe ser posterior a la hora de inicio."
             )
 
         return cleaned_data
 
-
 class DictadoMateriaForm(forms.ModelForm):
+
     class Meta:
         model = DictadoMateria
 
@@ -162,22 +224,36 @@ class DictadoMateriaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["materia"].queryset = Materia.objects.filter(estado=True).order_by(
-            "nombre"
+        self.fields["materia"].queryset = (
+            Materia.objects
+            .filter(estado=True)
+            .order_by("nombre")
         )
 
-        self.fields["profesor"].queryset = Profesor.objects.filter(
-            estado=True
-        ).order_by("apellido", "nombre")
+        self.fields["profesor"].queryset = (
+            Profesor.objects
+            .filter(estado=True)
+            .order_by("apellido", "nombre")
+        )
 
         self.fields["curso"].queryset = (
-            Curso.objects.filter(estado=True)
+            Curso.objects
+            .filter(estado=True)
             .select_related("nivel")
-            .order_by("nivel__nombre", "nombre", "division")
+            .order_by(
+                "nivel__nombre",
+                "nombre",
+                "division"
+            )
         )
 
-        self.fields["horario"].queryset = Horario.objects.all().order_by(
-            "dia_semana", "hora_inicio"
+        self.fields["horario"].queryset = (
+            Horario.objects
+            .all()
+            .order_by(
+                "dia_semana",
+                "hora_inicio"
+            )
         )
 
     def clean(self):
@@ -190,12 +266,18 @@ class DictadoMateriaForm(forms.ModelForm):
         horario = cleaned_data.get("horario")
 
         if materia and profesor and curso and horario:
+
             asignaciones = DictadoMateria.objects.filter(
-                materia=materia, profesor=profesor, curso=curso, horario=horario
+                materia=materia,
+                profesor=profesor,
+                curso=curso,
+                horario=horario
             )
 
             if self.instance.pk:
-                asignaciones = asignaciones.exclude(pk=self.instance.pk)
+                asignaciones = asignaciones.exclude(
+                    pk=self.instance.pk
+                )
 
             if asignaciones.exists():
                 raise forms.ValidationError(
@@ -204,8 +286,8 @@ class DictadoMateriaForm(forms.ModelForm):
 
         return cleaned_data
 
-
 class NivelEducativoForm(forms.ModelForm):
+
     class Meta:
         model = NivelEducativo
 
@@ -216,12 +298,14 @@ class NivelEducativoForm(forms.ModelForm):
 
         widgets = {
             "nombre": forms.TextInput(
-                attrs={"placeholder": "Ej.: Inicial, Primario, Secundario"}
+                attrs={
+                    "placeholder": "Ej.: Inicial, Primario, Secundario"
+                }
             ),
         }
 
-
 class CursoForm(forms.ModelForm):
+
     class Meta:
         model = Curso
 
@@ -234,16 +318,26 @@ class CursoForm(forms.ModelForm):
         ]
 
         widgets = {
-            "nombre": forms.TextInput(attrs={"placeholder": "Ej.: 1°"}),
-            "division": forms.TextInput(attrs={"placeholder": "Ej.: A"}),
+            "nombre": forms.TextInput(
+                attrs={
+                    "placeholder": "Ej.: 1°"
+                }
+            ),
+            "division": forms.TextInput(
+                attrs={
+                    "placeholder": "Ej.: A"
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["nivel"].queryset = NivelEducativo.objects.filter(
-            estado=True
-        ).order_by("nombre")
+        self.fields["nivel"].queryset = (
+            NivelEducativo.objects
+            .filter(estado=True)
+            .order_by("nombre")
+        )
 
     def clean(self):
 
@@ -255,15 +349,18 @@ class CursoForm(forms.ModelForm):
         nivel = cleaned_data.get("nivel")
 
         if nombre and division and turno and nivel:
+
             cursos = Curso.objects.filter(
                 nombre__iexact=nombre,
                 division__iexact=division,
                 turno=turno,
-                nivel=nivel,
+                nivel=nivel
             )
 
             if self.instance.pk:
-                cursos = cursos.exclude(pk=self.instance.pk)
+                cursos = cursos.exclude(
+                    pk=self.instance.pk
+                )
 
             if cursos.exists():
                 raise forms.ValidationError(
@@ -271,10 +368,11 @@ class CursoForm(forms.ModelForm):
                 )
 
         return cleaned_data
-
-
+    
 class TutorForm(forms.ModelForm):
+
     class Meta:
+
         model = Tutor
 
         fields = [
@@ -288,17 +386,48 @@ class TutorForm(forms.ModelForm):
         ]
 
         widgets = {
-            "dni": forms.TextInput(attrs={"placeholder": "DNI"}),
-            "nombre": forms.TextInput(attrs={"placeholder": "Nombre"}),
-            "apellido": forms.TextInput(attrs={"placeholder": "Apellido"}),
-            "domicilio": forms.TextInput(attrs={"placeholder": "Domicilio"}),
-            "telefono": forms.TextInput(attrs={"placeholder": "Teléfono"}),
-            "correo": forms.EmailInput(attrs={"placeholder": "Correo electrónico"}),
+
+            "dni": forms.TextInput(
+                attrs={
+                    "placeholder": "DNI"
+                }
+            ),
+
+            "nombre": forms.TextInput(
+                attrs={
+                    "placeholder": "Nombre"
+                }
+            ),
+
+            "apellido": forms.TextInput(
+                attrs={
+                    "placeholder": "Apellido"
+                }
+            ),
+
+            "domicilio": forms.TextInput(
+                attrs={
+                    "placeholder": "Domicilio"
+                }
+            ),
+
+            "telefono": forms.TextInput(
+                attrs={
+                    "placeholder": "Teléfono"
+                }
+            ),
+
+            "correo": forms.EmailInput(
+                attrs={
+                    "placeholder": "Correo electrónico"
+                }
+            ),
         }
 
-
 class TutorAlumnoForm(forms.ModelForm):
+
     class Meta:
+
         model = TutorAlumno
 
         fields = [
@@ -310,14 +439,23 @@ class TutorAlumnoForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields["tutor"].queryset = Tutor.objects.filter(estado=True).order_by(
-            "apellido", "nombre"
+        self.fields["tutor"].queryset = (
+            Tutor.objects
+            .filter(estado=True)
+            .order_by(
+                "apellido",
+                "nombre"
+            )
         )
 
         self.fields["alumno"].queryset = (
-            Alumno.objects.filter(estado=True)
+            Alumno.objects
+            .filter(estado=True)
             .select_related("curso")
-            .order_by("apellido", "nombre")
+            .order_by(
+                "apellido",
+                "nombre"
+            )
         )
 
     def clean(self):
@@ -328,9 +466,15 @@ class TutorAlumnoForm(forms.ModelForm):
         alumno = cleaned_data.get("alumno")
 
         if tutor and alumno:
-            if TutorAlumno.objects.filter(tutor=tutor, alumno=alumno).exists():
+
+            if TutorAlumno.objects.filter(
+                tutor=tutor,
+                alumno=alumno
+            ).exists():
+
                 raise forms.ValidationError(
-                    "Este alumno ya se encuentra asociado a este tutor."
+                    "Este alumno ya se encuentra asociado "
+                    "a este tutor."
                 )
 
         return cleaned_data

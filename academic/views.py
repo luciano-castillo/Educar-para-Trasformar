@@ -48,33 +48,46 @@ from .models import (
 from .services import registrar_asistencias, registrar_notas
 
 
-# Alumnos
+#Alumnos
 @admin_required
 def alumno_lista(request):
 
     alumnos = (
-        Alumno.objects.select_related(
+        Alumno.objects
+        .select_related(
             "curso",
             "curso__nivel",
             "usuario",
         )
         .all()
-        .order_by("apellido", "nombre")
+        .order_by(
+            "apellido",
+            "nombre"
+        )
     )
 
-    return render(request, "academic/alumnos/lista.html", {"alumnos": alumnos})
-
-
+    return render(
+        request,
+        "academic/alumnos/lista.html",
+        {
+            "alumnos": alumnos
+        }
+    )
+    
 @admin_required
 def alumno_crear(request):
 
     if request.method == "POST":
+
         form = AlumnoForm(request.POST)
 
         if form.is_valid():
             form.save()
 
-            messages.success(request, "Alumno registrado correctamente.")
+            messages.success(
+                request,
+                "Alumno registrado correctamente."
+            )
 
             return redirect("alumno_lista")
 
@@ -84,30 +97,56 @@ def alumno_crear(request):
     return render(
         request,
         "academic/alumnos/formulario.html",
-        {"form": form, "titulo": "Registrar alumno"},
+        {
+            "form": form,
+            "titulo": "Registrar alumno"
+        }
     )
-
 
 @admin_required
 def alumno_editar(request, id_alumno):
 
-    alumno = get_object_or_404(Alumno, id_alumno=id_alumno)
+    alumno = get_object_or_404(
+        Alumno,
+        id_alumno=id_alumno
+    )
 
     if request.method == "POST":
-        form = AlumnoForm(request.POST, instance=alumno)
+
+        form = AlumnoForm(
+            request.POST,
+            instance=alumno
+        )
 
         if form.is_valid():
+
             alumno = form.save()
 
             if alumno.usuario_id:
-                if alumno.usuario.is_active != alumno.estado:
-                    alumno.usuario.is_active = alumno.estado
 
-                    alumno.usuario.save(update_fields=["is_active"])
+                if (
+                    alumno.usuario.is_active
+                    != alumno.estado
+                ):
 
-            messages.success(request, "Alumno modificado correctamente.")
+                    alumno.usuario.is_active = (
+                        alumno.estado
+                    )
 
-            return redirect("alumno_lista")
+                    alumno.usuario.save(
+                        update_fields=[
+                            "is_active"
+                        ]
+                    )
+
+            messages.success(
+                request,
+                "Alumno modificado correctamente."
+            )
+
+            return redirect(
+                "alumno_lista"
+            )
 
     else:
         form = AlumnoForm(instance=alumno)
@@ -115,26 +154,46 @@ def alumno_editar(request, id_alumno):
     return render(
         request,
         "academic/alumnos/formulario.html",
-        {"form": form, "titulo": "Modificar alumno"},
+        {
+            "form": form,
+            "titulo": "Modificar alumno"
+        }
     )
-
 
 @admin_required
 def alumno_desactivar(request, id_alumno):
 
-    alumno = get_object_or_404(Alumno, id_alumno=id_alumno)
-
+    alumno = get_object_or_404(
+        Alumno,
+        id_alumno=id_alumno
+    )
+    
     if request.method == "POST":
+
         alumno.estado = False
 
-        alumno.save(update_fields=["estado"])
+        alumno.save(
+            update_fields=[
+                "estado"
+            ]
+        )
 
         if alumno.usuario_id:
+
             alumno.usuario.is_active = False
 
-            alumno.usuario.save(update_fields=["is_active"])
+            alumno.usuario.save(
+                update_fields=[
+                    "is_active"
+                ]
+            )
 
-        messages.success(request, "Alumno desactivado correctamente.")
+        messages.success(
+            request,
+            "Alumno desactivado correctamente."
+        )
+
+
 
     return redirect("alumno_lista")
 
@@ -143,19 +202,27 @@ def alumno_desactivar(request, id_alumno):
 def alumno_mis_datos(request):
 
     try:
+
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un alumno.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     # -----------------------------------------
     # Materias del alumno
     # -----------------------------------------
 
     dictados = (
-        DictadoMateria.objects.filter(
+        DictadoMateria.objects
+        .filter(
             curso=alumno.curso,
             curso__estado=True,
             materia__estado=True,
@@ -166,17 +233,24 @@ def alumno_mis_datos(request):
             "profesor",
             "horario",
         )
-        .order_by("materia__nombre")
+        .order_by(
+            "materia__nombre"
+        )
     )
 
-    cantidad_materias = dictados.count()
+    cantidad_materias = (
+        dictados.count()
+    )
 
     # -----------------------------------------
     # Notas
     # -----------------------------------------
 
     notas = (
-        Nota.objects.filter(alumno=alumno)
+        Nota.objects
+        .filter(
+            alumno=alumno
+        )
         .select_related(
             "dictado",
             "dictado__materia",
@@ -187,34 +261,80 @@ def alumno_mis_datos(request):
         )
     )
 
-    promedio_general = notas.aggregate(promedio=Avg("calificacion"))["promedio"]
+    promedio_general = (
+        notas.aggregate(
+            promedio=Avg(
+                "calificacion"
+            )
+        )["promedio"]
+    )
 
-    notas_recientes = notas[:5]
+    notas_recientes = (
+        notas[:5]
+    )
 
     # -----------------------------------------
     # Asistencia
     # -----------------------------------------
 
-    asistencias = Asistencia.objects.filter(alumno=alumno)
+    asistencias = (
+        Asistencia.objects
+        .filter(
+            alumno=alumno
+        )
+    )
 
-    resumen_asistencia = asistencias.aggregate(
-        total=Count("id_asistencia"),
-        presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
-        ausentes=Count("id_asistencia", filter=Q(estado="AUSENTE")),
-        tardes=Count("id_asistencia", filter=Q(estado="TARDE")),
-        justificados=Count("id_asistencia", filter=Q(estado="JUSTIFICADO")),
+    resumen_asistencia = (
+        asistencias.aggregate(
+
+            total=Count(
+                "id_asistencia"
+            ),
+
+            presentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="PRESENTE"
+                )
+            ),
+
+            ausentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="AUSENTE"
+                )
+            ),
+
+            tardes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="TARDE"
+                )
+            ),
+
+            justificados=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="JUSTIFICADO"
+                )
+            ),
+        )
     )
 
     # -----------------------------------------
     # Deportes activos
     # -----------------------------------------
 
-    cantidad_deportes = InscripcionDeporte.objects.filter(
-        alumno=alumno,
-        estado=True,
-        grupo__estado=True,
-        grupo__deporte__estado=True,
-    ).count()
+    cantidad_deportes = (
+        InscripcionDeporte.objects
+        .filter(
+            alumno=alumno,
+            estado=True,
+            grupo__estado=True,
+            grupo__deporte__estado=True,
+        )
+        .count()
+    )
 
     return render(
         request,
@@ -227,23 +347,30 @@ def alumno_mis_datos(request):
             "resumen_asistencia": resumen_asistencia,
             "notas_recientes": notas_recientes,
             "seccion_activa": "resumen",
-        },
+        }
     )
-
 
 @alumno_required
 def alumno_materias(request):
 
     try:
+
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un alumno.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = (
-        DictadoMateria.objects.filter(
+        DictadoMateria.objects
+        .filter(
             curso=alumno.curso,
             curso__estado=True,
             materia__estado=True,
@@ -256,38 +383,76 @@ def alumno_materias(request):
             "curso",
             "curso__nivel",
         )
-        .order_by("materia__nombre")
+        .order_by(
+            "materia__nombre"
+        )
     )
 
     materias = []
 
     for dictado in dictados:
-        promedio = Nota.objects.filter(alumno=alumno, dictado=dictado).aggregate(
-            promedio=Avg("calificacion")
-        )["promedio"]
 
-        resumen_asistencia = Asistencia.objects.filter(
-            alumno=alumno, dictado=dictado
-        ).aggregate(
-            total=Count("id_asistencia"),
-            presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
+        promedio = (
+            Nota.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .aggregate(
+                promedio=Avg(
+                    "calificacion"
+                )
+            )["promedio"]
         )
 
-        total = resumen_asistencia["total"] or 0
+        resumen_asistencia = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .aggregate(
 
-        presentes = resumen_asistencia["presentes"] or 0
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+            )
+        )
+
+        total = (
+            resumen_asistencia["total"]
+            or 0
+        )
+
+        presentes = (
+            resumen_asistencia["presentes"]
+            or 0
+        )
 
         if total:
-            porcentaje_asistencia = round(presentes * 100 / total)
+
+            porcentaje_asistencia = round(
+                presentes * 100 / total
+            )
 
         else:
+
             porcentaje_asistencia = None
 
         materias.append(
             {
                 "dictado": dictado,
                 "promedio": promedio,
-                "porcentaje_asistencia": (porcentaje_asistencia),
+                "porcentaje_asistencia": (
+                    porcentaje_asistencia
+                ),
             }
         )
 
@@ -298,28 +463,36 @@ def alumno_materias(request):
             "alumno": alumno,
             "materias": materias,
             "seccion_activa": "materias",
-        },
+        }
     )
-
-
+    
 @alumno_required
 def alumno_horarios(request):
 
     try:
+
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un alumno.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = list(
-        DictadoMateria.objects.filter(
+        DictadoMateria.objects
+        .filter(
             curso=alumno.curso,
             curso__estado=True,
             materia__estado=True,
             profesor__estado=True,
-        ).select_related(
+        )
+        .select_related(
             "materia",
             "profesor",
             "horario",
@@ -338,13 +511,20 @@ def alumno_horarios(request):
     horarios_por_dia = []
 
     for codigo, nombre in dias_semana:
+
         clases = [
-            dictado for dictado in dictados if dictado.horario.dia_semana == codigo
+            dictado
+            for dictado in dictados
+            if dictado.horario.dia_semana == codigo
         ]
 
-        clases.sort(key=lambda dictado: dictado.horario.hora_inicio)
+        clases.sort(
+            key=lambda dictado:
+            dictado.horario.hora_inicio
+        )
 
         if clases:
+
             horarios_por_dia.append(
                 {
                     "codigo": codigo,
@@ -360,23 +540,30 @@ def alumno_horarios(request):
             "alumno": alumno,
             "horarios_por_dia": horarios_por_dia,
             "seccion_activa": "horarios",
-        },
+        }
     )
-
 
 @alumno_required
 def alumno_deportes(request):
 
     try:
+
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un alumno.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     inscripciones = (
-        InscripcionDeporte.objects.filter(
+        InscripcionDeporte.objects
+        .filter(
             alumno=alumno,
             estado=True,
             grupo__estado=True,
@@ -389,7 +576,9 @@ def alumno_deportes(request):
             "grupo__horario",
             "grupo__nivel",
         )
-        .order_by("grupo__deporte__nombre")
+        .order_by(
+            "grupo__deporte__nombre"
+        )
     )
 
     return render(
@@ -399,10 +588,9 @@ def alumno_deportes(request):
             "alumno": alumno,
             "inscripciones": inscripciones,
             "seccion_activa": "deportes",
-        },
+        }
     )
-
-
+    
 @alumno_required
 def alumno_editar_mis_datos(request):
 
@@ -410,47 +598,72 @@ def alumno_editar_mis_datos(request):
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un alumno.")
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
 
         return redirect("inicio_por_rol")
 
     if request.method == "POST":
-        form = AlumnoDatosPersonalesForm(request.POST, instance=alumno)
+
+        form = AlumnoDatosPersonalesForm(
+            request.POST,
+            instance=alumno
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "Sus datos fueron actualizados correctamente.")
+            messages.success(
+                request,
+                "Sus datos fueron actualizados correctamente."
+            )
 
             return redirect("alumno_mis_datos")
 
     else:
-        form = AlumnoDatosPersonalesForm(instance=alumno)
+
+        form = AlumnoDatosPersonalesForm(
+            instance=alumno
+        )
 
     return render(
         request,
         "academic/alumnos/editar_mis_datos.html",
-        {"form": form, "alumno": alumno},
+        {
+            "form": form,
+            "alumno": alumno
+        }
     )
-
-
+    
 @alumno_required
 def alumno_academico(request):
 
     try:
+
         alumno = request.user.alumno
 
     except Alumno.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un alumno.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un alumno."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = (
-        DictadoMateria.objects.filter(
+        DictadoMateria.objects
+        .filter(
             curso=alumno.curso,
             materia__estado=True,
             profesor__estado=True,
-            curso__estado=True,
+            curso__estado=True
         )
         .select_related(
             "materia",
@@ -459,26 +672,74 @@ def alumno_academico(request):
             "curso",
             "curso__nivel",
         )
-        .order_by("materia__nombre")
+        .order_by(
+            "materia__nombre"
+        )
     )
 
     materias = []
 
     for dictado in dictados:
-        notas = Nota.objects.filter(alumno=alumno, dictado=dictado).order_by(
-            "-fecha", "periodo", "evaluacion"
+
+        notas = (
+            Nota.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha",
+                "periodo",
+                "evaluacion"
+            )
         )
 
-        asistencias = Asistencia.objects.filter(
-            alumno=alumno, dictado=dictado
-        ).order_by("-fecha")
+        asistencias = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha"
+            )
+        )
 
-        resumen_asistencia = asistencias.aggregate(
-            total=Count("id_asistencia"),
-            presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
-            ausentes=Count("id_asistencia", filter=Q(estado="AUSENTE")),
-            tardes=Count("id_asistencia", filter=Q(estado="TARDE")),
-            justificados=Count("id_asistencia", filter=Q(estado="JUSTIFICADO")),
+        resumen_asistencia = (
+            asistencias.aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+
+                ausentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="AUSENTE"
+                    )
+                ),
+
+                tardes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="TARDE"
+                    )
+                ),
+
+                justificados=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="JUSTIFICADO"
+                    )
+                ),
+            )
         )
 
         materias.append(
@@ -486,7 +747,9 @@ def alumno_academico(request):
                 "dictado": dictado,
                 "notas": notas,
                 "asistencias": asistencias,
-                "resumen_asistencia": (resumen_asistencia),
+                "resumen_asistencia": (
+                    resumen_asistencia
+                ),
             }
         )
 
@@ -497,125 +760,231 @@ def alumno_academico(request):
             "alumno": alumno,
             "materias": materias,
             "seccion_activa": "academico",
-        },
+        }
     )
 
-
-# Profesores
+#Profesores
 @admin_required
 def profesor_lista(request):
 
     profesores = (
-        Profesor.objects.select_related("usuario").all().order_by("apellido", "nombre")
+        Profesor.objects
+        .select_related(
+            "usuario"
+        )
+        .all()
+        .order_by(
+            "apellido",
+            "nombre"
+        )
     )
 
-    return render(request, "academic/profesores/lista.html", {"profesores": profesores})
-
+    return render(
+        request,
+        "academic/profesores/lista.html",
+        {
+            "profesores": profesores
+        }
+    )
 
 @admin_required
 def profesor_crear(request):
 
     if request.method == "POST":
+
         form = ProfesorForm(request.POST)
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "Profesor registrado correctamente.")
+            messages.success(
+                request,
+                "Profesor registrado correctamente."
+            )
 
             return redirect("profesor_lista")
 
     else:
+
         form = ProfesorForm()
 
     return render(
         request,
         "academic/profesores/formulario.html",
-        {"form": form, "titulo": "Registrar profesor"},
+        {
+            "form": form,
+            "titulo": "Registrar profesor"
+        }
     )
-
 
 @admin_required
 def profesor_editar(request, id_profesor):
 
-    profesor = get_object_or_404(Profesor, id_profesor=id_profesor)
+    profesor = get_object_or_404(
+        Profesor,
+        id_profesor=id_profesor
+    )
 
     if request.method == "POST":
-        form = ProfesorForm(request.POST, instance=profesor)
+
+        form = ProfesorForm(
+            request.POST,
+            instance=profesor
+        )
 
         if form.is_valid():
+
             profesor = form.save()
 
             if profesor.usuario_id:
-                if profesor.usuario.is_active != profesor.estado:
-                    profesor.usuario.is_active = profesor.estado
 
-                    profesor.usuario.save(update_fields=["is_active"])
+                if (
+                    profesor.usuario.is_active
+                    != profesor.estado
+                ):
+
+                    profesor.usuario.is_active = (
+                        profesor.estado
+                    )
+
+                    profesor.usuario.save(
+                        update_fields=[
+                            "is_active"
+                        ]
+                    )
 
             return redirect("profesor_lista")
 
     else:
-        form = ProfesorForm(instance=profesor)
+
+        form = ProfesorForm(
+            instance=profesor
+        )
 
     return render(
         request,
         "academic/profesores/formulario.html",
-        {"form": form, "titulo": "Modificar profesor"},
+        {
+            "form": form,
+            "titulo": "Modificar profesor"
+        }
     )
-
-
+    
 @admin_required
 def profesor_desactivar(request, id_profesor):
 
-    profesor = get_object_or_404(Profesor, id_profesor=id_profesor)
+    profesor = get_object_or_404(
+        Profesor,
+        id_profesor=id_profesor
+    )
 
     if request.method == "POST":
+        
         profesor.estado = False
 
-        profesor.save(update_fields=["estado"])
+        profesor.save(
+            update_fields=[
+                "estado"
+            ]
+        )
 
         if profesor.usuario_id:
+
             profesor.usuario.is_active = False
 
-            profesor.usuario.save(update_fields=["is_active"])
+            profesor.usuario.save(
+                update_fields=[
+                    "is_active"
+                ]
+            )
 
-        messages.success(request, "Profesor desactivado correctamente.")
+        messages.success(
+            request,
+            "Profesor desactivado correctamente."
+        )
 
     return redirect("profesor_lista")
-
 
 @docente_required
 def profesor_mis_datos(request):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = (
-        profesor.dictados.select_related("materia", "curso", "curso__nivel", "horario")
-        .filter(materia__estado=True, curso__estado=True)
-        .order_by("materia__nombre", "curso__nombre")
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre"
+        )
     )
 
     # -----------------------------------------
     # Resumen del docente
     # -----------------------------------------
 
-    cantidad_dictados = dictados.count()
+    cantidad_dictados = (
+        dictados.count()
+    )
 
-    cantidad_materias = dictados.values("materia_id").distinct().count()
+    cantidad_materias = (
+        dictados
+        .values(
+            "materia_id"
+        )
+        .distinct()
+        .count()
+    )
 
-    cantidad_cursos = dictados.values("curso_id").distinct().count()
+    cantidad_cursos = (
+        dictados
+        .values(
+            "curso_id"
+        )
+        .distinct()
+        .count()
+    )
 
-    cursos_ids = dictados.values_list("curso_id", flat=True).distinct()
+    cursos_ids = (
+        dictados
+        .values_list(
+            "curso_id",
+            flat=True
+        )
+        .distinct()
+    )
 
-    cantidad_alumnos = Alumno.objects.filter(
-        curso_id__in=cursos_ids, estado=True
-    ).count()
+    cantidad_alumnos = (
+        Alumno.objects
+        .filter(
+            curso_id__in=cursos_ids,
+            estado=True
+        )
+        .count()
+    )
 
     return render(
         request,
@@ -628,25 +997,44 @@ def profesor_mis_datos(request):
             "cantidad_cursos": cantidad_cursos,
             "cantidad_alumnos": cantidad_alumnos,
             "seccion_activa": "resumen",
-        },
+        }
     )
-
 
 @docente_required
 def profesor_cursos(request):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = (
-        profesor.dictados.select_related("materia", "curso", "curso__nivel", "horario")
-        .filter(materia__estado=True, curso__estado=True)
-        .order_by("materia__nombre", "curso__nombre", "curso__division")
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre",
+            "curso__division"
+        )
     )
 
     return render(
@@ -656,25 +1044,44 @@ def profesor_cursos(request):
             "profesor": profesor,
             "dictados": dictados,
             "seccion_activa": "cursos",
-        },
+        }
     )
-
 
 @docente_required
 def profesor_asistencias(request):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = (
-        profesor.dictados.select_related("materia", "curso", "curso__nivel", "horario")
-        .filter(materia__estado=True, curso__estado=True)
-        .order_by("materia__nombre", "curso__nombre", "curso__division")
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre",
+            "curso__division"
+        )
     )
 
     return render(
@@ -684,25 +1091,44 @@ def profesor_asistencias(request):
             "profesor": profesor,
             "dictados": dictados,
             "seccion_activa": "asistencias",
-        },
+        }
     )
-
 
 @docente_required
 def profesor_calificaciones(request):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictados = (
-        profesor.dictados.select_related("materia", "curso", "curso__nivel", "horario")
-        .filter(materia__estado=True, curso__estado=True)
-        .order_by("materia__nombre", "curso__nombre", "curso__division")
+        profesor.dictados
+        .select_related(
+            "materia",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .filter(
+            materia__estado=True,
+            curso__estado=True
+        )
+        .order_by(
+            "materia__nombre",
+            "curso__nombre",
+            "curso__division"
+        )
     )
 
     return render(
@@ -712,9 +1138,8 @@ def profesor_calificaciones(request):
             "profesor": profesor,
             "dictados": dictados,
             "seccion_activa": "calificaciones",
-        },
+        }
     )
-
 
 @docente_required
 def profesor_editar_mis_datos(request):
@@ -723,40 +1148,67 @@ def profesor_editar_mis_datos(request):
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
+
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
 
         return redirect("inicio_por_rol")
 
     if request.method == "POST":
-        form = ProfesorDatosPersonalesForm(request.POST, instance=profesor)
+
+        form = ProfesorDatosPersonalesForm(
+            request.POST,
+            instance=profesor
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "Sus datos fueron actualizados correctamente.")
+            messages.success(
+                request,
+                "Sus datos fueron actualizados correctamente."
+            )
 
             return redirect("profesor_mis_datos")
 
     else:
-        form = ProfesorDatosPersonalesForm(instance=profesor)
+
+        form = ProfesorDatosPersonalesForm(
+            instance=profesor
+        )
 
     return render(
         request,
         "academic/profesores/editar_mis_datos.html",
-        {"form": form, "profesor": profesor},
+        {
+            "form": form,
+            "profesor": profesor
+        }
     )
 
-
 @docente_required
-def asistencia_tomar(request, id_dictado):
+def asistencia_tomar(
+    request,
+    id_dictado
+):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictado = get_object_or_404(
         DictadoMateria.objects.select_related(
@@ -767,31 +1219,54 @@ def asistencia_tomar(request, id_dictado):
             "profesor",
         ),
         id_dictado=id_dictado,
-        profesor=profesor,
+        profesor=profesor
     )
 
     # -----------------------------------------
     # Fecha seleccionada
     # -----------------------------------------
 
-    fecha_texto = request.POST.get("fecha") or request.GET.get("fecha")
+    fecha_texto = (
+        request.POST.get("fecha")
+        or request.GET.get("fecha")
+    )
 
     if fecha_texto:
+
         try:
-            fecha_seleccionada = date.fromisoformat(fecha_texto)
+
+            fecha_seleccionada = (
+                date.fromisoformat(
+                    fecha_texto
+                )
+            )
 
         except ValueError:
-            fecha_seleccionada = date.today()
+
+            fecha_seleccionada = (
+                date.today()
+            )
 
     else:
-        fecha_seleccionada = date.today()
+
+        fecha_seleccionada = (
+            date.today()
+        )
 
     # -----------------------------------------
     # Alumnos activos del curso
     # -----------------------------------------
 
-    alumnos = Alumno.objects.filter(curso=dictado.curso, estado=True).order_by(
-        "apellido", "nombre"
+    alumnos = (
+        Alumno.objects
+        .filter(
+            curso=dictado.curso,
+            estado=True
+        )
+        .order_by(
+            "apellido",
+            "nombre"
+        )
     )
 
     # -----------------------------------------
@@ -799,12 +1274,21 @@ def asistencia_tomar(request, id_dictado):
     # -----------------------------------------
 
     if request.method == "POST":
+
         registros = []
 
         for alumno in alumnos:
-            estado = request.POST.get(f"estado_{alumno.id_alumno}")
 
-            observaciones = request.POST.get(f"observaciones_{alumno.id_alumno}", "")
+            estado = request.POST.get(
+                f"estado_{alumno.id_alumno}"
+            )
+
+            observaciones = (
+                request.POST.get(
+                    f"observaciones_{alumno.id_alumno}",
+                    ""
+                )
+            )
 
             registros.append(
                 {
@@ -815,19 +1299,32 @@ def asistencia_tomar(request, id_dictado):
             )
 
         try:
+
             registrar_asistencias(
                 profesor=profesor,
                 dictado=dictado,
                 fecha=fecha_seleccionada,
-                registros=registros,
+                registros=registros
             )
 
-            messages.success(request, "La asistencia fue registrada correctamente.")
+            messages.success(
+                request,
+                "La asistencia fue registrada correctamente."
+            )
 
-            return redirect(f"{request.path}?fecha={fecha_seleccionada.isoformat()}")
+            return redirect(
+                
+                    f"{request.path}"
+                    f"?fecha={fecha_seleccionada.isoformat()}"
+                
+            )
 
         except ValidationError as error:
-            messages.error(request, error.messages[0])
+
+            messages.error(
+                request,
+                error.messages[0]
+            )
 
     # -----------------------------------------
     # Asistencias ya existentes
@@ -836,20 +1333,37 @@ def asistencia_tomar(request, id_dictado):
     asistencias_existentes = {
         asistencia.alumno_id: asistencia
         for asistencia in (
-            Asistencia.objects.filter(dictado=dictado, fecha=fecha_seleccionada)
+            Asistencia.objects
+            .filter(
+                dictado=dictado,
+                fecha=fecha_seleccionada
+            )
         )
     }
 
     filas = []
 
     for alumno in alumnos:
-        asistencia = asistencias_existentes.get(alumno.id_alumno)
+
+        asistencia = (
+            asistencias_existentes.get(
+                alumno.id_alumno
+            )
+        )
 
         filas.append(
             {
                 "alumno": alumno,
-                "estado": (asistencia.estado if asistencia else "PRESENTE"),
-                "observaciones": (asistencia.observaciones if asistencia else ""),
+                "estado": (
+                    asistencia.estado
+                    if asistencia
+                    else "PRESENTE"
+                ),
+                "observaciones": (
+                    asistencia.observaciones
+                    if asistencia
+                    else ""
+                ),
             }
         )
 
@@ -859,24 +1373,35 @@ def asistencia_tomar(request, id_dictado):
         {
             "profesor": profesor,
             "dictado": dictado,
-            "fecha_seleccionada": (fecha_seleccionada),
+            "fecha_seleccionada": (
+                fecha_seleccionada
+            ),
             "filas": filas,
             "estados": Asistencia.ESTADOS,
             "seccion_activa": "asistencias",
-        },
+        }
     )
 
-
 @docente_required
-def asistencia_historial(request, id_dictado):
+def asistencia_historial(
+    request,
+    id_dictado
+):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictado = get_object_or_404(
         DictadoMateria.objects.select_related(
@@ -887,20 +1412,54 @@ def asistencia_historial(request, id_dictado):
             "profesor",
         ),
         id_dictado=id_dictado,
-        profesor=profesor,
+        profesor=profesor
     )
 
     historial = (
-        Asistencia.objects.filter(dictado=dictado)
-        .values("fecha")
-        .annotate(
-            total=Count("id_asistencia"),
-            presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
-            ausentes=Count("id_asistencia", filter=Q(estado="AUSENTE")),
-            tardes=Count("id_asistencia", filter=Q(estado="TARDE")),
-            justificados=Count("id_asistencia", filter=Q(estado="JUSTIFICADO")),
+        Asistencia.objects
+        .filter(
+            dictado=dictado
         )
-        .order_by("-fecha")
+        .values(
+            "fecha"
+        )
+        .annotate(
+
+            total=Count(
+                "id_asistencia"
+            ),
+
+            presentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="PRESENTE"
+                )
+            ),
+
+            ausentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="AUSENTE"
+                )
+            ),
+
+            tardes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="TARDE"
+                )
+            ),
+
+            justificados=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="JUSTIFICADO"
+                )
+            ),
+        )
+        .order_by(
+            "-fecha"
+        )
     )
 
     return render(
@@ -911,20 +1470,29 @@ def asistencia_historial(request, id_dictado):
             "dictado": dictado,
             "historial": historial,
             "seccion_activa": "asistencias",
-        },
+        }
     )
 
-
 @docente_required
-def nota_registrar(request, id_dictado):
+def nota_registrar(
+    request,
+    id_dictado
+):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictado = get_object_or_404(
         DictadoMateria.objects.select_related(
@@ -935,54 +1503,97 @@ def nota_registrar(request, id_dictado):
             "profesor",
         ),
         id_dictado=id_dictado,
-        profesor=profesor,
+        profesor=profesor
     )
 
-    alumnos = Alumno.objects.filter(curso=dictado.curso, estado=True).order_by(
-        "apellido", "nombre"
+    alumnos = (
+        Alumno.objects
+        .filter(
+            curso=dictado.curso,
+            estado=True
+        )
+        .order_by(
+            "apellido",
+            "nombre"
+        )
     )
 
     # -----------------------------------------
     # Datos generales de la evaluación
     # -----------------------------------------
 
-    periodo = (request.POST.get("periodo") or request.GET.get("periodo") or "").strip()
-
-    evaluacion = (
-        request.POST.get("evaluacion") or request.GET.get("evaluacion") or ""
+    periodo = (
+        request.POST.get("periodo")
+        or
+        request.GET.get("periodo")
+        or
+        ""
     ).strip()
 
-    fecha_texto = request.POST.get("fecha") or request.GET.get("fecha")
+    evaluacion = (
+        request.POST.get("evaluacion")
+        or
+        request.GET.get("evaluacion")
+        or
+        ""
+    ).strip()
+
+    fecha_texto = (
+        request.POST.get("fecha")
+        or
+        request.GET.get("fecha")
+    )
 
     if fecha_texto:
+
         try:
-            fecha_seleccionada = date.fromisoformat(fecha_texto)
+
+            fecha_seleccionada = (
+                date.fromisoformat(
+                    fecha_texto
+                )
+            )
 
         except ValueError:
-            fecha_seleccionada = date.today()
+
+            fecha_seleccionada = (
+                date.today()
+            )
 
     else:
-        fecha_seleccionada = date.today()
+
+        fecha_seleccionada = (
+            date.today()
+        )
 
     # -----------------------------------------
     # Guardar notas
     # -----------------------------------------
 
     if request.method == "POST":
+
         registros = []
 
         for alumno in alumnos:
+
             calificacion = (
-                request.POST.get(f"calificacion_{alumno.id_alumno}", "")
+                request.POST.get(
+                    f"calificacion_{alumno.id_alumno}",
+                    ""
+                )
             ).strip()
 
             observaciones = (
-                request.POST.get(f"observaciones_{alumno.id_alumno}", "")
+                request.POST.get(
+                    f"observaciones_{alumno.id_alumno}",
+                    ""
+                )
             ).strip()
 
             # Si no escribió una nota,
             # no guardamos ese alumno.
             if not calificacion:
+
                 continue
 
             registros.append(
@@ -994,21 +1605,35 @@ def nota_registrar(request, id_dictado):
             )
 
         try:
+
             registrar_notas(
                 profesor=profesor,
                 dictado=dictado,
                 periodo=periodo,
                 evaluacion=evaluacion,
                 fecha=fecha_seleccionada,
-                registros=registros,
+                registros=registros
             )
 
-            messages.success(request, "Las notas fueron registradas correctamente.")
+            messages.success(
+                request,
+                "Las notas fueron registradas correctamente."
+            )
 
-            return redirect(f"{request.path}?periodo={periodo}&evaluacion={evaluacion}")
+            return redirect(
+                
+                    f"{request.path}"
+                    f"?periodo={periodo}"
+                    f"&evaluacion={evaluacion}"
+                
+            )
 
         except ValidationError as error:
-            messages.error(request, error.messages[0])
+
+            messages.error(
+                request,
+                error.messages[0]
+            )
 
     # -----------------------------------------
     # Buscar notas ya registradas
@@ -1019,30 +1644,60 @@ def nota_registrar(request, id_dictado):
     notas_queryset = Nota.objects.none()
 
     if periodo and evaluacion:
-        notas_queryset = Nota.objects.filter(
-            dictado=dictado,
-            periodo__iexact=periodo,
-            evaluacion__iexact=evaluacion,
+
+        notas_queryset = (
+            Nota.objects
+            .filter(
+                dictado=dictado,
+                periodo__iexact=periodo,
+                evaluacion__iexact=evaluacion,
+            )
         )
 
-        notas_existentes = {nota.alumno_id: nota for nota in notas_queryset}
+        notas_existentes = {
+            nota.alumno_id: nota
+            for nota in notas_queryset
+        }
 
         # Si estamos consultando una evaluación existente
         # y no se indicó una fecha manualmente,
         # recuperamos la fecha original.
-        if request.method == "GET" and not fecha_texto and notas_queryset.exists():
-            fecha_seleccionada = notas_queryset.order_by("fecha").first().fecha
+        if (
+            request.method == "GET"
+            and
+            not fecha_texto
+            and
+            notas_queryset.exists()
+        ):
+
+            fecha_seleccionada = (
+                notas_queryset
+                .order_by("fecha")
+                .first()
+                .fecha
+            )
 
     filas = []
 
     for alumno in alumnos:
-        nota = notas_existentes.get(alumno.id_alumno)
+
+        nota = notas_existentes.get(
+            alumno.id_alumno
+        )
 
         filas.append(
             {
                 "alumno": alumno,
-                "calificacion": (nota.calificacion if nota else ""),
-                "observaciones": (nota.observaciones if nota else ""),
+                "calificacion": (
+                    nota.calificacion
+                    if nota
+                    else ""
+                ),
+                "observaciones": (
+                    nota.observaciones
+                    if nota
+                    else ""
+                ),
             }
         )
 
@@ -1054,23 +1709,34 @@ def nota_registrar(request, id_dictado):
             "dictado": dictado,
             "periodo": periodo,
             "evaluacion": evaluacion,
-            "fecha_seleccionada": (fecha_seleccionada),
+            "fecha_seleccionada": (
+                fecha_seleccionada
+            ),
             "filas": filas,
             "seccion_activa": "calificaciones",
-        },
+        }
     )
 
-
 @docente_required
-def nota_historial(request, id_dictado):
+def nota_historial(
+    request,
+    id_dictado
+):
 
     try:
+
         profesor = request.user.profesor
 
     except Profesor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un profesor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un profesor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     dictado = get_object_or_404(
         DictadoMateria.objects.select_related(
@@ -1081,18 +1747,25 @@ def nota_historial(request, id_dictado):
             "profesor",
         ),
         id_dictado=id_dictado,
-        profesor=profesor,
+        profesor=profesor
     )
 
     historial = (
-        Nota.objects.filter(dictado=dictado)
+        Nota.objects
+        .filter(
+            dictado=dictado
+        )
         .values(
             "periodo",
             "evaluacion",
         )
         .annotate(
-            fecha=Max("fecha"),
-            cantidad_notas=Count("id_nota"),
+            fecha=Max(
+                "fecha"
+            ),
+            cantidad_notas=Count(
+                "id_nota"
+            ),
         )
         .order_by(
             "-fecha",
@@ -1109,577 +1782,944 @@ def nota_historial(request, id_dictado):
             "dictado": dictado,
             "historial": historial,
             "seccion_activa": "calificaciones",
-        },
+        }
     )
 
-
-# Materias
+#Materias
 @admin_required
 def materia_lista(request):
 
     materias = Materia.objects.all().order_by("nombre")
 
-    return render(request, "academic/materias/lista.html", {"materias": materias})
-
+    return render(
+        request,
+        "academic/materias/lista.html",
+        {
+            "materias": materias
+        }
+    )
 
 @admin_required
 def materia_crear(request):
 
     if request.method == "POST":
+
         form = MateriaForm(request.POST)
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "La materia fue registrada correctamente.")
+            messages.success(
+                request,
+                "La materia fue registrada correctamente."
+            )
 
             return redirect("materia_lista")
 
     else:
+
         form = MateriaForm()
 
     return render(
         request,
         "academic/materias/formulario.html",
-        {"form": form, "titulo": "Nueva materia"},
+        {
+            "form": form,
+            "titulo": "Nueva materia"
+        }
     )
-
-
+    
 @admin_required
 def materia_editar(request, id_materia):
 
-    materia = get_object_or_404(Materia, id_materia=id_materia)
+    materia = get_object_or_404(
+        Materia,
+        id_materia=id_materia
+    )
 
     if request.method == "POST":
-        form = MateriaForm(request.POST, instance=materia)
+
+        form = MateriaForm(
+            request.POST,
+            instance=materia
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "La materia fue modificada correctamente.")
+            messages.success(
+                request,
+                "La materia fue modificada correctamente."
+            )
 
             return redirect("materia_lista")
 
     else:
-        form = MateriaForm(instance=materia)
+
+        form = MateriaForm(
+            instance=materia
+        )
 
     return render(
         request,
         "academic/materias/formulario.html",
-        {"form": form, "titulo": "Modificar materia"},
+        {
+            "form": form,
+            "titulo": "Modificar materia"
+        }
     )
-
 
 @admin_required
 def materia_desactivar(request, id_materia):
 
-    materia = get_object_or_404(Materia, id_materia=id_materia)
+    materia = get_object_or_404(
+        Materia,
+        id_materia=id_materia
+    )
 
     if request.method == "POST":
+
         materia.estado = False
         materia.save()
 
-        messages.success(request, "La materia fue desactivada correctamente.")
+        messages.success(
+            request,
+            "La materia fue desactivada correctamente."
+        )
 
     return redirect("materia_lista")
 
-
-# Horarios
+#Horarios
 @admin_required
 def horario_lista(request):
 
-    horarios = Horario.objects.all().order_by("dia_semana", "hora_inicio")
+    horarios = Horario.objects.all().order_by(
+        "dia_semana",
+        "hora_inicio"
+    )
 
-    return render(request, "academic/horarios/lista.html", {"horarios": horarios})
-
+    return render(
+        request,
+        "academic/horarios/lista.html",
+        {
+            "horarios": horarios
+        }
+    )
 
 @admin_required
 def horario_crear(request):
 
     if request.method == "POST":
+
         form = HorarioForm(request.POST)
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "El horario fue registrado correctamente.")
+            messages.success(
+                request,
+                "El horario fue registrado correctamente."
+            )
 
             return redirect("horario_lista")
 
     else:
+
         form = HorarioForm()
 
     return render(
         request,
         "academic/horarios/formulario.html",
-        {"form": form, "titulo": "Nuevo horario"},
+        {
+            "form": form,
+            "titulo": "Nuevo horario"
+        }
     )
-
 
 @admin_required
 def horario_editar(request, id_horario):
 
-    horario = get_object_or_404(Horario, id_horario=id_horario)
+    horario = get_object_or_404(
+        Horario,
+        id_horario=id_horario
+    )
 
     if request.method == "POST":
-        form = HorarioForm(request.POST, instance=horario)
+
+        form = HorarioForm(
+            request.POST,
+            instance=horario
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "El horario fue modificado correctamente.")
+            messages.success(
+                request,
+                "El horario fue modificado correctamente."
+            )
 
             return redirect("horario_lista")
 
     else:
-        form = HorarioForm(instance=horario)
+
+        form = HorarioForm(
+            instance=horario
+        )
 
     return render(
         request,
         "academic/horarios/formulario.html",
-        {"form": form, "titulo": "Modificar horario"},
+        {
+            "form": form,
+            "titulo": "Modificar horario"
+        }
     )
-
 
 @admin_required
 def horario_eliminar(request, id_horario):
 
-    horario = get_object_or_404(Horario, id_horario=id_horario)
+    horario = get_object_or_404(
+        Horario,
+        id_horario=id_horario
+    )
 
     if request.method == "POST":
+
         try:
+
             horario.delete()
 
-            messages.success(request, "El horario fue eliminado correctamente.")
+            messages.success(
+                request,
+                "El horario fue eliminado correctamente."
+            )
 
         except ProtectedError:
+
             messages.error(
                 request,
-                "No se puede eliminar el horario porque está asignado a una materia.",
+                "No se puede eliminar el horario porque está asignado a una materia."
             )
 
     return redirect("horario_lista")
 
-
-# DictadoMaterias
+#DictadoMaterias
 @admin_required
 def dictado_lista(request):
 
-    dictados = DictadoMateria.objects.select_related(
-        "materia", "profesor", "curso", "curso__nivel", "horario"
-    ).order_by("curso__nivel__nombre", "curso__nombre", "materia__nombre")
+    dictados = (
+        DictadoMateria.objects
+        .select_related(
+            "materia",
+            "profesor",
+            "curso",
+            "curso__nivel",
+            "horario"
+        )
+        .order_by(
+            "curso__nivel__nombre",
+            "curso__nombre",
+            "materia__nombre"
+        )
+    )
 
-    return render(request, "academic/dictados/lista.html", {"dictados": dictados})
-
+    return render(
+        request,
+        "academic/dictados/lista.html",
+        {
+            "dictados": dictados
+        }
+    )
 
 @admin_required
 def dictado_crear(request):
 
     if request.method == "POST":
-        form = DictadoMateriaForm(request.POST)
+
+        form = DictadoMateriaForm(
+            request.POST
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "La asignación fue registrada correctamente.")
+            messages.success(
+                request,
+                "La asignación fue registrada correctamente."
+            )
 
             return redirect("dictado_lista")
 
     else:
+
         form = DictadoMateriaForm()
 
     return render(
         request,
         "academic/dictados/formulario.html",
-        {"form": form, "titulo": "Nueva asignación"},
+        {
+            "form": form,
+            "titulo": "Nueva asignación"
+        }
     )
-
 
 @admin_required
 def dictado_editar(request, id_dictado):
 
-    dictado = get_object_or_404(DictadoMateria, id_dictado=id_dictado)
+    dictado = get_object_or_404(
+        DictadoMateria,
+        id_dictado=id_dictado
+    )
 
     if request.method == "POST":
-        form = DictadoMateriaForm(request.POST, instance=dictado)
+
+        form = DictadoMateriaForm(
+            request.POST,
+            instance=dictado
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "La asignación fue modificada correctamente.")
+            messages.success(
+                request,
+                "La asignación fue modificada correctamente."
+            )
 
             return redirect("dictado_lista")
 
     else:
-        form = DictadoMateriaForm(instance=dictado)
+
+        form = DictadoMateriaForm(
+            instance=dictado
+        )
 
     return render(
         request,
         "academic/dictados/formulario.html",
-        {"form": form, "titulo": "Modificar asignación"},
+        {
+            "form": form,
+            "titulo": "Modificar asignación"
+        }
     )
 
-
-# Nivel Educativo
+#Nivel Educativo
 @admin_required
 def nivel_lista(request):
 
     niveles = NivelEducativo.objects.all().order_by("nombre")
 
-    return render(request, "academic/niveles/lista.html", {"niveles": niveles})
-
+    return render(
+        request,
+        "academic/niveles/lista.html",
+        {
+            "niveles": niveles
+        }
+    )
 
 @admin_required
 def nivel_crear(request):
 
     if request.method == "POST":
+
         form = NivelEducativoForm(request.POST)
 
         if form.is_valid():
+
             form.save()
 
             messages.success(
-                request, "El nivel educativo fue registrado correctamente."
+                request,
+                "El nivel educativo fue registrado correctamente."
             )
 
             return redirect("nivel_lista")
 
     else:
+
         form = NivelEducativoForm()
 
     return render(
         request,
         "academic/niveles/formulario.html",
-        {"form": form, "titulo": "Nuevo nivel educativo"},
+        {
+            "form": form,
+            "titulo": "Nuevo nivel educativo"
+        }
     )
-
 
 @admin_required
 def nivel_editar(request, id_nivel):
 
-    nivel = get_object_or_404(NivelEducativo, id_nivel=id_nivel)
+    nivel = get_object_or_404(
+        NivelEducativo,
+        id_nivel=id_nivel
+    )
 
     if request.method == "POST":
-        form = NivelEducativoForm(request.POST, instance=nivel)
+
+        form = NivelEducativoForm(
+            request.POST,
+            instance=nivel
+        )
 
         if form.is_valid():
+
             form.save()
 
             messages.success(
-                request, "El nivel educativo fue modificado correctamente."
+                request,
+                "El nivel educativo fue modificado correctamente."
             )
 
             return redirect("nivel_lista")
 
     else:
-        form = NivelEducativoForm(instance=nivel)
+
+        form = NivelEducativoForm(
+            instance=nivel
+        )
 
     return render(
         request,
         "academic/niveles/formulario.html",
-        {"form": form, "titulo": "Modificar nivel educativo"},
+        {
+            "form": form,
+            "titulo": "Modificar nivel educativo"
+        }
     )
-
 
 @admin_required
 def nivel_desactivar(request, id_nivel):
 
-    nivel = get_object_or_404(NivelEducativo, id_nivel=id_nivel)
+    nivel = get_object_or_404(
+        NivelEducativo,
+        id_nivel=id_nivel
+    )
 
     if request.method == "POST":
+
         nivel.estado = False
         nivel.save()
 
-        messages.success(request, "El nivel educativo fue desactivado correctamente.")
+        messages.success(
+            request,
+            "El nivel educativo fue desactivado correctamente."
+        )
 
     return redirect("nivel_lista")
 
-
-# Curso
+#Curso
 @admin_required
 def curso_lista(request):
 
     cursos = (
-        Curso.objects.select_related("nivel")
+        Curso.objects
+        .select_related("nivel")
         .all()
-        .order_by("nivel__nombre", "nombre", "division")
+        .order_by(
+            "nivel__nombre",
+            "nombre",
+            "division"
+        )
     )
 
-    return render(request, "academic/cursos/lista.html", {"cursos": cursos})
-
+    return render(
+        request,
+        "academic/cursos/lista.html",
+        {
+            "cursos": cursos
+        }
+    )
 
 @admin_required
 def curso_crear(request):
 
     if request.method == "POST":
+
         form = CursoForm(request.POST)
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "El curso fue registrado correctamente.")
+            messages.success(
+                request,
+                "El curso fue registrado correctamente."
+            )
 
             return redirect("curso_lista")
 
     else:
+
         form = CursoForm()
 
     return render(
         request,
         "academic/cursos/formulario.html",
-        {"form": form, "titulo": "Nuevo curso"},
+        {
+            "form": form,
+            "titulo": "Nuevo curso"
+        }
     )
-
 
 @admin_required
 def curso_editar(request, id_curso):
 
-    curso = get_object_or_404(Curso, id_curso=id_curso)
+    curso = get_object_or_404(
+        Curso,
+        id_curso=id_curso
+    )
 
     if request.method == "POST":
-        form = CursoForm(request.POST, instance=curso)
+
+        form = CursoForm(
+            request.POST,
+            instance=curso
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "El curso fue modificado correctamente.")
+            messages.success(
+                request,
+                "El curso fue modificado correctamente."
+            )
 
             return redirect("curso_lista")
 
     else:
-        form = CursoForm(instance=curso)
+
+        form = CursoForm(
+            instance=curso
+        )
 
     return render(
         request,
         "academic/cursos/formulario.html",
-        {"form": form, "titulo": "Modificar curso"},
+        {
+            "form": form,
+            "titulo": "Modificar curso"
+        }
     )
-
 
 @admin_required
 def curso_desactivar(request, id_curso):
 
-    curso = get_object_or_404(Curso, id_curso=id_curso)
+    curso = get_object_or_404(
+        Curso,
+        id_curso=id_curso
+    )
 
     if request.method == "POST":
+
         curso.estado = False
         curso.save()
 
-        messages.success(request, "El curso fue desactivado correctamente.")
+        messages.success(
+            request,
+            "El curso fue desactivado correctamente."
+        )
 
     return redirect("curso_lista")
 
-
-# Tutor
+#Tutor
 @admin_required
 def tutor_lista(request):
 
     tutores = (
-        Tutor.objects.select_related("usuario").all().order_by("apellido", "nombre")
+        Tutor.objects
+        .select_related(
+            "usuario"
+        )
+        .all()
+        .order_by(
+            "apellido",
+            "nombre"
+        )
     )
 
-    return render(request, "academic/tutores/lista.html", {"tutores": tutores})
-
+    return render(
+        request,
+        "academic/tutores/lista.html",
+        {
+            "tutores": tutores
+        }
+    )
 
 @admin_required
 def tutor_crear(request):
 
     if request.method == "POST":
-        form = TutorForm(request.POST)
+
+        form = TutorForm(
+            request.POST
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "El tutor fue registrado correctamente.")
+            messages.success(
+                request,
+                "El tutor fue registrado correctamente."
+            )
 
-            return redirect("tutor_lista")
+            return redirect(
+                "tutor_lista"
+            )
 
     else:
+
         form = TutorForm()
 
     return render(
         request,
         "academic/tutores/formulario.html",
-        {"form": form, "titulo": "Nuevo tutor"},
+        {
+            "form": form,
+            "titulo": "Nuevo tutor"
+        }
     )
 
-
 @admin_required
-def tutor_editar(request, id_tutor):
+def tutor_editar(
+    request,
+    id_tutor
+):
 
-    tutor = get_object_or_404(Tutor, id_tutor=id_tutor)
+    tutor = get_object_or_404(
+        Tutor,
+        id_tutor=id_tutor
+    )
 
     if request.method == "POST":
-        form = TutorForm(request.POST, instance=tutor)
+
+        form = TutorForm(
+            request.POST,
+            instance=tutor
+        )
 
         if form.is_valid():
+
             tutor = form.save()
 
             if tutor.usuario_id:
-                if tutor.usuario.is_active != tutor.estado:
-                    tutor.usuario.is_active = tutor.estado
 
-                    tutor.usuario.save(update_fields=["is_active"])
+                if (
+                    tutor.usuario.is_active
+                    != tutor.estado
+                ):
 
-            return redirect("tutor_lista")
+                    tutor.usuario.is_active = (
+                        tutor.estado
+                    )
+
+                    tutor.usuario.save(
+                        update_fields=[
+                            "is_active"
+                        ]
+                    )
+
+            return redirect(
+                "tutor_lista"
+            )
 
     else:
-        form = TutorForm(instance=tutor)
+
+        form = TutorForm(
+            instance=tutor
+        )
 
     return render(
         request,
         "academic/tutores/formulario.html",
-        {"form": form, "titulo": "Modificar tutor"},
+        {
+            "form": form,
+            "titulo": "Modificar tutor"
+        }
     )
 
-
 @admin_required
-def tutor_desactivar(request, id_tutor):
+def tutor_desactivar(
+    request,
+    id_tutor
+):
 
-    tutor = get_object_or_404(Tutor, id_tutor=id_tutor)
+    tutor = get_object_or_404(
+        Tutor,
+        id_tutor=id_tutor
+    )
 
     if request.method == "POST":
+
         tutor.estado = False
 
-        tutor.save(update_fields=["estado"])
+        tutor.save(
+            update_fields=[
+                "estado"
+            ]
+        )
 
         if tutor.usuario_id:
+
             tutor.usuario.is_active = False
 
-            tutor.usuario.save(update_fields=["is_active"])
+            tutor.usuario.save(
+                update_fields=[
+                    "is_active"
+                ]
+            )
 
-        messages.success(request, "El tutor fue desactivado correctamente.")
+        messages.success(
+            request,
+            "El tutor fue desactivado correctamente."
+        )
 
-    return redirect("tutor_lista")
+    return redirect(
+        "tutor_lista"
+    )
 
-
-# Tutores y alumnos
+#Tutores y alumnos 
 @admin_required
 def tutor_alumno_lista(request):
 
-    relaciones = TutorAlumno.objects.select_related(
-        "tutor", "alumno", "alumno__curso", "alumno__curso__nivel"
-    ).order_by("tutor__apellido", "tutor__nombre", "alumno__apellido")
-
-    return render(
-        request, "academic/tutores/asociaciones_lista.html", {"relaciones": relaciones}
+    relaciones = (
+        TutorAlumno.objects
+        .select_related(
+            "tutor",
+            "alumno",
+            "alumno__curso",
+            "alumno__curso__nivel"
+        )
+        .order_by(
+            "tutor__apellido",
+            "tutor__nombre",
+            "alumno__apellido"
+        )
     )
 
+    return render(
+        request,
+        "academic/tutores/asociaciones_lista.html",
+        {
+            "relaciones": relaciones
+        }
+    )
 
 @admin_required
 def tutor_alumno_crear(request):
 
     if request.method == "POST":
-        form = TutorAlumnoForm(request.POST)
+
+        form = TutorAlumnoForm(
+            request.POST
+        )
 
         if form.is_valid():
+
             form.save()
 
-            messages.success(request, "El alumno fue asociado al tutor correctamente.")
+            messages.success(
+                request,
+                "El alumno fue asociado al tutor correctamente."
+            )
 
-            return redirect("tutor_alumno_lista")
+            return redirect(
+                "tutor_alumno_lista"
+            )
 
     else:
+
         form = TutorAlumnoForm()
 
     return render(
         request,
         "academic/tutores/asociacion_formulario.html",
-        {"form": form, "titulo": "Asociar alumno a tutor"},
+        {
+            "form": form,
+            "titulo": "Asociar alumno a tutor"
+        }
     )
 
-
 @admin_required
-def tutor_alumno_eliminar(request, id_relacion):
+def tutor_alumno_eliminar(
+    request,
+    id_relacion
+):
 
-    relacion = get_object_or_404(TutorAlumno, id_relacion=id_relacion)
+    relacion = get_object_or_404(
+        TutorAlumno,
+        id_relacion=id_relacion
+    )
 
     if request.method == "POST":
+
         relacion.delete()
 
-        messages.success(request, "La asociación entre tutor y alumno fue eliminada.")
+        messages.success(
+            request,
+            "La asociación entre tutor y alumno fue eliminada."
+        )
 
-    return redirect("tutor_alumno_lista")
-
-
+    return redirect(
+        "tutor_alumno_lista"
+    )
+    
 @tutor_required
 def tutor_mis_hijos(request):
 
     try:
+
         tutor = request.user.tutor
 
     except Tutor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un tutor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un tutor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     relaciones = (
-        TutorAlumno.objects.filter(tutor=tutor, alumno__estado=True)
-        .select_related("alumno", "alumno__curso", "alumno__curso__nivel")
-        .order_by("alumno__apellido", "alumno__nombre")
+        TutorAlumno.objects
+        .filter(
+            tutor=tutor,
+            alumno__estado=True
+        )
+        .select_related(
+            "alumno",
+            "alumno__curso",
+            "alumno__curso__nivel"
+        )
+        .order_by(
+            "alumno__apellido",
+            "alumno__nombre"
+        )
     )
 
     alumnos_resumen = []
 
     for relacion in relaciones:
+
         alumno = relacion.alumno
 
         # -----------------------------------------
         # Promedio
         # -----------------------------------------
 
-        promedio = Nota.objects.filter(alumno=alumno).aggregate(
-            promedio=Avg("calificacion")
-        )["promedio"]
+        promedio = (
+            Nota.objects
+            .filter(
+                alumno=alumno
+            )
+            .aggregate(
+                promedio=Avg(
+                    "calificacion"
+                )
+            )["promedio"]
+        )
 
         # -----------------------------------------
         # Asistencia
         # -----------------------------------------
 
-        resumen_asistencia = Asistencia.objects.filter(alumno=alumno).aggregate(
-            total=Count("id_asistencia"),
-            presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
+        resumen_asistencia = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno
+            )
+            .aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+            )
         )
 
-        total_asistencias = resumen_asistencia["total"] or 0
+        total_asistencias = (
+            resumen_asistencia["total"]
+            or 0
+        )
 
-        presentes = resumen_asistencia["presentes"] or 0
+        presentes = (
+            resumen_asistencia["presentes"]
+            or 0
+        )
 
         if total_asistencias:
-            porcentaje_asistencia = round(presentes * 100 / total_asistencias)
+
+            porcentaje_asistencia = round(
+                presentes
+                * 100
+                / total_asistencias
+            )
 
         else:
+
             porcentaje_asistencia = None
 
         # -----------------------------------------
         # Materias
         # -----------------------------------------
 
-        cantidad_materias = DictadoMateria.objects.filter(
-            curso=alumno.curso,
-            curso__estado=True,
-            materia__estado=True,
-            profesor__estado=True,
-        ).count()
+        cantidad_materias = (
+            DictadoMateria.objects
+            .filter(
+                curso=alumno.curso,
+                curso__estado=True,
+                materia__estado=True,
+                profesor__estado=True,
+            )
+            .count()
+        )
 
         # -----------------------------------------
         # Deportes
         # -----------------------------------------
 
-        cantidad_deportes = InscripcionDeporte.objects.filter(
-            alumno=alumno,
-            estado=True,
-            grupo__estado=True,
-            grupo__deporte__estado=True,
-        ).count()
+        cantidad_deportes = (
+            InscripcionDeporte.objects
+            .filter(
+                alumno=alumno,
+                estado=True,
+                grupo__estado=True,
+                grupo__deporte__estado=True,
+            )
+            .count()
+        )
 
         alumnos_resumen.append(
             {
                 "alumno": alumno,
                 "promedio": promedio,
-                "porcentaje_asistencia": (porcentaje_asistencia),
-                "cantidad_materias": (cantidad_materias),
-                "cantidad_deportes": (cantidad_deportes),
+                "porcentaje_asistencia": (
+                    porcentaje_asistencia
+                ),
+                "cantidad_materias": (
+                    cantidad_materias
+                ),
+                "cantidad_deportes": (
+                    cantidad_deportes
+                ),
             }
         )
 
@@ -1689,33 +2729,46 @@ def tutor_mis_hijos(request):
         {
             "tutor": tutor,
             "alumnos_resumen": alumnos_resumen,
-        },
+        }
     )
 
-
 @tutor_required
-def tutor_detalle_alumno(request, id_alumno):
+def tutor_detalle_alumno(
+    request,
+    id_alumno
+):
 
     try:
+
         tutor = request.user.tutor
 
     except Tutor.DoesNotExist:
-        messages.error(request, "Su cuenta no está asociada a un tutor.")
 
-        return redirect("inicio_por_rol")
+        messages.error(
+            request,
+            "Su cuenta no está asociada a un tutor."
+        )
+
+        return redirect(
+            "inicio_por_rol"
+        )
 
     relacion = get_object_or_404(
-        TutorAlumno, tutor=tutor, alumno__id_alumno=id_alumno, alumno__estado=True
+        TutorAlumno,
+        tutor=tutor,
+        alumno__id_alumno=id_alumno,
+        alumno__estado=True
     )
 
     alumno = relacion.alumno
 
     dictados = (
-        DictadoMateria.objects.filter(
+        DictadoMateria.objects
+        .filter(
             curso=alumno.curso,
             materia__estado=True,
             profesor__estado=True,
-            curso__estado=True,
+            curso__estado=True
         )
         .select_related(
             "materia",
@@ -1724,26 +2777,74 @@ def tutor_detalle_alumno(request, id_alumno):
             "curso",
             "curso__nivel",
         )
-        .order_by("materia__nombre")
+        .order_by(
+            "materia__nombre"
+        )
     )
 
     materias = []
 
     for dictado in dictados:
-        notas = Nota.objects.filter(alumno=alumno, dictado=dictado).order_by(
-            "-fecha", "periodo", "evaluacion"
+
+        notas = (
+            Nota.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha",
+                "periodo",
+                "evaluacion"
+            )
         )
 
-        asistencias = Asistencia.objects.filter(
-            alumno=alumno, dictado=dictado
-        ).order_by("-fecha")
+        asistencias = (
+            Asistencia.objects
+            .filter(
+                alumno=alumno,
+                dictado=dictado
+            )
+            .order_by(
+                "-fecha"
+            )
+        )
 
-        resumen_asistencia = asistencias.aggregate(
-            total=Count("id_asistencia"),
-            presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
-            ausentes=Count("id_asistencia", filter=Q(estado="AUSENTE")),
-            tardes=Count("id_asistencia", filter=Q(estado="TARDE")),
-            justificados=Count("id_asistencia", filter=Q(estado="JUSTIFICADO")),
+        resumen_asistencia = (
+            asistencias.aggregate(
+
+                total=Count(
+                    "id_asistencia"
+                ),
+
+                presentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="PRESENTE"
+                    )
+                ),
+
+                ausentes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="AUSENTE"
+                    )
+                ),
+
+                tardes=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="TARDE"
+                    )
+                ),
+
+                justificados=Count(
+                    "id_asistencia",
+                    filter=Q(
+                        estado="JUSTIFICADO"
+                    )
+                ),
+            )
         )
 
         materias.append(
@@ -1754,44 +2855,117 @@ def tutor_detalle_alumno(request, id_alumno):
                 "resumen_asistencia": resumen_asistencia,
             }
         )
-
+        
     deportes = (
-        InscripcionDeporte.objects.filter(
-            alumno=alumno, estado=True, grupo__estado=True, grupo__deporte__estado=True
+        InscripcionDeporte.objects
+        .filter(
+            alumno=alumno,
+            estado=True,
+            grupo__estado=True,
+            grupo__deporte__estado=True
         )
-        .select_related("grupo", "grupo__deporte", "grupo__profesor", "grupo__horario")
-        .order_by("grupo__deporte__nombre")
+        .select_related(
+            "grupo",
+            "grupo__deporte",
+            "grupo__profesor",
+            "grupo__horario"
+        )
+        .order_by(
+            "grupo__deporte__nombre"
+        )
     )
 
     # -----------------------------------------
     # Resumen general del alumno
     # -----------------------------------------
 
-    promedio_general = Nota.objects.filter(alumno=alumno).aggregate(
-        promedio=Avg("calificacion")
-    )["promedio"]
-
-    resumen_asistencia_general = Asistencia.objects.filter(alumno=alumno).aggregate(
-        total=Count("id_asistencia"),
-        presentes=Count("id_asistencia", filter=Q(estado="PRESENTE")),
-        ausentes=Count("id_asistencia", filter=Q(estado="AUSENTE")),
-        tardes=Count("id_asistencia", filter=Q(estado="TARDE")),
-        justificados=Count("id_asistencia", filter=Q(estado="JUSTIFICADO")),
+    promedio_general = (
+        Nota.objects
+        .filter(
+            alumno=alumno
+        )
+        .aggregate(
+            promedio=Avg(
+                "calificacion"
+            )
+        )["promedio"]
     )
 
-    total_asistencias = resumen_asistencia_general["total"] or 0
 
-    presentes = resumen_asistencia_general["presentes"] or 0
+    resumen_asistencia_general = (
+        Asistencia.objects
+        .filter(
+            alumno=alumno
+        )
+        .aggregate(
+
+            total=Count(
+                "id_asistencia"
+            ),
+
+            presentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="PRESENTE"
+                )
+            ),
+
+            ausentes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="AUSENTE"
+                )
+            ),
+
+            tardes=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="TARDE"
+                )
+            ),
+
+            justificados=Count(
+                "id_asistencia",
+                filter=Q(
+                    estado="JUSTIFICADO"
+                )
+            ),
+        )
+    )
+
+
+    total_asistencias = (
+        resumen_asistencia_general["total"]
+        or 0
+    )
+
+    presentes = (
+        resumen_asistencia_general["presentes"]
+        or 0
+    )
+
 
     if total_asistencias:
-        porcentaje_asistencia = round(presentes * 100 / total_asistencias)
+
+        porcentaje_asistencia = round(
+            presentes
+            * 100
+            / total_asistencias
+        )
 
     else:
+
         porcentaje_asistencia = None
 
-    cantidad_materias = dictados.count()
 
-    cantidad_deportes = deportes.count()
+    cantidad_materias = (
+        dictados.count()
+    )
+
+
+    cantidad_deportes = (
+        deportes.count()
+    )
 
     return render(
         request,
@@ -1803,9 +2977,21 @@ def tutor_detalle_alumno(request, id_alumno):
             "materias": materias,
             "deportes": deportes,
             "promedio_general": promedio_general,
-            "resumen_asistencia_general": (resumen_asistencia_general),
-            "porcentaje_asistencia": (porcentaje_asistencia),
-            "cantidad_materias": (cantidad_materias),
-            "cantidad_deportes": (cantidad_deportes),
-        },
+            
+            "resumen_asistencia_general": (
+                resumen_asistencia_general
+            ),
+
+            "porcentaje_asistencia": (
+                porcentaje_asistencia
+            ),
+
+            "cantidad_materias": (
+                cantidad_materias
+            ),
+
+            "cantidad_deportes": (
+                cantidad_deportes
+            ),
+        }
     )

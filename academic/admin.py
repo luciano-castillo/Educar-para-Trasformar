@@ -19,7 +19,6 @@ class NivelEducativoAdmin(admin.ModelAdmin):
     search_fields = ("nombre",)
     list_filter = ("estado",)
 
-
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
     list_display = (
@@ -41,7 +40,6 @@ class CursoAdmin(admin.ModelAdmin):
         "turno",
         "estado",
     )
-
 
 @admin.register(Alumno)
 class AlumnoAdmin(admin.ModelAdmin):
@@ -75,9 +73,9 @@ class AlumnoAdmin(admin.ModelAdmin):
         "nombre",
     )
 
-
 @admin.register(Profesor)
 class ProfesorAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_profesor",
         "legajo",
@@ -109,9 +107,9 @@ class ProfesorAdmin(admin.ModelAdmin):
         "nombre",
     )
 
-
 @admin.register(Tutor)
 class TutorAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_tutor",
         "dni",
@@ -128,11 +126,13 @@ class TutorAdmin(admin.ModelAdmin):
         "nombre",
     )
 
-    list_filter = ("estado",)
-
+    list_filter = (
+        "estado",
+    )
 
 @admin.register(TutorAlumno)
 class TutorAlumnoAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_relacion",
         "tutor",
@@ -149,7 +149,6 @@ class TutorAlumnoAdmin(admin.ModelAdmin):
         "alumno__legajo",
     )
 
-
 @admin.register(Materia)
 class MateriaAdmin(admin.ModelAdmin):
     list_display = (
@@ -158,10 +157,13 @@ class MateriaAdmin(admin.ModelAdmin):
         "estado",
     )
 
-    search_fields = ("nombre",)
+    search_fields = (
+        "nombre",
+    )
 
-    list_filter = ("estado",)
-
+    list_filter = (
+        "estado",
+    )
 
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
@@ -172,8 +174,9 @@ class HorarioAdmin(admin.ModelAdmin):
         "hora_fin",
     )
 
-    list_filter = ("dia_semana",)
-
+    list_filter = (
+        "dia_semana",
+    )
 
 @admin.register(DictadoMateria)
 class DictadoMateriaAdmin(admin.ModelAdmin):

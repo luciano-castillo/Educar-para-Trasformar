@@ -10,6 +10,7 @@ from .models import (
 
 @admin.register(RutaTransporte)
 class RutaTransporteAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_ruta",
         "nombre",
@@ -17,13 +18,17 @@ class RutaTransporteAdmin(admin.ModelAdmin):
         "estado",
     )
 
-    search_fields = ("nombre",)
+    search_fields = (
+        "nombre",
+    )
 
-    list_filter = ("estado",)
-
+    list_filter = (
+        "estado",
+    )
 
 @admin.register(ContratacionTransporte)
 class ContratacionTransporteAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_contratacion",
         "alumno",
@@ -47,9 +52,9 @@ class ContratacionTransporteAdmin(admin.ModelAdmin):
         "alumno__legajo",
     )
 
-
 @admin.register(ServicioComedor)
 class ServicioComedorAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_servicio_comedor",
         "nombre",
@@ -57,13 +62,17 @@ class ServicioComedorAdmin(admin.ModelAdmin):
         "estado",
     )
 
-    search_fields = ("nombre",)
+    search_fields = (
+        "nombre",
+    )
 
-    list_filter = ("estado",)
-
+    list_filter = (
+        "estado",
+    )
 
 @admin.register(ContratacionComedor)
 class ContratacionComedorAdmin(admin.ModelAdmin):
+
     list_display = (
         "id_contratacion_comedor",
         "alumno",

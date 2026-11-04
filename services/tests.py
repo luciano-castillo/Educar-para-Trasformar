@@ -23,16 +23,24 @@ from .models import (
 
 
 class ServiciosTestCase(TestCase):
+
     def setUp(self):
 
         # Nivel educativo
 
-        self.nivel = NivelEducativo.objects.create(nombre="Primario", estado=True)
+        self.nivel = NivelEducativo.objects.create(
+            nombre="Primario",
+            estado=True
+        )
 
         # Curso
 
         self.curso = Curso.objects.create(
-            nombre="1°", division="A", turno="MANANA", nivel=self.nivel, estado=True
+            nombre="1°",
+            division="A",
+            turno="MANANA",
+            nivel=self.nivel,
+            estado=True
         )
 
         # Alumno
@@ -47,7 +55,7 @@ class ServiciosTestCase(TestCase):
             telefono="3624000000",
             correo="lucia@test.com",
             curso=self.curso,
-            estado=True,
+            estado=True
         )
 
         # Rutas
@@ -56,14 +64,14 @@ class ServiciosTestCase(TestCase):
             nombre="Zona Centro",
             descripcion="Recorrido zona centro",
             valor_mensual=45000,
-            estado=True,
+            estado=True
         )
 
         self.ruta_norte = RutaTransporte.objects.create(
             nombre="Zona Norte",
             descripcion="Recorrido zona norte",
             valor_mensual=48000,
-            estado=True,
+            estado=True
         )
 
         # Comedor
@@ -72,9 +80,9 @@ class ServiciosTestCase(TestCase):
             nombre="Comedor Escolar",
             descripcion="Servicio de comedor",
             valor_mensual=65000,
-            estado=True,
+            estado=True
         )
-
+    
     def test_ruta_no_permite_valor_cero(self):
 
         form = RutaTransporteForm(
@@ -86,8 +94,10 @@ class ServiciosTestCase(TestCase):
             }
         )
 
-        self.assertFalse(form.is_valid())
-
+        self.assertFalse(
+            form.is_valid()
+        )
+        
     def test_comedor_no_permite_valor_cero(self):
 
         form = ServicioComedorForm(
@@ -99,12 +109,18 @@ class ServiciosTestCase(TestCase):
             }
         )
 
-        self.assertFalse(form.is_valid())
-
+        self.assertFalse(
+            form.is_valid()
+        )
+    
     def test_alumno_no_puede_tener_dos_transportes_mismo_periodo(self):
 
         ContratacionTransporte.objects.create(
-            alumno=self.alumno, ruta=self.ruta_centro, mes=3, anio=2027, estado=True
+            alumno=self.alumno,
+            ruta=self.ruta_centro,
+            mes=3,
+            anio=2027,
+            estado=True
         )
 
         form = ContratacionTransporteForm(
@@ -117,12 +133,18 @@ class ServiciosTestCase(TestCase):
             }
         )
 
-        self.assertFalse(form.is_valid())
-
+        self.assertFalse(
+            form.is_valid()
+        )
+        
     def test_alumno_no_puede_tener_dos_comedores_mismo_periodo(self):
 
         ContratacionComedor.objects.create(
-            alumno=self.alumno, servicio=self.comedor, mes=3, anio=2027, estado=True
+            alumno=self.alumno,
+            servicio=self.comedor,
+            mes=3,
+            anio=2027,
+            estado=True
         )
 
         form = ContratacionComedorForm(
@@ -135,4 +157,6 @@ class ServiciosTestCase(TestCase):
             }
         )
 
-        self.assertFalse(form.is_valid())
+        self.assertFalse(
+            form.is_valid()
+        )
