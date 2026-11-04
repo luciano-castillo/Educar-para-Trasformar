@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.contrib.auth.models import User
+from django.core.management.utils import get_random_secret_key
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -36,9 +37,13 @@ class ApiTutorTest(APITestCase):
             estado=True,
         )
 
+        self.password_tutor = get_random_secret_key()
+        self.password_incorrecta = get_random_secret_key()
+        self.password_otro_tutor = get_random_secret_key()
+
         self.usuario_tutor = User.objects.create_user(
             username="tutor_prueba",
-            password="ClaveSegura123!",
+            password=self.password_tutor,
         )
 
         PerfilUsuario.objects.create(
@@ -108,7 +113,7 @@ class ApiTutorTest(APITestCase):
 
         self.usuario_otro_tutor = User.objects.create_user(
             username="otro_tutor",
-            password="ClaveSegura456!",
+            password=self.password_otro_tutor,
         )
 
         PerfilUsuario.objects.create(
@@ -249,7 +254,7 @@ class ApiTutorTest(APITestCase):
             reverse("api:login_mobile"),
             {
                 "username": "tutor_prueba",
-                "password": "ClaveSegura123!",
+                "password": self.password_tutor,
             },
             format="json",
         )
@@ -279,7 +284,7 @@ class ApiTutorTest(APITestCase):
             reverse("api:login_mobile"),
             {
                 "username": "tutor_prueba",
-                "password": "password_incorrecto",
+                "password": self.password_incorrecta,
             },
             format="json",
         )
@@ -297,7 +302,7 @@ class ApiTutorTest(APITestCase):
             reverse("api:login_mobile"),
             {
                 "username": "tutor_prueba",
-                "password": "ClaveSegura123!",
+                "password": self.password_tutor,
             },
             format="json",
         )
@@ -331,7 +336,7 @@ class ApiTutorTest(APITestCase):
             reverse("api:login_mobile"),
             {
                 "username": "tutor_prueba",
-                "password": "ClaveSegura123!",
+                "password": self.password_tutor,
             },
             format="json",
         )
