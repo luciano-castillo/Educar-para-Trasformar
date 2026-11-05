@@ -409,3 +409,136 @@ class GestionCuentasTestCase(TestCase):
         self.assertFalse(
             self.alumno.usuario.is_active
         )
+
+class PermisosAdministracionTestCase(TestCase):
+
+    def setUp(self):
+
+        self.admin = User.objects.create_user(
+            username="admin_seguridad",
+            password="Admin123!",
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=self.admin,
+            rol=PerfilUsuario.Rol.ADMIN,
+            debe_cambiar_password=False,
+        )
+
+        self.usuarios_no_admin = []
+
+        for indice, rol in enumerate(
+            [
+                PerfilUsuario.Rol.ALUMNO,
+                PerfilUsuario.Rol.DOCENTE,
+                PerfilUsuario.Rol.TUTOR,
+            ],
+            start=1,
+        ):
+
+            usuario = User.objects.create_user(
+                username=f"usuario_seguridad_{indice}",
+                password="Prueba123!",
+            )
+
+            PerfilUsuario.objects.create(
+                usuario=usuario,
+                rol=rol,
+                debe_cambiar_password=False,
+            )
+
+            self.usuarios_no_admin.append(
+                usuario
+            )
+
+        self.urls_admin = [
+            reverse("admin_dashboard"),
+            reverse("alumno_lista"),
+            reverse("profesor_lista"),
+            reverse("deporte_lista"),
+            reverse("ruta_lista"),
+            reverse("comedor_lista"),
+            reverse("cuota_lista"),
+            reverse("factura_lista"),
+            reverse("reporte_pagos"),
+        ]
+
+    def test_roles_no_admin_no_acceden_a_gestion(
+        self,
+    ):
+
+        for usuario in self.usuarios_no_admin:
+
+            self.client.force_login(
+                usuario
+            )
+
+            for url in self.urls_admin:
+
+                with self.subTest(
+                    usuario=usuario.username,
+                    url=url,
+                ):
+
+                    response = self.client.get(
+                        url
+                    )
+
+                    self.assertEqual(
+                        response.status_code,
+                        302,
+                    )
+
+                    self.assertEqual(
+                        response.url,
+                        reverse(
+                            "inicio_por_rol"
+                        ),
+                    )
+
+            self.client.logout()
+
+    def test_admin_accede_a_modulos_de_gestion(
+        self,
+    ):
+
+        self.client.force_login(
+            self.admin
+        )
+
+        for url in self.urls_admin:
+
+            with self.subTest(
+                url=url
+            ):
+
+                response = self.client.get(
+                    url
+                )
+
+                self.assertEqual(
+                    response.status_code,
+                    200,
+                )
+    
+    def test_usuario_anonimo_no_accede_a_gestion(
+        self,
+    ):
+
+        response = self.client.get(
+            reverse(
+                "factura_lista"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
+        self.assertEqual(
+            response.url,
+            reverse(
+                "login"
+            ),
+        )
