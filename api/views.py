@@ -40,6 +40,18 @@ from .serializers import (
 )
 
 
+def obtener_tutor_activo(usuario):
+
+    return (
+        Tutor.objects
+        .filter(
+            usuario=usuario,
+            estado=True,
+        )
+        .first()
+    )
+
+
 @api_view(["GET"])
 def estado_api(request):
 
@@ -101,6 +113,21 @@ def login_mobile(request):
             },
             status=status.HTTP_403_FORBIDDEN,
         )
+    
+    tutor = obtener_tutor_activo(
+        usuario
+    )
+
+    if tutor is None:
+        return Response(
+            {
+                "detail": (
+                    "El perfil de tutor se encuentra "
+                    "inactivo o no existe."
+                )
+            },
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
     token, _ = Token.objects.get_or_create(user=usuario)
 
@@ -133,12 +160,18 @@ def logout_mobile(request):
 @permission_classes([IsAuthenticated])
 def mis_hijos(request):
 
-    try:
-        tutor = Tutor.objects.get(usuario=request.user)
+    tutor = obtener_tutor_activo(
+        request.user
+    )
 
-    except Tutor.DoesNotExist:
+    if tutor is None:
         return Response(
-            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -171,12 +204,18 @@ def facturas_hijo(
     id_alumno,
 ):
 
-    try:
-        tutor = Tutor.objects.get(usuario=request.user)
+    tutor = obtener_tutor_activo(
+        request.user
+    )
 
-    except Tutor.DoesNotExist:
+    if tutor is None:
         return Response(
-            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -234,12 +273,18 @@ def resumen_financiero_hijo(
     request,
     id_alumno,
 ):
-    try:
-        tutor = Tutor.objects.get(usuario=request.user)
+    tutor = obtener_tutor_activo(
+        request.user
+    )
 
-    except Tutor.DoesNotExist:
+    if tutor is None:
         return Response(
-            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -342,12 +387,18 @@ def pagos_factura(
     id_alumno,
     id_factura,
 ):
-    try:
-        tutor = Tutor.objects.get(usuario=request.user)
+    tutor = obtener_tutor_activo(
+        request.user
+    )
 
-    except Tutor.DoesNotExist:
+    if tutor is None:
         return Response(
-            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -417,12 +468,18 @@ def historial_pagos_hijo(
     request,
     id_alumno,
 ):
-    try:
-        tutor = Tutor.objects.get(usuario=request.user)
+    tutor = obtener_tutor_activo(
+        request.user
+    )
 
-    except Tutor.DoesNotExist:
+    if tutor is None:
         return Response(
-            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -486,12 +543,18 @@ def registrar_pago_mobile(
     id_alumno,
     id_factura,
 ):
-    try:
-        tutor = Tutor.objects.get(usuario=request.user)
+    tutor = obtener_tutor_activo(
+        request.user
+    )
 
-    except Tutor.DoesNotExist:
+    if tutor is None:
         return Response(
-            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
