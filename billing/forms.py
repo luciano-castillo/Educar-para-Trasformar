@@ -412,6 +412,16 @@ class ReportePagosForm(forms.Form):
             *Factura.ESTADOS,
         ]
     )
+    
+    situacion_pago = forms.ChoiceField(
+        label="Situación de pago",
+        required=False,
+        choices=[
+            ("", "Todas"),
+            ("COMPLETO", "Pagos completos"),
+            ("INCOMPLETO", "Pagos incompletos"),
+        ],
+    )
 
     def __init__(
         self,
