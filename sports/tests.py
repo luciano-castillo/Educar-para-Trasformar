@@ -10,7 +10,7 @@ from academic.models import (
     Profesor,
 )
 
-from .forms import InscripcionDeporteForm
+from .forms import DeporteForm, InscripcionDeporteForm
 from .models import (
     Deporte,
     GrupoDeportivo,
@@ -155,6 +155,26 @@ class InscripcionDeporteTestCase(TestCase):
             profesor=self.profesor,
             horario=self.horario_handball,
             estado=True
+        )
+    
+    def test_deporte_no_permite_valor_cero(self):
+
+        form = DeporteForm(
+            data={
+                "nombre": "Natación",
+                "descripcion": "Actividad de natación",
+                "valor_mensual": 0,
+                "estado": True,
+            }
+        )
+
+        self.assertFalse(
+            form.is_valid()
+        )
+
+        self.assertIn(
+            "El valor mensual del deporte debe ser mayor a cero.",
+            str(form.errors)
         )
 
 
