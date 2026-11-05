@@ -41,6 +41,10 @@ class ComprobantePago {
 class Pago {
   const Pago({
     required this.idPago,
+    required this.idFactura,
+    required this.mes,
+    required this.mesNombre,
+    required this.anio,
     required this.fechaTransferencia,
     required this.monto,
     required this.numeroOperacion,
@@ -53,6 +57,11 @@ class Pago {
   });
 
   final int idPago;
+  final int idFactura;
+  final int mes;
+  final String mesNombre;
+  final int anio;
+
   final String fechaTransferencia;
   final String monto;
   final String numeroOperacion;
@@ -60,6 +69,7 @@ class Pago {
   final String estadoNombre;
   final String observaciones;
   final String fechaRegistro;
+
   final List<DetallePago> detalles;
   final List<ComprobantePago> comprobantes;
 
@@ -70,6 +80,10 @@ class Pago {
 
     return Pago(
       idPago: json['id_pago'] as int,
+      idFactura: json['id_factura'] as int,
+      mes: json['mes'] as int,
+      mesNombre: json['mes_nombre']?.toString() ?? '',
+      anio: json['anio'] as int,
       fechaTransferencia: json['fecha_transferencia']?.toString() ?? '',
       monto: json['monto']?.toString() ?? '0.00',
       numeroOperacion: json['numero_operacion']?.toString() ?? '',

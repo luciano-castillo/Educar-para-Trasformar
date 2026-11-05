@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'historial_pagos_screen.dart';
 import '../models/factura.dart';
 import '../models/hijo.dart';
+import '../models/resumen_financiero.dart';
 import '../services/facturas_service.dart';
+import '../services/resumen_financiero_service.dart';
 import 'pagos_screen.dart';
 import 'registrar_pago_screen.dart';
 
@@ -21,13 +24,26 @@ class FacturasScreen extends StatefulWidget {
 class _FacturasScreenState extends State<FacturasScreen> {
   final _facturasService = FacturasService();
 
+  final _resumenService = ResumenFinancieroService();
+
   late Future<List<Factura>> _facturasFuture;
+
+  late Future<ResumenFinanciero> _resumenFuture;
 
   @override
   void initState() {
     super.initState();
 
+    _cargarDatos();
+  }
+
+  void _cargarDatos() {
     _facturasFuture = _facturasService.obtenerFacturas(
+      token: widget.token,
+      idAlumno: widget.hijo.idAlumno,
+    );
+
+    _resumenFuture = _resumenService.obtenerResumen(
       token: widget.token,
       idAlumno: widget.hijo.idAlumno,
     );
@@ -35,13 +51,10 @@ class _FacturasScreenState extends State<FacturasScreen> {
 
   Future<void> _recargar() async {
     setState(() {
-      _facturasFuture = _facturasService.obtenerFacturas(
-        token: widget.token,
-        idAlumno: widget.hijo.idAlumno,
-      );
+      _cargarDatos();
     });
 
-    await _facturasFuture;
+    await Future.wait([_facturasFuture, _resumenFuture]);
   }
 
   @override
@@ -76,10 +89,65 @@ class _FacturasScreenState extends State<FacturasScreen> {
 
             final facturas = snapshot.data ?? [];
 
-            if (facturas.isEmpty) {
-              return ListView(
-                children: [
-                  const SizedBox(height: 100),
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  widget.hijo.nombreCompleto,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+
+                const SizedBox(height: 4),
+
+                Text('Legajo: ${widget.hijo.legajo}'),
+
+                const SizedBox(height: 20),
+
+                FutureBuilder<ResumenFinanciero>(
+                  future: _resumenFuture,
+                  builder: (context, resumenSnapshot) {
+                    if (resumenSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      );
+                    }
+
+                    if (resumenSnapshot.hasError) {
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            resumenSnapshot.error.toString().replaceFirst(
+                              'Exception: ',
+                              '',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    final resumen = resumenSnapshot.data!;
+
+                    return _ResumenFinancieroCard(
+                      resumen: resumen,
+                      token: widget.token,
+                      hijo: widget.hijo,
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                Text('Facturas', style: Theme.of(context).textTheme.titleLarge),
+
+                const SizedBox(height: 12),
+
+                if (facturas.isEmpty) ...[
+                  const SizedBox(height: 40),
                   const Icon(Icons.receipt_long, size: 70),
                   const SizedBox(height: 16),
                   Text(
@@ -88,19 +156,6 @@ class _FacturasScreenState extends State<FacturasScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ],
-              );
-            }
-
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Text(
-                  widget.hijo.nombreCompleto,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 4),
-                Text('Legajo: ${widget.hijo.legajo}'),
-                const SizedBox(height: 20),
 
                 ...facturas.map(
                   (factura) => Padding(
@@ -117,6 +172,174 @@ class _FacturasScreenState extends State<FacturasScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _ResumenFinancieroCard extends StatelessWidget {
+  const _ResumenFinancieroCard({
+    required this.resumen,
+    required this.token,
+    required this.hijo,
+  });
+
+  final ResumenFinanciero resumen;
+  final String token;
+  final Hijo hijo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.account_balance_wallet_outlined),
+                const SizedBox(width: 8),
+                Text(
+                  'Resumen financiero',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            _DatoResumen(
+              titulo: 'Total facturado',
+              valor: '\$${resumen.totalFacturado}',
+            ),
+
+            _DatoResumen(
+              titulo: 'Total pagado',
+              valor: '\$${resumen.totalPagado}',
+            ),
+
+            _DatoResumen(
+              titulo: 'Deuda actual',
+              valor: '\$${resumen.deudaActual}',
+              destacado: true,
+            ),
+
+            const Divider(height: 28),
+
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(
+                  label: Text(
+                    'Pendientes: '
+                    '${resumen.pendientes}',
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    'Parciales: '
+                    '${resumen.parciales}',
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    'Pagadas: '
+                    '${resumen.pagadas}',
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    'Vencidas: '
+                    '${resumen.vencidas}',
+                  ),
+                ),
+              ],
+            ),
+
+            if (resumen.historialDeuda.isNotEmpty) ...[
+              const Divider(height: 28),
+
+              Text(
+                'Historial de deuda',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+
+              const SizedBox(height: 8),
+
+              ...resumen.historialDeuda.map(
+                (deuda) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.warning_amber_outlined),
+                  title: Text(
+                    '${deuda.mesNombre} '
+                    '${deuda.anio}',
+                  ),
+                  subtitle: Text(
+                    '${deuda.estadoNombre} · '
+                    'Vence: '
+                    '${deuda.fechaVencimiento}',
+                  ),
+                  trailing: Text(
+                    '\$${deuda.saldo}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 16),
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HistorialPagosScreen(token: token, hijo: hijo),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history),
+                label: const Text('Ver historial de pagos'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DatoResumen extends StatelessWidget {
+  const _DatoResumen({
+    required this.titulo,
+    required this.valor,
+    this.destacado = false,
+  });
+
+  final String titulo;
+  final String valor;
+  final bool destacado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(titulo),
+          Text(
+            valor,
+            style: TextStyle(
+              fontWeight: destacado ? FontWeight.bold : FontWeight.w600,
+              fontSize: destacado ? 17 : null,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,7 +373,8 @@ class _FacturaCard extends StatelessWidget {
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
           child: Text(
-            'Estado: ${factura.estadoNombre}\n'
+            'Estado: '
+            '${factura.estadoNombre}\n'
             'Saldo: \$${factura.saldo}',
           ),
         ),
