@@ -540,3 +540,66 @@ class ComprobantePago(models.Model):
             f"{self.id_comprobante} - "
             f"Pago {self.pago_id}"
         )
+
+class NotificacionPago(models.Model):
+
+    TIPOS = [
+        (
+            "RECORDATORIO",
+            "Recordatorio mensual",
+        ),
+        (
+            "DEUDA",
+            "Aviso de deuda",
+        ),
+    ]
+
+    id_notificacion = models.BigAutoField(
+        primary_key=True
+    )
+
+    factura = models.ForeignKey(
+        Factura,
+        on_delete=models.CASCADE,
+        related_name="notificaciones",
+    )
+
+    tutor = models.ForeignKey(
+        "academic.Tutor",
+        on_delete=models.PROTECT,
+        related_name="notificaciones_pago",
+    )
+
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPOS,
+    )
+
+    fecha_envio = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "factura",
+                    "tutor",
+                    "tipo",
+                ],
+                name="notificacion_pago_unica",
+            )
+        ]
+
+        ordering = [
+            "-fecha_envio"
+        ]
+
+    def __str__(self):
+
+        return (
+            f"{self.get_tipo_display()} - "
+            f"Factura {self.factura_id} - "
+            f"{self.tutor}"
+        )

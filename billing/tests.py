@@ -1,10 +1,14 @@
 import tempfile
 from datetime import date, time
 from decimal import Decimal
+from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -16,6 +20,8 @@ from academic.models import (
     Horario,
     NivelEducativo,
     Profesor,
+    Tutor,
+    TutorAlumno,
 )
 from accounts.models import PerfilUsuario
 from services.models import (
@@ -38,7 +44,14 @@ from .models import (
     ComprobantePago,
     CuotaMensual,
     Factura,
+    NotificacionPago,
     Pago,
+)
+from .notifications import (
+    construir_resumen_factura,
+    enviar_avisos_deuda,
+    enviar_recordatorios_pago,
+    es_ultimo_dia_habil_mes,
 )
 from .services import (
     actualizar_facturas_vencidas,
@@ -1801,3 +1814,603 @@ class GeneracionFacturaTestCase(TestCase):
                 response.status_code,
                 302
             )
+
+@override_settings(
+    EMAIL_BACKEND=(
+        "django.core.mail.backends."
+        "locmem.EmailBackend"
+    )
+)
+class NotificacionesPagoTestCase(TestCase):
+
+    def setUp(self):
+
+        self.nivel = NivelEducativo.objects.create(
+            nombre="Primario Notificaciones",
+            estado=True,
+        )
+
+        self.curso = Curso.objects.create(
+            nombre="1°",
+            division="N",
+            turno="MANANA",
+            nivel=self.nivel,
+            estado=True,
+        )
+
+        self.alumno = Alumno.objects.create(
+            dni="45900111",
+            legajo="NOT001",
+            nombre="Lucía",
+            apellido="Martínez",
+            fecha_nacimiento=date(
+                2015,
+                5,
+                10,
+            ),
+            domicilio="Calle 123",
+            telefono="3624000000",
+            correo="alumno@test.com",
+            curso=self.curso,
+            estado=True,
+        )
+
+        self.tutor = Tutor.objects.create(
+            dni="30900111",
+            nombre="María",
+            apellido="Martínez",
+            domicilio="Calle 123",
+            telefono="3624111111",
+            correo="tutor@test.com",
+            estado=True,
+        )
+
+        TutorAlumno.objects.create(
+            tutor=self.tutor,
+            alumno=self.alumno,
+        )
+
+        self.factura = Factura.objects.create(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026,
+            fecha_vencimiento=date(
+                2026,
+                10,
+                10,
+            ),
+            estado="PENDIENTE",
+        )
+
+        self.factura.detalles.create(
+            tipo_concepto="CUOTA",
+            descripcion="Cuota mensual Octubre 2026",
+            importe=55000,
+        )
+
+        self.factura.detalles.create(
+            tipo_concepto="COMEDOR",
+            descripcion="Comedor escolar",
+            importe=20000,
+        )
+
+    def test_detecta_ultimo_dia_habil_mes(self):
+
+        self.assertTrue(
+            es_ultimo_dia_habil_mes(
+                date(
+                    2026,
+                    10,
+                    30,
+                )
+            )
+        )
+
+        self.assertFalse(
+            es_ultimo_dia_habil_mes(
+                date(
+                    2026,
+                    10,
+                    29,
+                )
+            )
+        )
+
+    def test_resumen_incluye_composicion_y_total(self):
+
+        resumen = construir_resumen_factura(
+            self.factura
+        )
+
+        self.assertIn(
+            "Cuota mensual Octubre 2026",
+            resumen,
+        )
+
+        self.assertIn(
+            "Comedor escolar",
+            resumen,
+        )
+
+        self.assertIn(
+            "75000.00",
+            resumen,
+        )
+
+    def test_envia_recordatorio_al_tutor(self):
+
+        enviados = enviar_recordatorios_pago(
+            mes=10,
+            anio=2026,
+        )
+
+        self.assertEqual(
+            enviados,
+            1,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        email = mail.outbox[0]
+
+        self.assertEqual(
+            email.to,
+            [
+                "tutor@test.com"
+            ],
+        )
+
+        self.assertIn(
+            "75000.00",
+            email.body,
+        )
+
+        self.assertEqual(
+            len(email.attachments),
+            1,
+        )
+    @patch(
+    
+        "billing.management.commands."
+        "enviar_recordatorios_pago."
+        "enviar_recordatorios_pago"
+    
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "enviar_recordatorios_pago."
+            "timezone.localdate"
+        
+    )
+    def test_comando_no_envia_fuera_del_ultimo_dia_habil(
+        self,
+        mock_localdate,
+        mock_enviar,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            10,
+            29,
+        )
+
+        salida = StringIO()
+
+        call_command(
+            "enviar_recordatorios_pago",
+            stdout=salida,
+        )
+
+        mock_enviar.assert_not_called()
+
+        self.assertIn(
+            "No se enviaron recordatorios",
+            salida.getvalue(),
+        )
+
+
+    @patch(
+        
+            "billing.management.commands."
+            "enviar_recordatorios_pago."
+            "enviar_recordatorios_pago"
+        
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "enviar_recordatorios_pago."
+            "timezone.localdate"
+        
+    )
+    def test_comando_envia_en_ultimo_dia_habil(
+        self,
+        mock_localdate,
+        mock_enviar,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            10,
+            30,
+        )
+
+        mock_enviar.return_value = 2
+
+        salida = StringIO()
+
+        call_command(
+            "enviar_recordatorios_pago",
+            stdout=salida,
+        )
+
+        mock_enviar.assert_called_once_with(
+            mes=10,
+            anio=2026,
+        )
+
+        self.assertIn(
+            "Correos enviados: 2",
+            salida.getvalue(),
+        )
+        
+    def test_envia_aviso_deuda_al_tutor(self):
+
+        enviados = enviar_avisos_deuda(
+            mes=10,
+            anio=2026,
+        )
+
+        self.assertEqual(
+            enviados,
+            1,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        email = mail.outbox[0]
+
+        self.assertEqual(
+            email.to,
+            [
+                "tutor@test.com"
+            ],
+        )
+
+        self.assertIn(
+            "Saldo pendiente",
+            email.body,
+        )
+
+        self.assertIn(
+            "75000.00",
+            email.body,
+        )
+    
+    @patch(
+    
+        "billing.management.commands."
+        "enviar_avisos_deuda."
+        "enviar_avisos_deuda"
+    
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "enviar_avisos_deuda."
+            "timezone.localdate"
+        
+    )
+    def test_comando_deuda_no_envia_fuera_del_dia_20(
+        self,
+        mock_localdate,
+        mock_enviar,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            10,
+            19,
+        )
+
+        salida = StringIO()
+
+        call_command(
+            "enviar_avisos_deuda",
+            stdout=salida,
+        )
+
+        mock_enviar.assert_not_called()
+
+        self.assertIn(
+            "Hoy no es día 20",
+            salida.getvalue(),
+        )
+
+
+    @patch(
+        
+            "billing.management.commands."
+            "enviar_avisos_deuda."
+            "enviar_avisos_deuda"
+        
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "enviar_avisos_deuda."
+            "timezone.localdate"
+        
+    )
+    def test_comando_deuda_envia_el_dia_20(
+        self,
+        mock_localdate,
+        mock_enviar,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            10,
+            20,
+        )
+
+        mock_enviar.return_value = 2
+
+        salida = StringIO()
+
+        call_command(
+            "enviar_avisos_deuda",
+            stdout=salida,
+        )
+
+        mock_enviar.assert_called_once_with(
+            mes=10,
+            anio=2026,
+        )
+
+        self.assertIn(
+            "Avisos enviados: 2",
+            salida.getvalue(),
+        )
+        
+    def test_no_duplica_recordatorio_mensual(self):
+
+        primera_ejecucion = (
+            enviar_recordatorios_pago(
+                mes=10,
+                anio=2026,
+            )
+        )
+
+        segunda_ejecucion = (
+            enviar_recordatorios_pago(
+                mes=10,
+                anio=2026,
+            )
+        )
+
+        self.assertEqual(
+            primera_ejecucion,
+            1,
+        )
+
+        self.assertEqual(
+            segunda_ejecucion,
+            0,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        self.assertEqual(
+            NotificacionPago.objects.filter(
+                tipo="RECORDATORIO",
+            ).count(),
+            1,
+        )
+        
+    def test_no_duplica_aviso_deuda(self):
+
+        primera_ejecucion = (
+            enviar_avisos_deuda(
+                mes=10,
+                anio=2026,
+            )
+        )
+
+        segunda_ejecucion = (
+            enviar_avisos_deuda(
+                mes=10,
+                anio=2026,
+            )
+        )
+
+        self.assertEqual(
+            primera_ejecucion,
+            1,
+        )
+
+        self.assertEqual(
+            segunda_ejecucion,
+            0,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        self.assertEqual(
+            NotificacionPago.objects.filter(
+                tipo="DEUDA",
+            ).count(),
+            1,
+        )
+    
+    @patch(
+    
+        "billing.management.commands."
+        "procesar_notificaciones."
+        "enviar_recordatorios_pago"
+    
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "procesar_notificaciones."
+            "enviar_avisos_deuda"
+        
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "procesar_notificaciones."
+            "timezone.localdate"
+        
+    )
+    def test_procesar_notificaciones_dia_normal(
+        self,
+        mock_localdate,
+        mock_deuda,
+        mock_recordatorio,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            11,
+            5,
+        )
+
+        salida = StringIO()
+
+        call_command(
+            "procesar_notificaciones",
+            stdout=salida,
+        )
+
+        mock_deuda.assert_not_called()
+        mock_recordatorio.assert_not_called()
+
+        self.assertIn(
+            "ninguna notificación",
+            salida.getvalue(),
+        )
+        
+    @patch(
+    
+        "billing.management.commands."
+        "procesar_notificaciones."
+        "enviar_recordatorios_pago"
+    
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "procesar_notificaciones."
+            "enviar_avisos_deuda"
+        
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "procesar_notificaciones."
+            "timezone.localdate"
+        
+    )
+    def test_procesar_notificaciones_dia_20(
+        self,
+        mock_localdate,
+        mock_deuda,
+        mock_recordatorio,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            11,
+            20,
+        )
+
+        mock_deuda.return_value = 3
+
+        salida = StringIO()
+
+        call_command(
+            "procesar_notificaciones",
+            stdout=salida,
+        )
+
+        mock_deuda.assert_called_once_with(
+            mes=11,
+            anio=2026,
+        )
+
+        mock_recordatorio.assert_not_called()
+
+        self.assertIn(
+            "Avisos de deuda enviados: 3",
+            salida.getvalue(),
+        )
+    
+    @patch(
+    
+        "billing.management.commands."
+        "procesar_notificaciones."
+        "enviar_recordatorios_pago"
+    
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "procesar_notificaciones."
+            "enviar_avisos_deuda"
+        
+    )
+    @patch(
+        
+            "billing.management.commands."
+            "procesar_notificaciones."
+            "timezone.localdate"
+        
+    )
+    def test_procesar_notificaciones_ultimo_dia_habil(
+        self,
+        mock_localdate,
+        mock_deuda,
+        mock_recordatorio,
+    ):
+
+        mock_localdate.return_value = date(
+            2026,
+            10,
+            30,
+        )
+
+        mock_recordatorio.return_value = 4
+
+        salida = StringIO()
+
+        call_command(
+            "procesar_notificaciones",
+            stdout=salida,
+        )
+
+        mock_recordatorio.assert_called_once_with(
+            mes=10,
+            anio=2026,
+        )
+
+        mock_deuda.assert_not_called()
+
+        self.assertIn(
+            "Recordatorios mensuales enviados: 4",
+            salida.getvalue(),
+        )
