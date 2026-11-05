@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from decimal import Decimal
 
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
@@ -25,8 +26,12 @@ from accounts.models import PerfilUsuario
 from billing.models import (
     DetalleFactura,
     Factura,
+    Pago,
 )
-from billing.services import registrar_pago
+from billing.services import (
+    actualizar_facturas_vencidas,
+    registrar_pago,
+)
 
 from .serializers import (
     AlumnoResumenSerializer,
@@ -84,6 +89,16 @@ def login_mobile(request):
     except PerfilUsuario.DoesNotExist:
         return Response(
             {"detail": ("La cuenta no posee un perfil de usuario.")},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    if perfil.rol != PerfilUsuario.Rol.TUTOR:
+        return Response(
+            {
+                "detail": (
+                    "El acceso móvil está disponible únicamente para padres o tutores."
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -215,6 +230,113 @@ def facturas_hijo(
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def resumen_financiero_hijo(
+    request,
+    id_alumno,
+):
+    try:
+        tutor = Tutor.objects.get(usuario=request.user)
+
+    except Tutor.DoesNotExist:
+        return Response(
+            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    relacion = (
+        tutor.alumnos_asociados.select_related("alumno")
+        .filter(alumno_id=id_alumno)
+        .first()
+    )
+
+    if relacion is None:
+        return Response(
+            {
+                "detail": (
+                    "El alumno solicitado "
+                    "no se encuentra asociado "
+                    "al tutor autenticado."
+                )
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    actualizar_facturas_vencidas()
+
+    alumno = relacion.alumno
+
+    facturas = Factura.objects.filter(alumno=alumno).prefetch_related(
+        "detalles",
+        "pagos",
+        "pagos__detalles_pago",
+    )
+
+    total_facturado = Decimal("0.00")
+    total_pagado = Decimal("0.00")
+    deuda_actual = Decimal("0.00")
+
+    cantidades = {
+        "PENDIENTE": 0,
+        "PARCIAL": 0,
+        "PAGADA": 0,
+        "VENCIDA": 0,
+        "ANULADA": 0,
+    }
+
+    historial_deuda = []
+
+    for factura in facturas:
+        cantidades[factura.estado] += 1
+
+        if factura.estado == "ANULADA":
+            continue
+
+        total_facturado += factura.total
+        total_pagado += factura.total_pagado
+        deuda_actual += factura.saldo
+
+        if factura.saldo > 0:
+            historial_deuda.append(
+                {
+                    "id_factura": (factura.id_factura),
+                    "mes": factura.mes,
+                    "mes_nombre": (factura.get_mes_display()),
+                    "anio": factura.anio,
+                    "fecha_vencimiento": (factura.fecha_vencimiento),
+                    "estado": factura.estado,
+                    "estado_nombre": (factura.get_estado_display()),
+                    "total": str(factura.total),
+                    "total_pagado": str(factura.total_pagado),
+                    "saldo": str(factura.saldo),
+                }
+            )
+
+    return Response(
+        {
+            "alumno": {
+                "id_alumno": alumno.id_alumno,
+                "nombre": alumno.nombre,
+                "apellido": alumno.apellido,
+                "legajo": alumno.legajo,
+            },
+            "resumen": {
+                "total_facturado": str(total_facturado),
+                "total_pagado": str(total_pagado),
+                "deuda_actual": str(deuda_actual),
+                "cantidad_facturas": (facturas.count()),
+                "pendientes": cantidades["PENDIENTE"],
+                "parciales": cantidades["PARCIAL"],
+                "pagadas": cantidades["PAGADA"],
+                "vencidas": cantidades["VENCIDA"],
+                "anuladas": cantidades["ANULADA"],
+            },
+            "historial_deuda": (historial_deuda),
+        }
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def pagos_factura(
     request,
     id_alumno,
@@ -284,6 +406,73 @@ def pagos_factura(
                 "total_pagado": str(factura.total_pagado),
                 "saldo": str(factura.saldo),
             },
+            "pagos": serializer.data,
+        }
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def historial_pagos_hijo(
+    request,
+    id_alumno,
+):
+    try:
+        tutor = Tutor.objects.get(usuario=request.user)
+
+    except Tutor.DoesNotExist:
+        return Response(
+            {"detail": ("El usuario autenticado no posee un perfil de tutor.")},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    relacion = (
+        tutor.alumnos_asociados.select_related("alumno")
+        .filter(alumno_id=id_alumno)
+        .first()
+    )
+
+    if relacion is None:
+        return Response(
+            {
+                "detail": (
+                    "El alumno solicitado "
+                    "no se encuentra asociado "
+                    "al tutor autenticado."
+                )
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    alumno = relacion.alumno
+
+    pagos = (
+        Pago.objects.filter(factura__alumno=alumno)
+        .select_related("factura")
+        .prefetch_related(
+            "detalles_pago__detalle_factura",
+            "comprobantes",
+        )
+        .order_by("-fecha_registro")
+    )
+
+    serializer = PagoSerializer(
+        pagos,
+        many=True,
+        context={
+            "request": request,
+        },
+    )
+
+    return Response(
+        {
+            "alumno": {
+                "id_alumno": alumno.id_alumno,
+                "nombre": alumno.nombre,
+                "apellido": alumno.apellido,
+                "legajo": alumno.legajo,
+            },
+            "cantidad_pagos": pagos.count(),
             "pagos": serializer.data,
         }
     )

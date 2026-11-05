@@ -52,7 +52,7 @@ class DetalleFacturaSerializer(serializers.ModelSerializer):
         decimal_places=2,
         read_only=True,
     )
-    
+
     saldo_disponible_pago = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -170,6 +170,26 @@ class ComprobantePagoSerializer(serializers.ModelSerializer):
 
 
 class PagoSerializer(serializers.ModelSerializer):
+    id_factura = serializers.IntegerField(
+        source="factura.id_factura",
+        read_only=True,
+    )
+
+    mes = serializers.IntegerField(
+        source="factura.mes",
+        read_only=True,
+    )
+
+    mes_nombre = serializers.CharField(
+        source="factura.get_mes_display",
+        read_only=True,
+    )
+
+    anio = serializers.IntegerField(
+        source="factura.anio",
+        read_only=True,
+    )
+
     estado_nombre = serializers.CharField(
         source="get_estado_display",
         read_only=True,
@@ -190,6 +210,10 @@ class PagoSerializer(serializers.ModelSerializer):
 
         fields = [
             "id_pago",
+            "id_factura",
+            "mes",
+            "mes_nombre",
+            "anio",
             "fecha_transferencia",
             "monto",
             "numero_operacion",

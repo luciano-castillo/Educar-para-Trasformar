@@ -18,6 +18,8 @@ from accounts.models import PerfilUsuario
 from billing.models import (
     DetalleFactura,
     Factura,
+    Pago,
+    PagoDetalle,
 )
 
 
@@ -83,6 +85,19 @@ class ApiTutorTest(APITestCase):
         TutorAlumno.objects.create(
             tutor=self.tutor,
             alumno=self.alumno,
+        )
+
+        self.password_docente = get_random_secret_key()
+
+        self.usuario_docente = User.objects.create_user(
+            username="docente_prueba",
+            password=self.password_docente,
+        )
+
+        PerfilUsuario.objects.create(
+            usuario=self.usuario_docente,
+            rol=PerfilUsuario.Rol.DOCENTE,
+            debe_cambiar_password=False,
         )
 
         self.factura = Factura.objects.create(
@@ -328,6 +343,26 @@ class ApiTutorTest(APITestCase):
             self.alumno.id_alumno,
         )
 
+    def test_login_mobile_rechaza_usuario_no_tutor(
+        self,
+    ):
+
+        response = self.client.post(
+            reverse("api:login_mobile"),
+            {
+                "username": "docente_prueba",
+                "password": self.password_docente,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        self.assertFalse(Token.objects.filter(user=self.usuario_docente).exists())
+
     def test_logout_invalida_token(
         self,
     ):
@@ -359,4 +394,153 @@ class ApiTutorTest(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_resumen_financiero_hijo(self):
+
+        self.client.force_authenticate(user=self.usuario_tutor)
+
+        response = self.client.get(
+            reverse(
+                "api:resumen_financiero_hijo",
+                kwargs={
+                    "id_alumno": (self.alumno.id_alumno),
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        resumen = response.data["resumen"]
+
+        self.assertEqual(
+            resumen["total_facturado"],
+            "15000.00",
+        )
+
+        self.assertEqual(
+            resumen["total_pagado"],
+            "0.00",
+        )
+
+        self.assertEqual(
+            resumen["deuda_actual"],
+            "15000.00",
+        )
+
+        self.assertEqual(
+            resumen["pendientes"],
+            0,
+        )
+
+        self.assertEqual(
+            resumen["vencidas"],
+            1,
+        )
+
+        self.assertEqual(
+            len(response.data["historial_deuda"]),
+            1,
+        )
+
+    def test_resumen_financiero_no_permite_alumno_ajeno(
+        self,
+    ):
+
+        self.client.force_authenticate(user=self.usuario_tutor)
+
+        response = self.client.get(
+            reverse(
+                "api:resumen_financiero_hijo",
+                kwargs={
+                    "id_alumno": (self.alumno_ajeno.id_alumno),
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_historial_pagos_hijo(self):
+
+        detalle = self.factura.detalles.first()
+
+        pago = Pago.objects.create(
+            factura=self.factura,
+            fecha_transferencia=date(
+                2026,
+                10,
+                5,
+            ),
+            monto="10000.00",
+            numero_operacion="TEST-001",
+            estado="VALIDADO",
+            registrado_por=self.usuario_tutor,
+        )
+
+        PagoDetalle.objects.create(
+            pago=pago,
+            detalle_factura=detalle,
+            importe_aplicado="10000.00",
+        )
+
+        self.client.force_authenticate(user=self.usuario_tutor)
+
+        response = self.client.get(
+            reverse(
+                "api:historial_pagos_hijo",
+                kwargs={
+                    "id_alumno": (self.alumno.id_alumno),
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.assertEqual(
+            response.data["cantidad_pagos"],
+            1,
+        )
+
+        self.assertEqual(
+            len(response.data["pagos"]),
+            1,
+        )
+
+        self.assertEqual(
+            response.data["pagos"][0]["estado"],
+            "VALIDADO",
+        )
+
+        self.assertEqual(
+            response.data["pagos"][0]["id_factura"],
+            self.factura.id_factura,
+        )
+
+    def test_historial_pagos_no_permite_alumno_ajeno(
+        self,
+    ):
+
+        self.client.force_authenticate(user=self.usuario_tutor)
+
+        response = self.client.get(
+            reverse(
+                "api:historial_pagos_hijo",
+                kwargs={
+                    "id_alumno": (self.alumno_ajeno.id_alumno),
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
         )

@@ -33,6 +33,35 @@ class PagosService {
         .toList();
   }
 
+  Future<List<Pago>> obtenerHistorialPagos({
+    required String token,
+    required int idAlumno,
+  }) async {
+    final response = await http.get(
+      Uri.parse(
+        '${ApiConfig.baseUrl}/mis-hijos/'
+        '$idAlumno/historial-pagos/',
+      ),
+      headers: {'Authorization': 'Token $token'},
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        data['detail'] ??
+            'No se pudo obtener '
+                'el historial de pagos.',
+      );
+    }
+
+    final pagosJson = data['pagos'] as List<dynamic>? ?? [];
+
+    return pagosJson
+        .map((item) => Pago.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<String> registrarPago({
     required String token,
     required int idAlumno,
