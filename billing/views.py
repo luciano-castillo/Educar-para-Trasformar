@@ -517,6 +517,10 @@ def reporte_pagos(request):
         estado = form.cleaned_data.get(
             "estado"
         )
+        
+        situacion_pago = form.cleaned_data.get(
+            "situacion_pago"
+        )
 
         if mes:
 
@@ -540,6 +544,21 @@ def reporte_pagos(request):
 
             facturas = facturas.filter(
                 estado=estado
+            )
+        
+        if situacion_pago == "COMPLETO":
+
+            facturas = facturas.filter(
+                estado="PAGADA"
+            )
+
+        elif situacion_pago == "INCOMPLETO":
+
+            facturas = facturas.exclude(
+                estado__in=[
+                    "PAGADA",
+                    "ANULADA",
+                ]
             )
 
     facturas = facturas.order_by(

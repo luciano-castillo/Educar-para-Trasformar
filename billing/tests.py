@@ -1776,6 +1776,168 @@ class GeneracionFacturaTestCase(TestCase):
             2
         )
     
+    def test_reporte_filtra_pagos_completos_por_periodo_y_alumno(self):
+
+        self._login_admin()
+
+        factura_pagada = generar_factura_alumno(
+            alumno=self.alumno,
+            mes=10,
+            anio=2026,
+        )
+
+        detalles = list(
+            factura_pagada.detalles.all()
+        )
+
+        pago = registrar_pago(
+            factura=factura_pagada,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15,
+            ),
+            aplicaciones=[
+                (
+                    detalle,
+                    detalle.importe,
+                )
+                for detalle in detalles
+            ],
+            numero_operacion="RF58-001",
+        )
+
+        validar_pago(
+            pago
+        )
+
+        # Otra factura del mismo período
+        # queda incompleta.
+        generar_factura_alumno(
+            alumno=self.alumno_sin_servicios,
+            mes=10,
+            anio=2026,
+        )
+
+        response = self.client.get(
+            reverse(
+                "reporte_pagos"
+            ),
+            {
+                "mes": 10,
+                "anio": 2026,
+                "alumno": self.alumno.pk,
+                "situacion_pago": "COMPLETO",
+            },
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        facturas = list(
+            response.context[
+                "facturas"
+            ]
+        )
+
+        self.assertEqual(
+            len(facturas),
+            1,
+        )
+
+        self.assertEqual(
+            facturas[0].pk,
+            factura_pagada.pk,
+        )
+
+        self.assertEqual(
+            facturas[0].estado,
+            "PAGADA",
+        )
+    
+    def test_reporte_filtra_pagos_incompletos_por_periodo_y_alumno(self):
+
+        self._login_admin()
+
+        factura_incompleta = (
+            generar_factura_alumno(
+                alumno=self.alumno,
+                mes=10,
+                anio=2026,
+            )
+        )
+
+        # Pagamos solamente uno de los conceptos,
+        # por lo que la factura queda incompleta.
+        detalle = (
+            factura_incompleta.detalles.first()
+        )
+
+        pago = registrar_pago(
+            factura=factura_incompleta,
+            fecha_transferencia=date(
+                2026,
+                10,
+                15,
+            ),
+            aplicaciones=[
+                (
+                    detalle,
+                    detalle.importe,
+                )
+            ],
+            numero_operacion="RF59-001",
+        )
+
+        validar_pago(
+            pago
+        )
+
+        response = self.client.get(
+            reverse(
+                "reporte_pagos"
+            ),
+            {
+                "mes": 10,
+                "anio": 2026,
+                "alumno": self.alumno.pk,
+                "situacion_pago": "INCOMPLETO",
+            },
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        facturas = list(
+            response.context[
+                "facturas"
+            ]
+        )
+
+        self.assertEqual(
+            len(facturas),
+            1,
+        )
+
+        self.assertEqual(
+            facturas[0].pk,
+            factura_incompleta.pk,
+        )
+
+        self.assertNotEqual(
+            facturas[0].estado,
+            "PAGADA",
+        )
+
+        self.assertGreater(
+            facturas[0].saldo,
+            Decimal("0.00"),
+        )
+    
     def test_reportes_requieren_usuario_admin(self):
 
         usuario = User.objects.create_user(
