@@ -21,3 +21,5 @@ Thumbs.db
 
 # PyCharm
 .idea/
+
+staticfiles/
