@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../models/hijo.dart';
 import '../models/pago.dart';
@@ -48,14 +48,34 @@ class _HistorialPagosScreenState extends State<HistorialPagosScreen> {
     await _pagosFuture;
   }
 
-  Future<void> _abrirComprobante(String url) async {
-    final uri = Uri.parse(url);
+  Future<void> _abrirComprobante(
+    int idComprobante,
+  ) async {
+    try {
+      final ruta = await _pagosService
+          .descargarComprobante(
+        token: widget.token,
+        idAlumno: widget.hijo.idAlumno,
+        idComprobante: idComprobante,
+      );
 
-    final abierto = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      await OpenFilex.open(ruta);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
 
-    if (!abierto && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el comprobante.')),
+        SnackBar(
+          content: Text(
+            error
+                .toString()
+                .replaceFirst(
+                  'Exception: ',
+                  '',
+                ),
+          ),
+        ),
       );
     }
   }
@@ -231,11 +251,11 @@ class _HistorialPagosScreenState extends State<HistorialPagosScreen> {
                               title: const Text('Ver comprobante'),
                               subtitle: Text(comprobante.fechaSubida),
                               trailing: const Icon(Icons.open_in_new),
-                              onTap: comprobante.archivoUrl.isEmpty
-                                  ? null
-                                  : () {
-                                      _abrirComprobante(comprobante.archivoUrl);
-                                    },
+                              onTap: () {
+                                  _abrirComprobante(
+                                    comprobante.idComprobante,
+                                  );
+                                },
                             ),
                           ),
                         ],
