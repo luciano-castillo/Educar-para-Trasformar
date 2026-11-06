@@ -6,6 +6,7 @@ from django.db.models import (
     Count,
     Sum,
 )
+from django.http import FileResponse, Http404
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -23,6 +24,7 @@ from .forms import (
     ReporteTransporteForm,
 )
 from .models import (
+    ComprobantePago,
     CuotaMensual,
     Factura,
     Pago,
@@ -931,4 +933,42 @@ def reporte_transporte(request):
             "reporte": reporte,
             "total_cobrado": total_cobrado,
         }
+    )
+
+@admin_required
+def comprobante_descargar(
+    request,
+    id_comprobante,
+):
+
+    comprobante = get_object_or_404(
+        ComprobantePago,
+        id_comprobante=id_comprobante,
+    )
+
+    if not comprobante.archivo:
+        raise Http404(
+            "El comprobante no posee archivo."
+        )
+
+    try:
+        archivo = comprobante.archivo.open(
+            "rb"
+        )
+
+    except (FileNotFoundError, OSError):
+        raise Http404(
+            "El archivo del comprobante "
+            "no fue encontrado."
+        )
+
+    nombre_archivo = (
+        comprobante.archivo.name
+        .rsplit("/", 1)[-1]
+    )
+
+    return FileResponse(
+        archivo,
+        as_attachment=False,
+        filename=nombre_archivo,
     )

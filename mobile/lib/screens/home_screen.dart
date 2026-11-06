@@ -26,29 +26,26 @@ class _HomeScreenState extends State<HomeScreen> {
   final _sessionService = SessionService();
   Future<void> _cerrarSesion() async {
     try {
-      await _authService.logout(token: widget.token);
-
-      await _sessionService.eliminarToken();
-
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
+      await _authService.logout(
+        token: widget.token,
       );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
-        ),
-      );
+    } catch (_) {
+      // Aunque el servidor rechace el token,
+      // la sesión local debe poder cerrarse.
     }
+
+    await _sessionService.eliminarToken();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+      (route) => false,
+    );
   }
 
   late Future<List<Hijo>> _hijosFuture;
