@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from django.http import FileResponse, Http404
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (
@@ -24,6 +25,7 @@ from rest_framework.response import Response
 from academic.models import Tutor
 from accounts.models import PerfilUsuario
 from billing.models import (
+    ComprobantePago,
     DetalleFactura,
     Factura,
     Pago,
@@ -534,6 +536,93 @@ def historial_pagos_hijo(
         }
     )
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def comprobante_hijo(
+    request,
+    id_alumno,
+    id_comprobante,
+):
+    tutor = obtener_tutor_activo(
+        request.user
+    )
+
+    if tutor is None:
+        return Response(
+            {
+                "detail": (
+                    "El usuario autenticado no posee "
+                    "un perfil de tutor activo."
+                )
+            },
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    relacion = (
+        tutor.alumnos_asociados
+        .select_related("alumno")
+        .filter(
+            alumno_id=id_alumno
+        )
+        .first()
+    )
+
+    if relacion is None:
+        return Response(
+            {
+                "detail": (
+                    "El alumno solicitado no se "
+                    "encuentra asociado al tutor."
+                )
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    comprobante = (
+        ComprobantePago.objects
+        .select_related(
+            "pago__factura"
+        )
+        .filter(
+            id_comprobante=id_comprobante,
+            pago__factura__alumno=(
+                relacion.alumno
+            ),
+        )
+        .first()
+    )
+
+    if comprobante is None:
+        return Response(
+            {
+                "detail": (
+                    "El comprobante solicitado "
+                    "no pertenece al alumno."
+                )
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        archivo = comprobante.archivo.open(
+            "rb"
+        )
+    except (FileNotFoundError, OSError):
+        raise Http404(
+            "El archivo del comprobante "
+            "no fue encontrado."
+        )
+
+    nombre = (
+        comprobante.archivo.name
+        .rsplit("/", 1)[-1]
+    )
+
+    return FileResponse(
+        archivo,
+        as_attachment=False,
+        filename=nombre,
+    )
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

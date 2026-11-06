@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
@@ -119,5 +120,56 @@ class PagosService {
     }
 
     throw Exception(data['detail'] ?? 'No se pudo registrar el pago.');
+  }
+
+  Future<String> descargarComprobante({
+  required String token,
+  required int idAlumno,
+  required int idComprobante,
+  }) async {
+    final response = await http.get(
+      Uri.parse(
+        '${ApiConfig.baseUrl}/mis-hijos/'
+        '$idAlumno/comprobantes/'
+        '$idComprobante/archivo/',
+      ),
+      headers: {
+        'Authorization': 'Token $token',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'No se pudo descargar el comprobante.',
+      );
+    }
+
+    final contentDisposition =
+        response.headers['content-disposition'] ?? '';
+
+    final match = RegExp(
+      r'filename="?([^";]+)"?',
+    ).firstMatch(contentDisposition);
+
+    var nombreArchivo =
+        match?.group(1) ??
+        'comprobante_$idComprobante';
+
+    nombreArchivo = nombreArchivo.replaceAll(
+      RegExp(r'[\\/]'),
+      '_',
+    );
+
+    final archivo = File(
+      '${Directory.systemTemp.path}/'
+      '$nombreArchivo',
+    );
+
+    await archivo.writeAsBytes(
+      response.bodyBytes,
+      flush: true,
+    );
+
+    return archivo.path;
   }
 }

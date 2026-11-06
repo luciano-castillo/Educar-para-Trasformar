@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    comprobante_hijo,
     estado_api,
     facturas_hijo,
     historial_pagos_hijo,
@@ -52,5 +53,13 @@ urlpatterns = [
         ("mis-hijos/<int:id_alumno>/historial-pagos/"),
         historial_pagos_hijo,
         name="historial_pagos_hijo",
+    ),
+    path(
+        (
+            "mis-hijos/<int:id_alumno>/"
+            "comprobantes/<int:id_comprobante>/archivo/"
+        ),
+        comprobante_hijo,
+        name="comprobante_hijo",
     ),
 ]
