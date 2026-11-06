@@ -66,6 +66,12 @@ urlpatterns = [
         name="pago_rechazar"
     ),
     
+    path(
+        "comprobantes/<int:id_comprobante>/archivo/",
+        views.comprobante_descargar,
+        name="comprobante_descargar",
+    ),
+    
     # REPORTES
 
     path(

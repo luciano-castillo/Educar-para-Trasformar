@@ -1,7 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../config/api_config.dart';
 
 class SessionService {
-  static const _tokenKey = 'auth_token';
+  static String get _tokenKey {
+    return 'auth_token_${ApiConfig.environment}';
+  }
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 

@@ -441,7 +441,7 @@
                                 {% for comprobante in pago.comprobantes.all %}
 
                                     <a
-                                        href="{{ comprobante.archivo.url }}"
+                                        href="{% url 'comprobante_descargar' comprobante.id_comprobante %}"
                                         target="_blank"
                                         rel="noopener"
                                         class="enlace-seccion"
