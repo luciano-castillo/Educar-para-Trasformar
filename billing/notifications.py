@@ -1,6 +1,18 @@
 from datetime import date, timedelta
+from io import BytesIO
 
 from django.core.mail import EmailMessage
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.platypus import (
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 from academic.models import Tutor
 
@@ -73,6 +85,184 @@ def construir_resumen_factura(
 
     return "\n".join(lineas)
 
+def generar_factura_pdf(
+    factura,
+):
+    buffer = BytesIO()
+
+    documento = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=2 * cm,
+        leftMargin=2 * cm,
+        topMargin=2 * cm,
+        bottomMargin=2 * cm,
+    )
+
+    estilos = getSampleStyleSheet()
+
+    elementos = [
+        Paragraph(
+            "Educar para Transformar",
+            estilos["Title"],
+        ),
+        Spacer(
+            1,
+            0.4 * cm,
+        ),
+        Paragraph(
+            f"Factura N° {factura.id_factura}",
+            estilos["Heading2"],
+        ),
+        Spacer(
+            1,
+            0.3 * cm,
+        ),
+        Paragraph(
+            (
+                f"<b>Alumno:</b> "
+                f"{factura.alumno.apellido}, "
+                f"{factura.alumno.nombre}"
+            ),
+            estilos["BodyText"],
+        ),
+        Paragraph(
+            (
+                f"<b>Período:</b> "
+                f"{factura.get_mes_display()} "
+                f"{factura.anio}"
+            ),
+            estilos["BodyText"],
+        ),
+        Paragraph(
+            (
+                f"<b>Vencimiento:</b> "
+                f"{factura.fecha_vencimiento:%d/%m/%Y}"
+            ),
+            estilos["BodyText"],
+        ),
+        Spacer(
+            1,
+            0.6 * cm,
+        ),
+    ]
+
+    datos = [
+        [
+            "Concepto",
+            "Importe",
+        ]
+    ]
+
+    for detalle in factura.detalles.all():
+        datos.append(
+            [
+                detalle.descripcion,
+                f"$ {detalle.importe:.2f}",
+            ]
+        )
+
+    tabla = Table(
+        datos,
+        colWidths=[
+            12 * cm,
+            4 * cm,
+        ],
+    )
+
+    tabla.setStyle(
+        TableStyle(
+            [
+                (
+                    "BACKGROUND",
+                    (0, 0),
+                    (-1, 0),
+                    colors.lightgrey,
+                ),
+                (
+                    "FONTNAME",
+                    (0, 0),
+                    (-1, 0),
+                    "Helvetica-Bold",
+                ),
+                (
+                    "GRID",
+                    (0, 0),
+                    (-1, -1),
+                    0.5,
+                    colors.grey,
+                ),
+                (
+                    "ALIGN",
+                    (1, 1),
+                    (1, -1),
+                    "RIGHT",
+                ),
+                (
+                    "VALIGN",
+                    (0, 0),
+                    (-1, -1),
+                    "MIDDLE",
+                ),
+                (
+                    "BOTTOMPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    7,
+                ),
+                (
+                    "TOPPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    7,
+                ),
+            ]
+        )
+    )
+
+    elementos.append(
+        tabla
+    )
+
+    elementos.extend(
+        [
+            Spacer(
+                1,
+                0.6 * cm,
+            ),
+            Paragraph(
+                (
+                    f"<b>Total:</b> "
+                    f"$ {factura.total:.2f}"
+                ),
+                estilos["BodyText"],
+            ),
+            Paragraph(
+                (
+                    f"<b>Pagado:</b> "
+                    f"$ {factura.total_pagado:.2f}"
+                ),
+                estilos["BodyText"],
+            ),
+            Paragraph(
+                (
+                    f"<b>Saldo pendiente:</b> "
+                    f"$ {factura.saldo:.2f}"
+                ),
+                estilos["BodyText"],
+            ),
+        ]
+    )
+
+    documento.build(
+        elementos
+    )
+
+    pdf = buffer.getvalue()
+
+    buffer.close()
+
+    return pdf
 
 def enviar_recordatorios_pago(
     mes,
@@ -120,6 +310,9 @@ def enviar_recordatorios_pago(
         resumen = construir_resumen_factura(
             factura
         )
+        pdf_factura = generar_factura_pdf(
+            factura
+        )
 
         for tutor in tutores:
             if NotificacionPago.objects.filter(
@@ -155,10 +348,10 @@ def enviar_recordatorios_pago(
             email.attach(
                 (
                     f"factura_"
-                    f"{factura.id_factura}.txt"
+                    f"{factura.id_factura}.pdf"
                 ),
-                resumen,
-                "text/plain",
+                pdf_factura,
+                "application/pdf",
             )
 
             email.send()
