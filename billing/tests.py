@@ -52,6 +52,7 @@ from .notifications import (
     enviar_avisos_deuda,
     enviar_recordatorios_pago,
     es_ultimo_dia_habil_mes,
+    generar_factura_pdf,
 )
 from .services import (
     actualizar_facturas_vencidas,
@@ -2134,6 +2135,27 @@ class NotificacionesPagoTestCase(TestCase):
             len(email.attachments),
             1,
         )
+        
+        adjunto = email.attachments[0]
+
+        self.assertEqual(
+            adjunto[0],
+            (
+                f"factura_"
+                f"{self.factura.id_factura}.pdf"
+            ),
+        )
+
+        self.assertEqual(
+            adjunto[2],
+            "application/pdf",
+        )
+
+        self.assertTrue(
+            adjunto[1].startswith(
+                b"%PDF"
+            )
+        )
     @patch(
     
         "billing.management.commands."
@@ -2575,4 +2597,26 @@ class NotificacionesPagoTestCase(TestCase):
         self.assertIn(
             "Recordatorios mensuales enviados: 4",
             salida.getvalue(),
+        )
+    
+    def test_genera_factura_pdf(self):
+
+        pdf = generar_factura_pdf(
+            self.factura
+        )
+
+        self.assertIsInstance(
+            pdf,
+            bytes,
+        )
+
+        self.assertTrue(
+            pdf.startswith(
+                b"%PDF"
+            )
+        )
+
+        self.assertGreater(
+            len(pdf),
+            1000,
         )
