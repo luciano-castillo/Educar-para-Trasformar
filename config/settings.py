@@ -253,6 +253,11 @@ EMAIL_BACKEND = os.getenv(
     "django.core.mail.backends.console.EmailBackend",
 )
 
+RESEND_API_KEY = os.getenv(
+    "RESEND_API_KEY",
+    "",
+)
+
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     "Educar para Transformar <no-reply@educarparatransformar.local>",
