@@ -1,92 +1,150 @@
 # Educar Para Transformar
 
-Sistema web de gestión educativa desarrollado como Trabajo Práctico Integrador de la materia **Metodología de Sistemas II**.
+Trabajo Práctico Integrador de **Metodología de Sistemas II – TUP 2026**.
 
-El proyecto permite administrar información académica, deportiva, servicios complementarios y aspectos económicos de una institución educativa.
+**Integrantes:** Luciano Castillo · Franco Zarate  
+**Profesora:** Carolina Vargas
 
-La aplicación cuenta con distintos perfiles de usuario y restringe las funcionalidades disponibles según el rol autenticado.
+Educar Para Transformar es una solución integral para la gestión de un centro educativo. El proyecto incluye:
+
+- sitio web público;
+- sistema web de gestión;
+- API REST;
+- aplicación móvil Flutter para padres/tutores;
+- base de datos PostgreSQL compartida;
+- gestión económica y facturación;
+- notificaciones automáticas por correo;
+- despliegue productivo en Railway;
+- integración continua con GitHub Actions.
 
 ---
 
-## Tecnologías utilizadas
+## Estado del proyecto
+
+El proyecto se encuentra funcional y desplegado en producción.
+
+**Web:**  
+https://educar-para-trasformar-production.up.railway.app/
+
+La aplicación móvil se conecta al mismo backend y a la misma base de datos que el sistema web, evitando duplicación e inconsistencias de información.
+
+---
+
+## Arquitectura general
+
+```text
+Sitio web público
+        │
+Sistema web Django
+        │
+        ├───────────────┐
+        │               │
+     API REST       Administración web
+        │               │
+        └──────┬────────┘
+               │
+          PostgreSQL
+               │
+          Flutter Mobile
+               │
+       Padres / Tutores
+
+Railway Cron
+     │
+     └── Procesamiento de notificaciones
+               │
+             Resend
+               │
+       Correos + factura PDF
+```
+
+La web y la aplicación móvil reutilizan la misma lógica de negocio y persisten la información en una única base PostgreSQL.
+
+---
+
+# Tecnologías utilizadas
+
+## Backend y web
 
 - Python 3
 - Django 5.2
+- Django REST Framework
 - PostgreSQL
+- Django ORM
 - HTML
 - CSS
-- Django ORM
-- Git
-- GitHub
-- GitHub Actions
+- Gunicorn
+- WhiteNoise
+- dj-database-url
 - python-dotenv
 - psycopg
 
----
+## Mobile
 
-## Arquitectura
+- Flutter
+- Dart
+- HTTP
+- flutter_secure_storage
+- file_picker
+- open_filex
 
-El sistema utiliza una arquitectura web basada en Django.
+## Notificaciones y documentos
 
-### Presentación
+- django-anymail
+- Resend
+- ReportLab
 
-Interfaz desarrollada mediante:
+## DevOps
 
-- Django Templates
-- HTML
-- CSS
-
-### Lógica de negocio
-
-La lógica principal se implementa mediante:
-
-- Views
-- Forms
-- Models
-- Services
-
-Para operaciones que requieren reglas de negocio adicionales se utilizan servicios específicos, por ejemplo:
-
-- generación de facturas;
-- registro y validación de pagos;
-- registro de asistencias;
-- registro de notas.
-
-### Persistencia
-
-La aplicación utiliza:
-
-- PostgreSQL como sistema gestor de base de datos;
-- Django ORM para el acceso y manipulación de los datos.
+- Git
+- GitHub
+- GitHub Actions
+- Railway
+- PostgreSQL administrado
+- Railway Volume
+- Railway Cron
 
 ---
 
-# Módulos
+# Componentes del sistema
 
-## Accounts
+## 1. Sitio web público
 
-Gestiona la autenticación, perfiles y permisos del sistema.
+El módulo público permite presentar la institución y recibir información de personas interesadas.
 
-Cada usuario posee un `PerfilUsuario` asociado.
+Incluye:
 
-Roles disponibles:
+- información institucional;
+- niveles educativos;
+- noticias;
+- galería;
+- formulario de contacto;
+- solicitudes de inscripción;
+- opiniones de visitantes;
+- postulaciones de empleo.
+
+Las opiniones son revisadas antes de quedar visibles públicamente.
+
+---
+
+## 2. Accounts
+
+Gestiona autenticación, perfiles y permisos.
+
+Roles:
 
 - Administrador
 - Docente
 - Alumno
 - Padre / Tutor
 
-La aplicación valida el rol real del usuario desde el backend.
-
-La selección visual del perfil durante el inicio de sesión no concede permisos por sí sola.
+El backend valida el rol real asociado al usuario. La selección visual de un perfil no concede permisos por sí sola.
 
 ---
 
-## Academic
+## 3. Academic
 
-Gestiona la información académica de la institución.
-
-Incluye:
+Gestiona:
 
 - niveles educativos;
 - cursos;
@@ -94,217 +152,129 @@ Incluye:
 - profesores;
 - materias;
 - horarios;
-- asignación de materias a profesores y cursos;
+- dictados;
 - tutores;
-- asociación entre tutores y alumnos;
+- relación tutor-alumno;
 - asistencia;
 - notas.
 
-### Gestión de alumnos
+### Alumnos
 
 El administrador puede:
 
 - registrar alumnos;
-- listar alumnos;
-- modificar alumnos;
+- listar;
+- modificar;
 - realizar baja lógica;
-- asignar cursos.
+- asignar curso.
 
-Se valida la unicidad de:
+Se controla la unicidad de DNI y legajo.
 
-- DNI;
-- legajo.
-
-### Gestión de profesores
+### Profesores
 
 El administrador puede:
 
 - registrar profesores;
-- modificar profesores;
-- listar profesores;
-- desactivar profesores;
-- asignarlos a materias, cursos y horarios.
+- modificar;
+- listar;
+- desactivar;
+- asignar materias, cursos y horarios.
 
-### Dictado de materias
+### Asistencia
 
-Una materia puede asignarse a:
-
-- un profesor;
-- un curso;
-- un horario.
-
-Esta relación se administra mediante `DictadoMateria`.
-
----
-
-# Asistencia
-
-Los docentes pueden registrar la asistencia de los alumnos pertenecientes a sus materias y cursos asignados.
-
-Estados disponibles:
+Los docentes pueden registrar:
 
 - Presente
 - Ausente
 - Tarde
 - Justificado
 
-El sistema:
+Se controlan duplicados, fechas futuras, curso correspondiente y permisos del docente.
 
-- evita registros duplicados para el mismo alumno, materia y fecha;
-- permite corregir una asistencia ya registrada;
-- impide registrar alumnos de otro curso;
-- impide que un docente modifique dictados que no le pertenecen;
-- impide registrar asistencia para fechas futuras;
-- permite consultar el historial de asistencias.
+### Notas
 
----
+Se administran:
 
-# Notas
-
-Los docentes pueden registrar calificaciones para los alumnos de sus cursos.
-
-Cada nota posee:
-
-- alumno;
-- materia / dictado;
 - período;
 - evaluación;
 - calificación;
 - fecha;
 - observaciones.
 
-Las calificaciones permitidas se encuentran entre **1 y 10**.
-
-El sistema:
-
-- permite calificaciones decimales;
-- evita duplicados para una misma evaluación;
-- permite modificar una nota existente;
-- impide cargar notas a alumnos de otro curso;
-- restringe el acceso a los dictados del docente autenticado;
-- permite consultar el historial de evaluaciones.
+Las calificaciones permitidas se encuentran entre 1 y 10.
 
 ---
 
-# Vista del alumno
+## 4. Sports
 
-El alumno autenticado puede consultar:
-
-- sus datos personales;
-- curso;
-- nivel educativo;
-- materias;
-- profesores;
-- horarios;
-- notas;
-- historial de asistencia.
-
-También puede modificar únicamente sus datos de contacto:
-
-- correo electrónico;
-- teléfono;
-- domicilio.
-
-No puede modificar información académica ni administrativa.
-
----
-
-# Vista del tutor
-
-El padre o tutor puede consultar los alumnos que se encuentran asociados a su cuenta.
-
-Para cada alumno asociado puede consultar:
-
-- datos académicos;
-- materias;
-- profesores;
-- horarios;
-- notas;
-- asistencia;
-- deportes activos.
-
-Un tutor no puede consultar información de alumnos que no estén asociados a su cuenta.
-
-La consulta de deuda podrá incorporarse posteriormente.
-
----
-
-# Sports
-
-El módulo de deportes permite administrar:
+Gestiona:
 
 - deportes;
 - grupos deportivos;
-- profesores;
+- profesores responsables;
 - horarios;
 - valores mensuales;
-- inscripciones de alumnos.
+- inscripciones.
 
-Las inscripciones controlan:
+Reglas principales:
 
-- duplicados;
-- cantidad de deportes activos;
-- superposición de horarios.
-
-Las bajas se realizan de forma lógica conservando la información histórica.
+- máximo de dos deportes activos por alumno;
+- prevención de inscripciones duplicadas;
+- validación de superposición horaria;
+- baja lógica para conservar historial.
 
 ---
 
-# Services
+## 5. Services
 
-Gestiona servicios complementarios de la institución.
-
-Actualmente incluye:
-
-## Transporte
+### Transporte
 
 Permite administrar:
 
-- rutas;
+- recorridos;
 - valores mensuales;
-- contrataciones de transporte por alumno;
-- período mensual de contratación.
+- contratación por alumno;
+- período mensual.
 
-## Comedor
+### Comedor
 
 Permite administrar:
 
-- servicios de comedor;
+- servicios;
 - valores;
-- contrataciones por alumno;
-- período mensual de contratación.
+- contratación por alumno;
+- período mensual.
 
-El sistema evita contrataciones duplicadas para un mismo alumno y período.
+Se evita registrar contrataciones duplicadas para un mismo período.
 
 ---
 
-# Billing
+# 6. Billing
 
-Gestiona cuotas, facturación y pagos.
+Gestiona cuotas, facturación, pagos y comprobantes.
 
 ## Cuotas
 
-Permite:
+Permite definir:
 
-- registrar cuotas mensuales;
-- modificar cuotas;
-- desactivar cuotas;
-- definir mes, año, importe y fecha de vencimiento.
+- mes;
+- año;
+- importe;
+- vencimiento;
+- estado.
 
-## Facturación
+## Facturas
 
 Las facturas se generan por alumno y período.
 
-Una factura puede incluir conceptos correspondientes a:
+Pueden incluir:
 
 - cuota mensual;
 - deportes;
 - transporte;
 - comedor.
 
-Los importes se registran en detalles de factura para conservar el valor histórico utilizado al momento de generar la factura.
-
-Estados disponibles:
+Estados:
 
 - Pendiente
 - Parcial
@@ -318,249 +288,408 @@ El sistema calcula:
 - total pagado;
 - saldo pendiente.
 
-También actualiza las facturas vencidas según su fecha de vencimiento.
+Los valores de cada concepto quedan almacenados en el detalle de la factura para conservar el histórico aunque posteriormente cambien los precios.
 
 ---
 
-# Pagos
+## Pagos
 
-Los pagos se registran contra una factura.
+Los pagos se realizan mediante transferencia bancaria.
 
-Estados disponibles:
+Estados:
 
 - Pendiente
 - Validado
 - Rechazado
 
-Un pago puede aplicarse a uno o más conceptos de la factura.
+Un pago puede aplicarse a uno o más conceptos de una factura.
 
-El sistema controla:
+Validaciones principales:
 
-- que el importe sea válido;
-- que no se supere el saldo disponible;
-- que las aplicaciones correspondan a la misma factura;
-- que los pagos rechazados liberen nuevamente el saldo;
-- que solamente los pagos validados reduzcan la deuda real.
+- importe mayor a cero;
+- no superar el saldo disponible;
+- conceptos pertenecientes a la misma factura;
+- solo pagos validados reducen la deuda;
+- un pago rechazado libera nuevamente el saldo;
+- una factura puede poseer varios comprobantes.
 
----
-
-# Comprobantes de transferencia
-
-Al registrar un pago se pueden adjuntar uno o más comprobantes.
-
-Formatos admitidos:
+Formatos de comprobante admitidos:
 
 - PDF
 - JPG
 - JPEG
 - PNG
 
-Los archivos se almacenan dentro del directorio `media/`.
+---
 
-El directorio de archivos subidos se encuentra excluido del repositorio mediante `.gitignore`.
+# 7. API REST
+
+La API integra el sistema Django con la aplicación móvil.
+
+Utiliza autenticación por Token y valida tanto el usuario autenticado como la relación entre tutor y alumno.
+
+Principales funcionalidades:
+
+- inicio y cierre de sesión;
+- consulta de hijos asociados;
+- consulta de facturas;
+- resumen financiero;
+- historial de deuda;
+- historial de pagos;
+- registro de transferencias;
+- carga de comprobantes;
+- descarga protegida de comprobantes.
+
+Un tutor no puede consultar facturas, pagos ni comprobantes de alumnos que no estén asociados a su cuenta.
 
 ---
 
-# Reportes administrativos
+# 8. Aplicación móvil Flutter
 
-El sistema cuenta con reportes para usuarios administradores.
+La aplicación móvil fue desarrollada para la Parte 3 del Trabajo Práctico Integrador.
 
-Actualmente se encuentran implementados:
+Está orientada principalmente a padres y tutores.
 
-- reporte general de pagos;
-- reporte de ingresos por deportes;
-- reporte de ingresos por transporte.
+## Funcionalidades
 
-El reporte general permite consultar:
+- iniciar sesión;
+- cerrar sesión;
+- listar hijos asociados;
+- consultar facturas por hijo;
+- consultar cuotas pendientes y pagadas;
+- consultar vencimientos;
+- consultar importes y estados;
+- visualizar resumen financiero;
+- consultar historial de deuda;
+- consultar historial de pagos;
+- seleccionar conceptos a pagar;
+- registrar transferencias;
+- cargar uno o más comprobantes;
+- visualizar comprobantes desde el celular.
 
-- total facturado;
-- total pagado;
-- deuda pendiente;
-- facturas pendientes;
-- facturas parciales;
-- facturas pagadas;
-- facturas vencidas;
-- ingresos por tipo de concepto.
+## Flujo de pago
 
-Los reportes consideran únicamente pagos validados para calcular ingresos efectivos.
+```text
+Tutor
+  ↓
+Selecciona hijo
+  ↓
+Consulta factura
+  ↓
+Selecciona conceptos
+  ↓
+Registra transferencia
+  ↓
+Adjunta comprobante
+  ↓
+Pago queda PENDIENTE
+  ↓
+Administrador revisa desde la web
+  ↓
+Valida o rechaza
+  ↓
+La información se actualiza en Mobile
+```
+
+La aplicación utiliza almacenamiento seguro para el token y separa la sesión local de la sesión de producción mediante variables de entorno.
 
 ---
 
-# Seguridad y permisos
+# 9. Reportes administrativos
 
-El sistema utiliza la autenticación provista por Django.
+El sistema dispone de reportes para administradores.
 
-Cada usuario posee un perfil con un rol determinado.
+Incluyen:
 
-Se utilizan decoradores de autorización para restringir el acceso a las vistas según el rol:
+- ingresos por período;
+- pagos completos;
+- pagos incompletos;
+- facturación y deuda;
+- ingresos por deporte;
+- pagos por nivel, horario y profesor;
+- pagos por recorrido de transporte.
 
-- administrador;
-- docente;
+Los ingresos efectivos consideran únicamente pagos validados.
+
+---
+
+# 10. Notificaciones automáticas
+
+Se implementaron los requerimientos RF55 y RF56.
+
+## RF55 — Recordatorio mensual
+
+El último día hábil del mes se envía al tutor:
+
 - alumno;
-- tutor.
+- período;
+- composición de la factura;
+- total;
+- importe pagado;
+- saldo;
+- fecha de vencimiento;
+- factura PDF adjunta.
 
-Además de controlar el rol, las vistas verifican la relación entre el usuario autenticado y los datos solicitados.
+## RF56 — Aviso de deuda
 
-Por ejemplo:
+El día 20 se envía un aviso a los tutores que todavía poseen saldo pendiente.
 
-- un docente solamente puede administrar sus propios dictados;
-- un alumno solamente puede consultar sus propios datos académicos;
-- un tutor solamente puede consultar alumnos asociados a su cuenta.
+El sistema evita enviar la misma notificación más de una vez para la misma factura y tutor.
+
+### Infraestructura
+
+Los correos se envían mediante:
+
+- Resend;
+- django-anymail;
+- llamadas HTTPS desde Railway.
+
+Un servicio independiente de Railway Cron ejecuta diariamente:
+
+```bash
+python manage.py procesar_notificaciones
+```
+
+El propio comando decide si corresponde ejecutar RF55, RF56 o finalizar sin enviar notificaciones.
 
 ---
 
-# Base de datos
+# 11. Seguridad
+
+Se aplican controles tanto en la web como en la API.
+
+Ejemplos:
+
+- acceso según rol;
+- tutor activo;
+- relación tutor-alumno;
+- protección de facturas ajenas;
+- protección de pagos ajenos;
+- comprobantes protegidos mediante endpoints autenticados;
+- validación de montos;
+- prevención de sobrepagos;
+- secretos mediante variables de entorno;
+- archivos `.env` excluidos del repositorio;
+- HTTPS en producción.
+
+Los archivos `media` no se exponen de forma pública indiscriminada.
+
+---
+
+# 12. Base de datos
 
 El proyecto utiliza PostgreSQL.
 
-La configuración se obtiene mediante variables de entorno almacenadas en un archivo `.env`.
+En desarrollo puede configurarse mediante variables individuales y en producción mediante `DATABASE_URL`.
 
-El archivo `.env` no debe incorporarse al repositorio.
-
-Variables utilizadas:
+Ejemplo de configuración local:
 
 ```env
-SECRET_KEY=clave-local-de-django
+SECRET_KEY=clave-local
 DEBUG=True
 
-DB_NAME=nombre_base_datos
-DB_USER=usuario_postgresql
-DB_PASSWORD=contraseña_postgresql
-DB_HOST=localhost
-DB_PORT=5432
-```
-
-Nunca se deben publicar credenciales reales dentro del repositorio.
-
----
-
-# Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone https://github.com/luciano-castillo/Educar-para-Trasformar.git
-```
-
-Ingresar al proyecto:
-
-```bash
-cd Educar-para-Trasformar
-```
-
-Crear el entorno virtual:
-
-```bash
-py -m venv .venv
-```
-
-En Windows PowerShell, activar el entorno:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-Instalar las dependencias:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-# Configuración de PostgreSQL
-
-Antes de ejecutar Django debe existir una base de datos PostgreSQL y un usuario con permisos sobre ella.
-
-Luego se deben configurar en `.env`:
-
-```env
 DB_NAME=nombre_base_datos
 DB_USER=usuario
 DB_PASSWORD=contraseña
 DB_HOST=localhost
 DB_PORT=5432
+
+TIME_ZONE=America/Argentina/Cordoba
+```
+
+Nunca deben publicarse credenciales reales en el repositorio.
+
+---
+
+# 13. Despliegue en producción
+
+El backend está desplegado en Railway.
+
+Servicios principales:
+
+```text
+Postgres
+Educar-para-Trasformar
+notificaciones-cron
+```
+
+El despliegue incluye:
+
+- PostgreSQL administrado;
+- Gunicorn;
+- archivos estáticos con WhiteNoise;
+- Volume persistente para comprobantes;
+- variables de entorno;
+- servicio Cron para notificaciones;
+- Resend para correo transaccional.
+
+Dominio:
+
+```text
+https://educar-para-trasformar-production.up.railway.app/
 ```
 
 ---
 
-# Migraciones
+# 14. Instalación local del backend
 
-Aplicar las migraciones existentes:
+Clonar el repositorio:
+
+```bash
+git clone https://github.com/luciano-castillo/Educar-para-Trasformar.git
+cd Educar-para-Trasformar
+```
+
+Crear entorno virtual:
+
+```bash
+py -m venv .venv
+```
+
+Activar en PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Instalar dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+Crear el archivo `.env` con las variables locales necesarias.
+
+Aplicar migraciones:
 
 ```bash
 python manage.py migrate
 ```
 
-Para verificar que no existan cambios de modelos sin una migración correspondiente:
-
-```bash
-python manage.py makemigrations --check --dry-run
-```
-
----
-
-# Ejecutar el proyecto
-
-Iniciar el servidor de desarrollo:
+Iniciar Django:
 
 ```bash
 python manage.py runserver
 ```
 
-Por defecto Django estará disponible en:
-
-```text
-http://127.0.0.1:8000/
-```
-
 ---
 
-# Verificación del proyecto
+# 15. Datos demo
 
-Ejecutar las comprobaciones internas de Django:
+Existe un comando de administración para cargar información de demostración:
 
 ```bash
-python manage.py check
+python manage.py cargar_datos_demo
+```
+
+El comando genera datos de ejemplo para:
+
+- niveles;
+- cursos;
+- profesores;
+- tutores;
+- alumnos;
+- materias;
+- deportes;
+- servicios;
+- facturas;
+- usuarios demo.
+
+Está diseñado para poder ejecutarse nuevamente sin duplicar las facturas demo ya creadas.
+
+---
+
+# 16. Ejecutar la aplicación móvil
+
+Ingresar al directorio:
+
+```bash
+cd mobile
+```
+
+Instalar dependencias:
+
+```bash
+flutter pub get
+```
+
+## Desarrollo local
+
+```bash
+flutter run
+```
+
+Por defecto la aplicación utiliza:
+
+```text
+http://10.0.2.2:8000/api
+```
+
+## Ejecutar contra producción
+
+```bash
+flutter run --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://educar-para-trasformar-production.up.railway.app/api
 ```
 
 ---
 
-# Pruebas automatizadas
+# 17. Generar APK de producción
 
-Para ejecutar todas las pruebas:
+```bash
+flutter build apk --release --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://educar-para-trasformar-production.up.railway.app/api
+```
+
+El archivo generado se encuentra en:
+
+```text
+mobile/build/app/outputs/flutter-apk/app-release.apk
+```
+
+El APK fue probado instalándolo de forma independiente en Android y comunicándose directamente con el backend desplegado en Railway.
+
+---
+
+# 18. Pruebas automatizadas
+
+Ejecutar:
 
 ```bash
 python manage.py test
 ```
 
-Para ejecutar únicamente las pruebas del módulo académico:
+El proyecto cuenta con **157 pruebas automatizadas**.
 
-```bash
-python manage.py test academic
-```
+Las pruebas abarcan, entre otros aspectos:
 
-Actualmente el proyecto cuenta con **64 pruebas automatizadas** distribuidas entre los módulos principales.
-
-Las pruebas verifican, entre otros aspectos:
-
-- reglas de facturación;
+- modelos y reglas de negocio;
+- facturación;
 - pagos;
+- pagos parciales;
 - comprobantes;
+- generación de factura PDF;
 - cálculo de deuda;
 - deportes;
-- servicios;
+- transporte;
+- comedor;
 - asistencia;
 - notas;
-- permisos;
-- privacidad entre alumnos;
-- acceso de tutores.
+- API REST;
+- autenticación;
+- roles y permisos;
+- privacidad entre tutores y alumnos;
+- seguridad;
+- reportes;
+- notificaciones;
+- comandos automáticos;
+- integración web / base de datos / API / Mobile.
+
+También se realizaron pruebas manuales del flujo completo en producción.
 
 ---
 
-# Integración continua
+# 19. Integración continua
 
-El proyecto utiliza **GitHub Actions**.
+El proyecto utiliza GitHub Actions.
 
 Workflow:
 
@@ -568,20 +697,13 @@ Workflow:
 .github/workflows/django-ci.yml
 ```
 
-La integración continua se ejecuta automáticamente al realizar:
+Se ejecuta ante:
 
-- push sobre `main`;
-- Pull Request hacia `main`.
+- push a `main`;
+- Pull Request hacia `main`;
+- ejecución manual.
 
-También puede ejecutarse manualmente mediante `workflow_dispatch`.
-
-El workflow utiliza:
-
-- Ubuntu;
-- Python 3.11.3;
-- PostgreSQL 16.
-
-Durante cada ejecución se realizan los siguientes controles:
+Controles principales:
 
 ```bash
 python manage.py makemigrations --check --dry-run
@@ -590,52 +712,63 @@ python manage.py check
 python manage.py test
 ```
 
-Esto permite detectar automáticamente errores de configuración, migraciones pendientes o fallos en las pruebas.
-
 ---
 
-# Estructura principal
+# 20. Estructura principal
 
 ```text
 Educar-para-Trasformar/
 │
 ├── accounts/
 ├── academic/
-├── sports/
-├── services/
+├── api/
 ├── billing/
+├── services/
+├── sports/
+├── website/
 ├── config/
+├── mobile/
 ├── static/
 ├── templates/
+├── media/                  # excluido del repositorio
 ├── .github/
 │   └── workflows/
 ├── manage.py
 ├── requirements.txt
+├── requirements-dev.txt
+├── requirements-dev.lock
 └── README.md
 ```
 
 ---
 
-# Estado actual
+# 21. Uso de Inteligencia Artificial
 
-Actualmente se encuentran implementados los principales módulos definidos para el sistema:
+Durante el desarrollo de la Parte 3 se utilizó **ChatGPT** como herramienta de apoyo para:
 
-- autenticación y roles;
-- gestión académica;
-- profesores y tutores;
-- asistencia;
-- notas;
-- deportes;
-- transporte;
-- comedor;
-- cuotas;
-- facturación;
-- pagos;
-- comprobantes;
-- cálculo de deuda;
-- reportes administrativos;
-- vistas académicas para alumnos y tutores;
-- pruebas automatizadas;
-- integración continua.
+- análisis de requisitos;
+- diseño de integración Web–Mobile;
+- aprendizaje de Flutter;
+- construcción y revisión de API;
+- generación y revisión de pruebas;
+- análisis de errores;
+- seguridad;
+- despliegue;
+- Railway;
+- notificaciones;
+- documentación.
 
-El proyecto continúa en etapa de revisión, mejora visual, documentación y preparación para demostración.
+Las soluciones propuestas por IA fueron revisadas, probadas y adaptadas al contexto real del proyecto antes de incorporarlas.
+
+La IA se utilizó como herramienta de asistencia y no como reemplazo del conocimiento, análisis o responsabilidad del desarrollador.
+
+---
+
+# Autores
+
+- **Luciano Castillo**
+- **Franco Zarate**
+
+Materia: **Metodología de Sistemas II**  
+Profesora: **Carolina Vargas**  
+TUP – 2026
